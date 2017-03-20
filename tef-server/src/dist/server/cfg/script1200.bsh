@@ -1,0 +1,71 @@
+import org.jpos.iso.*;
+import com.bravado.util.*;
+
+String transactionAmount = request.getString(4);
+
+//logger.trace("transaction amount: " + transactionAmount);
+logger.warn("****************** Transaction amount: " + transactionAmount.substring(9,12));
+
+switch (transactionAmount.substring(8,12)) {
+	case "0401":
+		//call this script if the transaction amount end is "4,01" 
+		logger.warn("1210_4,01 OK Chamando script seguinte ********");   
+		shell.source("cfg/script1200_4,01.bsh");
+		break;
+		
+	case "0402":
+		//call this script if the transaction amount end is "4,02" 
+		logger.warn("1210_4,01 OK Chamando script seguinte ********");   
+		shell.source("cfg/script1200_4,02.bsh");
+		break;
+		
+	case "0403":
+		//call this script if the transaction amount end is "4,03" 
+		logger.warn("1210_4,01 OK Chamando script seguinte ********");   
+		shell.source("cfg/script1200_4,03.bsh");
+		break;
+		
+	case "1101":
+		//call this script if the transaction amount end is "11,01" 
+		logger.warn("1210_11,01 OK Chamando script seguinte");  
+		shell.source("cfg/script1200_11,01.bsh");
+		break;
+		
+	case "1102":
+		//call this script if the transaction amount end is "11,02" 
+		logger.warn("1210_11,02 OK Chamando script seguinte");  
+		shell.source("cfg/script1200_11,02.bsh");
+		break;
+		
+	case "1103":
+		//call this script if the transaction amount end is "11,03" 
+		logger.warn("1210_11,03 OK Chamando script seguinte");  
+		shell.source("cfg/script1200_11,03.bsh");
+		break;
+		
+	case "4101":
+		//call this script if the transaction amount end is "41,01" 
+		logger.warn("1210_41,01 OK Chamando script seguinte");   
+		shell.source("cfg/script1200_41,01.bsh");
+		break;
+		
+	case "0010":
+		//call this script if the transaction amount ends in "01" cents
+		logger.warn("1210 OK Chamando script seguinte");  
+		shell.source("cfg/script1200_00.bsh");
+		break;
+		
+	case "0099":
+		//call this script if the transaction amount ends in "99" cents
+		logger.warn("Script teste Marcus");  
+		logger.warn("1210 OK Chamando script seguinte");  
+		shell.source("cfg/script1200_99.bsh");
+		break;
+		
+	default:
+		logger.warn("1210  NOK response. 00, por enquanto Chamando script1200_00");
+		shell.source("cfg/script1200_00.bsh");
+		logger.warn("1210  Fim exec");
+		break;
+}
+				

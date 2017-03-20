@@ -1,0 +1,77 @@
+import java.lang.*;
+import org.jpos.iso.*;
+import org.jpos.tlv.*;
+import org.jpos.emv.*;
+import com.bravado.util.*;
+import com.bravado.gp.*;
+import com.bravado.tlv.*;
+
+logger.info(" >>>>>>> ****** Script 420 - response code = 00 ****** <<<<<<");
+
+String failureResponseCode = "01";
+String data = ISODate.getDateTime(new Date());
+String nsu = "00" + data;   	// monto um campo de 12 dígitos com valores crescentes
+
+//===========================================================================
+ISOMsg response = FileReader.readXMLMsg("resources/0430.xml");   
+
+int[] fieldsToCopy = new int[] {
+    3,  // processing code(debit or credit)
+    4,  // amount, transaction
+	7,  // transmission  date
+    11, // system trace audit number
+	12, // transaction local date
+	13, // transaction local time	
+    41, // terminal ID
+    42, // card aceptor ID
+	49, // 
+    90  //
+};
+
+ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+	
+response.set(127, nsu);         //  vai no comprovante, apos "CV:"
+
+// ==================== Verifica se existem todos os campos obrigatorios:
+
+int[] mandatoryFields = new int[] {
+	3,  // processing code(debit or credit)
+    4,  // amount, transaction
+	7,  // transmission  date
+    11, // system trace audit number
+    12, // date , local transaction
+	13, // hora local
+    41, // terminal ID
+    42, // card aceptor ID
+	49,
+	90
+};	
+
+String mandatory = ISOMsgUtil.verifyMandatoryFields(request, mandatoryFields);
+
+if (mandatory != "") {
+	String errormsg = mandatory + ":@ campos obrigatorios ausentes!";
+	
+	logger.warn(request.getString(42) + ":" + request.getString(41) + ":  ***************** " + errormsg + " ***************** ");
+	
+	response.set(39, failureResponseCode);
+	response.set (38, null);
+	response.set(60, null);
+	response.set(62, "D" + errormsg + "#" + errormsg);	
+		
+	socket.send (response);
+}
+else {
+	logger.info(" ***************** TODOS OS CAMPOS OBRIGATORIOS ESTAO PRESENTES ***************** ");
+
+	response.set (39, "00");
+	
+	String amount = request.getString(4);
+	
+	if (! amount.equals("000000000102")) {  // nao retorna 430, se valor= R$ 1,02
+	    socket.send (response);
+	} 
+	else logger.trace(">>>>>>>>>>>>>>>>> Desfazimento - nao retornar resposta para valor " + amount);	
+}
+	
+	

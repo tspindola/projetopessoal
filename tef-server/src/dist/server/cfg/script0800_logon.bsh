@@ -1,0 +1,115 @@
+import java.lang.*;
+import org.jpos.iso.*;
+import org.jpos.tlv.*;
+import org.jpos.emv.*;
+import com.bravado.util.*;
+import com.bravado.gp.*;
+import com.bravado.tlv.*;
+
+int responseIndex = context.get("response0810Index");
+
+String data = ISODate.getDateTime(new Date());
+String nsu = "00" + data;   	
+String successResponseCode = "00";  
+String failureResponseCode = "01";
+String errormsg="";
+
+String firstTab = "resources/0810_1.xml";    
+ISOMsg response = FileReader.readXMLMsg(firstTab);     
+
+int[] fieldsToCopy = new int[] {
+	7,  // transmission date and time
+    11, // system trace audit number
+    12, // date , local transaction
+	13, // hora local
+    42  // card aceptor ID
+};
+ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+int[] mandatoryFields = new int[] {
+	3,  // processing code(debit or credit)
+	7,  // transmission  date
+    11, // system trace audit number
+    12, // date , local transaction
+	13, // hora local
+	42, // card aceptor ID
+    48, // dados adicionais - pelo menos tag 1
+	61 // tag 1
+};	
+String mandatory = ISOMsgUtil.verifyMandatoryFields(request, mandatoryFields);
+if (mandatory != "") {
+	errormsg = "verifyMandatoryFields";
+}
+else {
+	String requestProcessingCode = request.getString(3);
+	// TODO verificar carga de tabelas
+	byte[] additionalData = request.getBytes(48);
+	logger.info("ADDITIONAL DATA (DE 48): " + additionalData);
+	
+		CustomTLVList tlvList = new CustomTLVList();
+		byte[] genericData48 = request.getBytes(48);
+		tlvList.unpack(genericData48);
+		CustomTLVMsg tag001 = tlvList.find(1);
+		
+		String versTEF = null;
+		if (tag001 != null) {
+			versTEF = new String(tag001.getValue());       // versao das tabelas no terminal
+			logger.info("DE 48 tag 1 (req): " + versTEF);
+		}
+		else {
+			throw new ISOException("ADDITIONAL DATA (DE 48) = TAG 1 (versao) obrigatoria!!! ");
+		}
+		
+		responseIndex = 0;
+		context.set("response0810Index", responseIndex);
+	
+		String responseFile;
+		CustomTLVList tlvOut = new CustomTLVList();
+		byte[] genericOut48 = response.getBytes(48);
+		tlvOut.unpack(genericOut48);
+		CustomTLVMsg tag001out = tlvOut.find(1);
+		
+		String versTABS = null;
+		if (tag001out != null)  {
+			versTABS = new String(tag001out.getValue());	
+			logger.info("DE 48 tag 1 (resp): " + versTABS);
+		}
+		else 
+			throw new ISOException("DADOS INVALIDOS EM " + firstTab + "! DE 48 tag 1 ");
+	
+		int vTEF = Integer.parseInt(versTEF);
+		int vTabs = Integer.parseInt(versTABS);
+		logger.info("Comparar versoes: Se " + vTEF + " < " + vTabs + " precisa inicializar.");
+		if (vTEF < vTabs) {  
+			// se tabelas do terminal desatualizadas, carregar arquivo com DE 48.2 = '1' -> INDICA QUE O TEF DEVE CARREGAR AS TABELAS
+			responseFile = "resources/0810_0_ini.xml";
+			logger.warn(request.getString(42) + ":" + request.getString(41) + ": ******************** " + vTEF + " < " + vTabs + ": Mandar carga.");
+		}
+		else {
+		    responseFile = "resources/0810_0.xml";            // resposta que nao solicita carga de tabelas
+			logger.warn(request.getString(42) + ":" + request.getString(41) + ": ******************** " + vTEF + " >= " + vTabs + ": Nao mandar carga.");
+		}
+		logger.info("******************** responseFile=" + responseFile);
+
+		response = FileReader.readXMLMsg(responseFile);     // =============== carrega o corpo da mensagem ===============
+	
+		// ===== ecoar: transmission date and time,  system trace audit number,  date and local transaction,  hora local,  card aceptor ID
+		int[] fieldsToCopy = new int[] { 7, 11, 12, 13, 42 };
+		ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+	
+		response.set (39, "00");
+	
+}   // campos obrigat�rios presentes
+
+if (errormsg != "") {    
+ 	logger.warn(request.getString(42) + ":" + request.getString(41) + ": ********** " + errormsg + " ********* ");
+ 
+ 	response.set(39, failureResponseCode);
+	response.set(38, null);
+	response.set(60, null);
+	response.set(62, "D" + errormsg + "#" + errormsg);	
+}
+	
+ISOMsg response = mux.request(request, 100000);
+
+//response.set(127, nsu);         // DE 127 = NSU (vai no comprovante, apos "CV:")
+socket.send (response);

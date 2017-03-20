@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+
+<!-- org.jpos.q2.iso.QMUX -->
+<mux class="br.listofacil.QMUXCustom" logger="Q2" name="clientsimulator-banrisul-mux">
+ <key>11</key>
+ <in>clientsimulatorba-receive</in>
+ <out>clientsimulatorba-send</out>
+ <unhandled>clientsimulatorba-unhandled</unhandled>
+</mux>

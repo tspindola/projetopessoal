@@ -1,0 +1,420 @@
+import org.jpos.iso.*;
+import com.bravado.gp.pdv.*;
+import net.hairi.Thales.*;
+import com.bravado.gp.*;
+import com.bravado.util.*;
+import com.bravado.tlv.*;
+//import org.jpos.core.ConfigurationException;
+
+ISOMsg response = new ISOMsg();
+response.setPackager(request.getPackager());
+
+String data = ISODate.getDateTime(new Date());
+String nsu = "00" + data;   	// monto um campo de 12 dígitos com valores crescentes
+String successResponseCode = "00";  
+String failureResponseCode = "01";
+String errormsg="", RImsg="";
+String func = null, nroParcelas = null;
+
+String amount = request.getString(4);
+
+		
+//============= Copia da msg de entrada para sa�da os campos que devem ser ecoados
+
+int[] fieldsToCopy = new int[] {
+	3,  // processing code(debit or credit)
+    4,  // amount, transaction
+	7,  // transmission  date
+    11, // system trace audit number
+    12, // date , local transaction
+	13, // hora local
+    41, // terminal ID
+    42, // card aceptor ID
+	49
+};
+ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+response.set(127, nsu);         // DE 127 = NSU (vai no comprovante, apos "CV:")
+	
+// ==================== Verifica se existem todos os campos obrigatorios:
+
+int[] mandatoryFields = new int[] {
+	3,  // processing code(debit or credit)
+    4,  // amount, transaction
+	7,  // transmission  date
+    11, // system trace audit number
+    12, // date , local transaction
+	13, // hora local
+	22, // modo de entrada (chip, tarja, digitada)
+	35, // bin do cart�o
+    41, // terminal ID
+    42, // card aceptor ID
+    48, // dados adicionais - pelo menos tag 3
+	49,
+	55, // dados de chip
+	61, // tags 1, 5, 6, 7
+	126 // pelo menos tag 5
+};	
+
+String mandatory = ISOMsgUtil.verifyMandatoryFields(request, mandatoryFields);
+
+//if (mandatory != "") {
+//	errormsg = "DE(s) " + mandatory + ":@ campos obrigatorios ausentes!";
+//}
+//else {
+//	logger.info(" ====== TODOS OS CAMPOS OBRIGATORIOS ESTAO PRESENTES ====== ");
+//
+//	String fourLast = "************1111";
+//	String strValor, dig;
+//	String brancosValor = "        ";
+//	String bandeira, AID="";
+//	String AC="E6E6E6E6E6E6E6E6", AppName="", CVM="";
+//	int i, j;
+//	
+	
+//	if (amount.substring(0,10) == "0000121314") {     // valor espec�fico para os testes de requisitos iniciais
+//		//shell.source("cfg/script0200_chip_RI.bsh");
+//	}
+//	else {
+		// amount tem 12 digitos, sendo os 2 ultimos, centavos. Procuro o primeiro nao zero,
+		// sendo que se for tudo zero, vou ler os 3 ultimos: 0,00 (dai a busca ser ate o 9o. digito)
+		
+//		for (i=0; i < 9; i++) {
+//			 j=i+1;
+//			 dig = amount.substring(i,j);
+//			 if ( ! dig.equals("0"))
+//				 break;
+//			 brancosValor = brancosValor + " ";
+//		}
+//		strValor=amount.substring(i,10) + "," + amount.substring(10,12);
+//		
+//		byte[] additionalData = request.getBytes(48);
+//		AdditionalDataAnalyser additionalDataAnalyser = new AdditionalDataAnalyser(additionalData);
+//		logger.info("criptogramaPan " + additionalDataAnalyser.getCriptogramaPan());
+//		String campoCriptografado = additionalDataAnalyser.getCampoCriptografado();
+//		String panCriptografado = additionalDataAnalyser.getPanCriptografado();
+//		
+//		logger.info("PAN Criptografado " + panCriptografado);
+//		 
+//		String version = null, vendor = null;
+//			
+//		if (panCriptografado == null) {
+//			errormsg = "Bit 48.5 (PAN criptografado):@ campo obrigatorio ausente!";	
+//		}
+//		else if (panCriptografado.length() != 32) {
+//			errormsg = "PAN criptografado: " + panCriptografado.length() + ": tamanho invalido!";
+//		}
+//		else {	
+//			CustomTLVList tlvList = new CustomTLVList();
+//			byte[] genericData61 = request.getBytes(61);
+//			tlvList.unpack(genericData61);
+//			
+//			CustomTLVMsg tag001 = tlvList.find(1);
+//			CustomTLVMsg tag005 = tlvList.find(5);
+//			
+//			if (! (tag001 == null)) {
+//			    version = new String(tag001.getValue());
+//			    //System.out.println(version);
+//				logger.info("DE 61 tag 1: " + version);
+//				version=version.substring(2,6);
+//			
+//				if (! (tag005 == null)) {
+//					vendor = new String(tag005.getValue());
+//					vendor = vendor.trim();
+//					//System.out.println(vendor);
+//					logger.info("DE 61 tag 5: " + vendor);
+//
+//					if ( ! panCriptografado.substring(16,32).equals("0000000000000000") ) 
+//						errormsg = "PAN criptografado invalido! Dados RFU devem conter zeros.";
+//				}
+//				else {
+//					if (version.equals("0102")) 
+//					    errormsg = "DE 61 tag 5:@ campo obrigatorio nao recebido!";
+//				}
+//			}
+//			else {
+//			    errormsg = "DE 61 tag 1: campo obrigatorio nao recebido!";
+//			}
+//		}	
+//		
+//		String zekLmk;
+//		if (errormsg == "") {    	// recebeu os dados necess�rios		
+//				logger.warn(request.getString(42) + ":" + request.getString(41) + ": Version: " + version + "  -    Vendor (only v.102): " + vendor);
+//				try {
+//					zekLmk = PinpadUtil.findZekKey(config, version, vendor);
+//				}
+//				catch(Exception e) {
+//					errormsg=e;
+//				}
+//		}
+//		if (errormsg == "") {    					
+//				logger.info("Version: " + version + " Vendor: " + vendor + " => ZMK: " + zekLmk);
+//				
+//				String zekDESMode = config.get("hsm-zek-des-mode");
+//				
+//				String clearPANData;
+//				try {
+//					clearPANData = CryptoUtil.decryptData(hsm, zekDESMode, zekLmk, panCriptografado);
+//				}
+//				catch (Exception e) {
+//					errormsg = " *** " + e;
+//				}
+//				
+//				if (errormsg == "") {
+//					String panData = null;
+//					if (version.equals("0102")) {
+//					    panData = clearPANData;			
+//					}
+//					else {
+//					    panData = StringUtil.hex2str(clearPANData);
+//					}
+//					
+//					logger.info("panData (aberto) " + panData);        
+//					String panPart = CardUtil.stripPadFromPan(panData); 
+//					int tam = panPart.length();
+//					logger.info("PAN part " + panPart + " tam=" + tam);
+//					
+//					if (tam < 6) {
+//					   errormsg = "PAN criptografado: tamanho invalido.";
+//					}
+//					else {
+//						fourLast="******";    // corresponde ao BIN
+//						for (int i = 4; i < tam; i++) {
+//							fourLast=fourLast + "*";
+//						}
+//						
+//						fourLast = fourLast + panPart.substring((tam-4),tam);
+//						logger.info("4 ultimos digitos: " + fourLast);
+//						
+//						String trackData = request.getString(35);
+//						
+//						String bin = CardUtil.extractBinFromTrack(trackData);
+//						
+//						logger.info("BIN " + bin);
+//		
+//						String primaryAccountNumber = bin + panPart;
+//							
+//					    // ------- descobrir bandeira e AID para os cupons...  -------------------------------------
+//						// AIDS:  MASTERCARD A0000000041010		ELECTRON   A0000000032010 
+//						//        MAESTRO    A0000000043060  	VISA       A0000000031010    
+//				    		
+//				    	bandeira = bin.substring(0,1);
+//						if (bandeira.equals("4")) {
+//							if (request.getString(3).equals("002000"))  {
+//							    bandeira = "Visa Electron";     AID="A0000000032010";
+//							} else {
+//								bandeira = "Visa";      AID="A0000000031010";
+//							}
+//						} else if (bandeira.equals("6")) {
+//							bandeira = "Maestro";   	AID="A0000000043060";
+//						} else {
+//							bandeira = "Mastercard";	AID="A0000000041010";
+//						}
+//						logger.warn(request.getString(42) + ":" + request.getString(41) + ": PAN " + primaryAccountNumber + "  " + bandeira);
+//							
+//					    // -------------------------------------------------------------	
+//						if (strValor.equals("12,21") || strValor.equals("13,31") || strValor.equals("14,41") || strValor.equals("15,51") || 
+//						    strValor.equals("16,61") || strValor.equals("17,71") || strValor.equals("18,81") || strValor.equals("19,91") ) {
+//								logger.warn(request.getString(42) + ":" + request.getString(41) + ":  > > > > > Valor=" + strValor + " seleciona teste sem valida��o do ARQC." );
+//						}	
+//						else {
+//							byte[] iccDataRequest = ISOUtil.hex2byte(request.getValue(55));
+//						
+//						    String iccData = ISOUtil.byte2hex(iccDataRequest);
+//						    
+//							logger.info("ICCDATA " + ISOUtil.byte2hex(iccDataRequest));
+//							// ICCDATA tem essa cara:
+//	    					// ff206d82027c009f2701809f2608f905f9666c563a3d9f36020004950500800000009f34030403029f370428ded6419f3303e0f0c85f280208409f100706010a03a400029a031505269f1a0200769f3501219c01008407a00000000310109f02060000000014005f2a0209865f340100
+//	  						// 		AC: tag 9f26 tam=08 dado=f905f9666c563a3d
+//	  						//		AID: tag 84 09 f100706010a03a4000
+//	  						// 		App pref name: tag 9f12  (se n�o vier, usar app label=tag 50 , sen�o, nada)
+//	  						//-------------------------------
+//	  						ICCDataAnalyser iccDt;
+//	  						try {
+//	  							iccDt = new ICCDataAnalyser(iccDataRequest,	primaryAccountNumber);
+//		  						String tags = iccDt.dumpTLVDescription(request);
+//		  						logger.warn(tags);
+//	  						}
+//	  						catch (Exception e) {
+//	  							errormsg = " *** " + e;
+//	  						}
+//	  						
+//	  						if (errormsg == "") {	
+//	  							String valueTag;
+//		  						
+//		  						valueTag=iccDt.TLVICCfind("9f26");
+//		  						if (valueTag == null) 
+//		  							logger.info("Tag 9f26 ausente!");
+//		  						else {
+//		  							AC = valueTag;
+//		  							logger.info("##### AC (Tag 9f26) = " + AC);
+//		 						}	
+//		 						
+//		 						valueTag=iccDt.TLVICCfind("9f34");
+//		  						if (valueTag == null) 
+//		  							logger.info("Tag 9f34 (CVM) ausente!");
+//		  						else {
+//		  							CVM = valueTag;
+//		  							logger.info("##### CVM (Tag 9f34) = " + CVM);
+//		  						}	
+//		  						
+//		  						valueTag=iccDt.TLVICCfind("9f12");
+//		  						if (valueTag == null) {
+//		  						 	valueTag=iccDt.TLVICCfind("50");
+//		  							if (valueTag == null) 
+//		  								logger.info("Tags 9f12 e 50 ausentes!");
+//		  							else {
+//		  								AppName = StringUtil.hex2str(valueTag);
+//		  								logger.info("##### Application Label (Tag 50) = " + AppName);
+//		  							}	
+//		  						
+//		  							logger.info("Tag 9f34 ausente!");
+//		  						}
+//		  						else {
+//		  							AppName = StringUtil.hex2str(valueTag);
+//		  							logger.info("##### Application Pref Name (Tag 9f12) = " + AppName + " (" + valueTag + ")");
+//		  						}	
+//		  							
+//								//-------------------------------						
+//		  						String panSequence = request.getValue(23);
+//		  						if ( ! (panSequence == null) ) {
+//			  						int n = panSequence.length();
+//			  						panSequence = panSequence.substring((n-2), n);
+//			  					}
+//		  						logger.info("PAN Sequence = " + panSequence);
+//		  						byte[] iccDataResponse;
+//		  						try {
+//									iccDataResponse = CryptoUtil.verifyApplicationCryptogram(hsm, primaryAccountNumber, iccDataRequest, panSequence);
+//							  	}
+//	  							catch (Exception e) {
+//	  								errormsg = " *** " + e;
+//	  								iccDataResponse = null;
+//	  							}
+//	 							if (iccDataResponse == null) {
+//									logger.warn(request.getString(42) + ":" + request.getString(41) + ": VERIFICACAO DO ARQC FALHOU!"); 
+//									logger.info("VERIFICACAO DO CRIPTOGRAMA: ARQC NAO CONFERE -  verifyApplicationCryptogram(hsm," + primaryAccountNumber + ", IccData,"  + panSequence + ")" );
+//									response.set(55, null);
+//								}
+//								else {
+//									logger.warn(request.getString(42) + ":" + request.getString(41) + ": CRIPTOGRAMA OK! ");
+//									response.set(55, ISOUtil.byte2hex(iccDataResponse).toUpperCase());					
+//								}
+//	  						
+//							} // sem exception no ICCDataAnalyser
+//						}	// PAN tem tamanho v�lido
+//					}	// sem exception no decryptData
+//					
+//					if (errormsg == "") {
+//					    response.set(39, successResponseCode);
+//						
+//						Random random = new Random (System.currentTimeMillis());	// gerar DE 38 aleatoriamente (nro de autorização) - "AUTO: "
+//						String autho = Integer.toString(Math.abs(random.nextInt()) % 1000000);
+//						response.set (38, autho);
+//						
+//						// ----------------- Cupons: ---------------------
+//						// obter dados sobre parcelamento, para cupons
+//						
+//						CustomTLVList tlvDE48 = new CustomTLVList();
+//						tlvDE48.unpack(additionalData);
+//						CustomTLVMsg DE48tag3 = tlvDE48.find(3);    // 1=aa� vista 2=emissor 3=loja
+//						CustomTLVMsg DE48tag6 = tlvDE48.find(6);    // nro de parcelas
+//						if (DE48tag3 != null) 
+//							func = new String(DE48tag3.getValue());
+//						
+//						if (DE48tag6 != null) 
+//							nroParcelas = new String(DE48tag6.getValue());
+//				
+//						logger.info("Funcionalidade: " + func + " nro. parcelas " + nroParcelas);
+//				
+//						String tipoVenda;
+//						String pcode = request.getString(3);
+//						String cupom;
+//						if (pcode.equals("003000")) {
+//							tipoVenda= "VENDA CREDITO A VISTA    ";
+//							if (func.equals("02")) 
+//								tipoVenda = "VENDA PARCELADO     @EMISSOR EM " + nroParcelas + " PARCELAS    ";
+//							if (func.equals("03")) 
+//								tipoVenda = "VENDA PARCELADO     @LOJA EM " + nroParcelas + " PARCELAS    ";
+//						}
+//						if (pcode.equals("002000") ) {
+//							tipoVenda= "VENDA DEBITO    ";
+//						}
+//				
+//						cupom = "Nome do Estabelecimento @Av Do Estado 1315 - Bloco 2       SPBR@";
+//						cupom = cupom + "CNPJ: 01006074/0001-06     1 4399 0000@EC:000006510                          @@";
+//						cupom = cupom + AppName + "@" + tipoVenda + "@" + fourLast + "   @";
+//						cupom = cupom + data.substring(02,04) + "/" + data.substring(00,02) + "/15                       ";   
+//						cupom = cupom + data.substring(04,06) + ":" + data.substring(6,8); 
+//						cupom = cupom + "@VALOR APROVADO:" + brancosValor + "R$ " + strValor;
+//						cupom = cupom + "@@CV:" + nsu + "            AUTO:" + autho;
+//						cupom = cupom + "@AC:" + AC ;
+//						cupom = cupom + "@AID:" + AID;
+//						cupom = cupom + "@TERM:" + request.getString(41) + "     @";
+//				
+//						String cupomCliente = "C@@       " + bandeira + " - Via Cliente        @@" + cupom;
+//						String cupomEstab  =  "C@@    " + bandeira + " - Via Estabelecimento   @@" + cupom;
+//				
+//						if ( ! CVM.equals("") ) {
+//							String cvm1=CVM.substring(0,2);
+//							logger.info("CVM 1o. byte = " + cvm1);
+//							
+//							if (cvm1.equals("41") || cvm1.equals("42") || cvm1.equals("43") || cvm1.equals("44") || cvm1.equals("45") ||
+//							    cvm1.equals("01") || cvm1.equals("02") || cvm1.equals("03") || cvm1.equals("04") || cvm1.equals("05")) {
+//									cupomEstab = cupomEstab + "  TRANSACAO AUTORIZADA MEDIANTE SENHA @";
+//							}
+//						
+//							if (cvm1.equals("5E") || cvm1.equals("1E") || cvm1.equals("43") || cvm1.equals("45") || cvm1.equals("03") || cvm1.equals("05")){
+//									cupomEstab = cupomEstab + "@@---------------------------------@";
+//									cupomEstab = cupomEstab + "ASSINATURA DO CLIENTE@(Nome do Cliente)@";
+//							}
+//						}
+//					
+//if (0==1) {
+//						if (pcode.equals("003000")) {   // cr�dito
+//							if (amount.equals("000000002300") ) {
+//								cupomEstab = cupomEstab + "  TRANSACAO AUTORIZADA MEDIANTE SENHA @";
+//							}
+//							if (amount.equals("000000002200") || amount.equals("000000002300")) {
+//								cupomEstab = cupomEstab + "@@---------------------------------@";
+//								cupomEstab = cupomEstab + "ASSINATURA DO CLIENTE@(Nome do Cliente)@";
+//							}
+//						}
+//						if (pcode.equals("002000")) {
+//							if (amount.equals("000000001200") ) {
+//								cupomEstab = cupomEstab + "@@---------------------------------@";
+//								cupomEstab = cupomEstab + "ASSINATURA DO CLIENTE@(Nome do Cliente)@";
+//							}
+//							else cupomEstab = cupomEstab + "@  TRANSACAO AUTORIZADA MEDIANTE SENHA @";
+//						}
+//}
+//						// ------------------------------------------------------------------------------------
+//				
+//						response.set(60, cupomCliente);
+//						response.set(62, cupomEstab);
+//					}     // n�o houve erro no ARQC
+//				}  // Pan criptografado OK					
+//			}   // DE 61 cont�m tags obrigat�rias e PAN criptografado presente
+//
+// //   } // script Req Ini
+//
+//}   // campos obrigat�rios presentes
+//
+
+
+// ================ valida��o de roteiro =================================
+if (amount.substring(0,10).equals("0000121314")) {     // valor espec�fico para roteiro de requisitos iniciais
+    shell.source("cfg/script_validacao_Req_Ini.bsh");
+}	
+
+// ====================================================================================
+if (errormsg != "") {    
+ 	logger.warn(request.getString(42) + ":" + request.getString(41) + ":  ********** " + errormsg + " ********* ");
+ 
+ 	response.set(39, failureResponseCode);
+	response.set(38, null);
+	response.set(60, null);
+	response.set(62, "D" + errormsg + "#" + errormsg);	
+}
+ISOMsg response = mux.request(request, 100000);
+socket.send (response);
+
+

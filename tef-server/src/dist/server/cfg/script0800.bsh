@@ -1,0 +1,46 @@
+import java.lang.*;
+import org.jpos.iso.*;
+import org.jpos.tlv.*;
+import org.jpos.emv.*;
+import com.bravado.util.*;
+import com.bravado.gp.*;
+import com.bravado.tlv.*;
+
+int responseIndex = context.get("response0810Index");
+String requestProcessingCode = request.getString(3);
+
+final String askForLogon = "910000";
+final String askForInitializationData = "900000";
+
+if (requestProcessingCode.equals(askForLogon)) {
+    shell.source("cfg/script0800_logon.bsh");
+}
+else if (requestProcessingCode.equals(askForInitializationData)) {
+	shell.source("cfg/script0800_init.bsh");
+}
+else {
+	ISOMsg response = FileReader.readXMLMsg("resources/0810_0.xml");  
+	
+	int[] fieldsToCopy = new int[] {
+		7,  // transmission date and time
+	    11, // system trace audit number
+	    12, // date , local transaction
+		13, // hora local
+	    42  // card aceptor ID
+	};
+	ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+	String errormsg = requestProcessingCode + ": unexpected processing code!";
+
+	response.set(3,"900001");
+	response.set(39, "01");
+	response.set(38, null);
+	response.set(60, null);
+	response.set(62, "D" + errormsg + "#" + errormsg);	
+		
+	String nsu = "00" + ISODate.getDateTime(new Date());   	
+	response.set(127, nsu); 
+
+	socket.send (response);
+
+}
+

@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding="iso-8859-1" ?>
+
+<qbean class="org.jpos.q2.ui.UI" name="UI" logger="Q2">
+ <ui width="300" height="150" 
+    full-screen="no" undecorated="no" close="true">
+  <caption>Client Simulator</caption>
+
+  <components>
+   <border-layout>
+    <center>
+     <grid rows="1" columns="1">
+      <cell>
+       <iso-meter refresh="250" idref="channel.clientsimulator-adaptor">Simulator</iso-meter>
+      </cell>
+     </grid>
+    </center>
+    
+
+    
+   </border-layout>
+  </components>
+ </ui>
+</qbean>
+

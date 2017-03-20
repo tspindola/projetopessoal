@@ -1,0 +1,33 @@
+import org.jpos.iso.*;
+
+logger.warn(">>>>>>>>>>>> **************** Script 1420 - response code = 00 ************* <<<<<");
+
+ISOMsg response;
+
+response = FileReader.readXMLMsg("resources/1430.xml");   // dá erro nesta linha  
+logger.warn("Carregou layout iso da 1430 29/outubro)");
+
+response.set(2, request.getString(2));     		//  PAC, only required for manual PAN entry 
+response.set(3, request.getString(3));			// processing code(debit or credit)
+response.set(4, request.getString(4));
+response.set(7, ISODate.getDateTime(new Date()));
+response.set(11, request.getString(11));
+response.set(12, request.getString(12));
+
+response.set(23, request.getString(23));   		// card sequence number, optionally present for manual PAN entry
+response.set(28, request.getString(12).substring(0,6));   		// date reconciliation, coloquei uma data qualquer
+// 37 - retrieval reference number - não vem na 1420. usa o valor carregado na resposta padrão ****
+response.set(39, request.getString(39));   		// action code
+response.set(41, request.getString(41));   		// terminal ID
+response.set(42, request.getString(42));   		// card aceptor ID
+// 46 - amounts, fees (LLLVar) - não vem na 1420. usa o valor carregado na resposta padrão
+// 48.1 POS data   48.16 structured data  (no log, passa na verdade 48.7 e 48.16)
+// (na documentação, a 1420 tem estes e também o DE 48.1, 7 e 16, mas nos logs, passam só 1 e 16)
+//                      Usar os valores da resposta padrão
+// response.set(48, request.getString(48));
+response.set(49, request.getString(49));   // currency code, transaction (obrigatório)
+// 54 - não vem na 1420. additional amounts
+response.set(56, request.getString(56));   		// original data
+
+
+socket.send (response);

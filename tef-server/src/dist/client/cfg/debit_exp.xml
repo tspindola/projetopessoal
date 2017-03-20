@@ -1,0 +1,13 @@
+<isomsg>
+  <field id="0" value="0210"/>
+  <field id="3" value="*E"/> <!-- field must be echoed -->
+  <field id="4" value="*E"/> <!-- field must be echoed -->
+  <field id="7" value="*M"/> <!-- field must be echoed -->
+  <field id="11" value="*E" /> <!-- field is mandatory -->
+  <field id="12" value="*M"/> <!-- field must be echoed -->
+  <field id="13" value="*M"/> <!-- field must be echoed -->
+  <field id="41" value="*E" /> <!-- field is mandatory -->
+  <field id="42" value="*E" /> <!-- field is mandatory -->
+  <field id="39" value="00"/> <!-- expected value for the field -->
+  <field id="49" value="*E" /> <!-- field is mandatory -->
+</isomsg>

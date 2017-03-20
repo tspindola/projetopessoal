@@ -1,0 +1,12 @@
+<channel-adaptor name='jpos-client-adaptor' class="org.jpos.q2.iso.ChannelAdaptor"
+	logger="Q2">
+	<channel class="br.listofacil.tefserver.iso.SimpleRawChannel" logger="Q2"
+		packager="br.listofacil.tefserver.iso.ISO87APackagerGP" header="000000000000">
+
+		<property name="host" value="127.0.0.1" />
+		<property name="port" value="16000" />
+	</channel>
+	<in>jpos-client-send</in>
+	<out>jpos-client-receive</out>
+	<reconnect-delay>10000</reconnect-delay>
+</channel-adaptor>

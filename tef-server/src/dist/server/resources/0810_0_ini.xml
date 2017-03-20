@@ -1,0 +1,11 @@
+<isomsg direction="outgoing">
+	<field id="0" value="0810" />
+	<field id="3" value="910000" />
+	<field id="7" value="0711135303" />
+	<field id="11" value="110003" />
+	<field id="12" value="135303" />
+	<field id="13" value="0711" />
+	<field id="39" value="00" />
+	<field id="42" value="006000006510001" />
+	<field id="48" value="001008000000000020011" />
+</isomsg>

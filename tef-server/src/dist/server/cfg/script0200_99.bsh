@@ -1,0 +1,19 @@
+import org.jpos.iso.*;
+
+ISOMsg response = new ISOMsg();
+response.setPackager(request.getPackager());
+
+response.setMTI("0210");
+response.set(3, "201234");
+response.set(4, "10000");
+response.set(7, ISODate.getDateTime(new Date()));
+response.set(11, "123456");
+response.set(32, "100005");
+response.set (39, "99");
+response.set(44, "A5DFGR");
+response.set(62, request.getString(62));
+response.set(63, "Invalid message: missing fields");
+response.set(105, "ABCDEFGHIJ 1234567890");
+
+socket.send (response);
+

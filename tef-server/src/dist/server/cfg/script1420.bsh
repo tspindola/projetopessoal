@@ -1,0 +1,19 @@
+import org.jpos.iso.*;
+import com.bravado.util.*;
+
+//String transactionAmount = request.getString(4);
+
+//logger.trace("transaction amount: " + transactionAmount);
+logger.warn(">>>>>> *********** Msg 1420 recebida! ********* <<<<<<<< " );
+
+//if (transactionAmount.substring(10,12).equals ("01")) {
+//call this script if the transaction amount ends in "01" cents
+//    logger.warn("1210  NOK response - 00, por enquanto Chamando script seguinte");
+//    shell.source("cfg/script1200_00.bsh");
+//	logger.warn("1210  Fim exec");
+//}
+//else {
+	logger.warn("1420 OK Chamando script seguinte");   
+    shell.source("cfg/script1420_00.bsh");
+//}
+

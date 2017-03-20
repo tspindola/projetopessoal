@@ -1,0 +1,53 @@
+import org.jpos.iso.*;
+import com.bravado.gp.pdv.*;
+import com.bravado.gp.*;
+import com.bravado.util.*;
+import com.bravado.tlv.*;
+
+String transactionAmount;
+
+int[] expectedFields = new int[] {4, 41,42};
+
+if (!request.hasFields(expectedFields)) {
+    logger.warn("Missing fields in request");
+    shell.source("cfg/script0200_99.bsh");
+}
+else if (request.getString(4).equals ("000000009999")) {
+		transactionAmount = request.getString(4);
+    	logger.warn(request.getString(42) + ":" + request.getString(41) + ": transaction amount: " + transactionAmount + " => Insufficient funds");
+    	shell.source("cfg/script0200_31.bsh");
+}
+else {
+	String trxChip = "no";
+	transactionAmount = request.getString(4);
+	
+	if (request.hasField(22)) 
+		if (request.getString(22).equals("051") )
+			trxChip="yes";
+			
+	if (trxChip.equals("yes")) {
+		logger.info("Transacao com chip"); 
+		
+		if ((transactionAmount.substring(0,10).equals("0000000039") ) && ( ! transactionAmount.equals("000000003900") ) ) {
+			// executar script de resposta negativa se valor = 39,xx sendo os centavos (xx) diferentes de 00
+			logger.info("Teste chip DE 39 nao 00");
+			shell.source("cfg/script0200_negada_chip.bsh");
+		}
+		else
+			shell.source("cfg/script0200_chip.bsh");
+	}
+	else {
+		if ((transactionAmount.substring(0,10).equals("0000000039") ) && ( ! transactionAmount.substring(0,12).equals("000000003900") ) ) {
+			// executar script de resposta negativa se valor = 39,xx sendo os centavos (xx) diferentes de 00
+			logger.info("Transacao tarja/digitada - negar.");
+			shell.source("cfg/script0200_negada_tarja.bsh");
+		}
+		else {
+			logger.info("Transacao tarja/digitada OK (DE 39=0)");
+		    shell.source("cfg/script0200_digit.bsh");
+		}
+	}
+}
+
+
+

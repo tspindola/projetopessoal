@@ -1,0 +1,39 @@
+import java.lang.*;
+import org.jpos.iso.*;
+import org.jpos.tlv.*;
+import org.jpos.emv.*;
+import com.bravado.util.*;
+import com.bravado.gp.*;
+import com.bravado.tlv.*;
+
+logger.warn(" >>>>>>> ****** Script 9820 - response code = 00 ****** <<<<<<");
+
+ISOMsg response = FileReader.readXMLMsg("resources/9830.xml");   
+
+int[] fieldsToCopy = new int[] {
+    3,  // processing code(debit or credit)
+	7,  // transmission date time
+    11, // system trace audit number
+	12, // transaction local date
+	13, // transaction local time	
+    41, // terminal ID
+    42, // preenchido com “99999999”
+};
+
+ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+
+response.set(0, "9830");
+
+String data = ISODate.getDateTime(new Date());
+String nsu = "00" + data;   	// monto um campo de 12 dígitos com valores crescentes
+
+response.set(127, nsu);         // DE 127 = NSU (vai no comprovante, após "CV:")
+
+//String hora = ;
+// hora = hora.substring(0,2);
+//if (! hora.equals("03")) {  // não retorna, para este valor
+    socket.send (response);
+//} 
+//else { 
+//   logger.trace(">>>>>>>>>>>>>>>>> Script programado para nao confirmar transacao");
+//}

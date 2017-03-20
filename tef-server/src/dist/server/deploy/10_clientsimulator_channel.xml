@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+
+<channel-adaptor name='clientsimulator-adaptor-banrisul' class="org.jpos.q2.iso.ChannelAdaptor"
+	logger="Q2">
+	<channel class="br.listofacil.tefserver.iso.SimpleRawChannel"
+		logger="Q2" packager="br.listofacil.tefserver.iso.ISO93EPackagerBanrisul">
+		<property name="host" value="52.67.150.185" />
+		<property name="port" value="5789" /> 
+	</channel>
+	<in>clientsimulatorba-send</in>
+	<out>clientsimulatorba-receive</out>
+	<reconnect-delay>20008</reconnect-delay>
+</channel-adaptor>
+

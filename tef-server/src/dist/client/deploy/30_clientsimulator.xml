@@ -1,0 +1,6 @@
+<qbean name="clientSimulator" logger="Q2" realm="client-simulator"
+	class="org.jpos.simulator.ListoGatewayQ2">
+	<property name="mux" value="clientsimulator-mux" />
+	<property name="message" value="cfg/init_req.xml" />
+</qbean>
+

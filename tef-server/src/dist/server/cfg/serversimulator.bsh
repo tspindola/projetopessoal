@@ -1,0 +1,8 @@
+request.setResponseMTI ();
+
+Random random = new Random (System.currentTimeMillis());
+request.set (37, Integer.toString(Math.abs(random.nextInt()) % 1000000));
+request.set (38, Integer.toString(Math.abs(random.nextInt()) % 1000000));
+
+socket.send (request);
+

@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+
+<!-- org.jpos.q2.iso.QMUX -->
+<mux class="br.listofacil.QMUXCustom" logger="Q2" name="clientsimulator-globalpayments-mux">
+ <key>11</key>
+ <in>clientsimulatorgp-receive</in>
+ <out>clientsimulatorgp-send</out>
+ <unhandled>clientsimulatorgp-unhandled</unhandled>
+</mux>

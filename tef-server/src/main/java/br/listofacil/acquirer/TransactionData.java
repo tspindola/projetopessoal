@@ -1,0 +1,62 @@
+package br.listofacil.acquirer;
+
+public class TransactionData {
+	
+	public String pan = new String();
+	public String panPartEncrypted = new String();
+	public String processingCode = new String();
+	public String amount = new String();
+	public String dateTime = new String();
+	public String nsuTef = new String();
+	public String nsuAcquirer = new String();
+	public String date = new String();
+	public String time = new String();
+	public String expirationDateCard = new String();
+	public String releaseDate = new String();
+	public String entryMode = new String();
+	public String panSequence = new String();
+	public String cardTrack1 = new String();
+	public String cardTrack2 = new String();
+	public String terminalCode = new String();
+	public String merchantCode = new String();
+	public String shopCode = new String();
+	public String acquirerCode = new String();
+	public String equipmentType = new String();
+	public String smid = new String();
+	public String currencyCode = new String();
+	public String countryCode = new String();
+	public String pin = new String();
+	public String typeCardRead = new String();
+	public String emvData = new String();
+	public String pinpadSerialNumber = new String();
+	public String pinpadBCVersion = new String();
+	public String pinpadManufacturer = new String();
+	public String pinpadModel = new String();
+	public String pinpadFirmware = new String();
+	public String pinpadVersionBasicApp = new String();
+	public String tablesVersion = new String();
+	public String merchantName = new String();
+	public String address = new String();
+	public String city = new String();
+	public String state = new String();
+	public String country = new String();
+	public String zipCode = new String();
+	public String mcc = new String();
+	public String cnpjcpf = new String();
+	public String phone = new String();
+	public String suggestedDate = new String();
+	public String installmentValue = new String();
+	public String installments = new String();
+	public String encryptionPinType = new String();
+	public String ksnPin = new String();
+	public String encryptionCardType = new String();
+	public String ksnCard = new String();
+	public String typeCardVerificationData = new String();
+	public String cardVerificationData = new String();
+	public String productDescription = new String();
+	public String authorizationCode = new String();
+	public String responseCode = new String();
+	public String cardholderReceipt = new String();
+	public String merchantReceipt = new String();
+	
+}

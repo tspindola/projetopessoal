@@ -1,0 +1,11 @@
+import org.jpos.iso.*;
+import com.bravado.util.*;
+
+ISOMsg response = FileReader.readXMLMsg("resources/0610.xml");   
+
+response.set(7, request.getString(7));     //  ISODate.getDateTime(new Date()));
+response.set (39, "00");
+response.set (63, "THIS IS A GENERIC TEXT FIELD");
+
+socket.send (response);
+

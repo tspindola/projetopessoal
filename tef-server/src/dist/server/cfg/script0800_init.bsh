@@ -1,0 +1,104 @@
+//import java.lang.*;
+//import org.jpos.iso.*;
+//import org.jpos.tlv.*;
+//import org.jpos.emv.*;
+//import com.bravado.util.*;
+//import com.bravado.tlv;
+//
+//String data = ISODate.getDateTime(new Date());
+//String nsu = "00" + data;
+//String successResponseCode = "00";  
+//String failureResponseCode = "01";
+//String errormsg="";
+//
+//ISOMsg response = FileReader.readXMLMsg("resources/0810_1.xml");
+//
+//int[] fieldsToCopy = new int[] {
+//	7,  // transmission date and time
+//    11, // system trace audit number
+//    12, // date , local transaction
+//	13, // hora local
+//    42  // card aceptor ID
+//};
+//ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+//
+//// ==================== Verifica se existem todos os campos obrigatorios:
+//
+//int[] mandatoryFields = new int[] {
+//	3,  // processing code(debit or credit)
+//	7,  // transmission  date
+//    11, // system trace audit number
+//    12, // date , local transaction
+//	13, // hora local
+//	42, // card aceptor ID
+// 	61 // tag 1
+//};
+//
+//String mandatory = ISOMsgUtil.verifyMandatoryFields(request, mandatoryFields);
+//
+//if (mandatory != "") {
+//	errormsg = "verifyMandatoryFields";
+//}
+//else {
+//	int responseIndex = context.get("response0810Index");
+//	String requestProcessingCode = request.getString(3);
+//	responseIndex++;
+//	context.set("response0810Index", responseIndex);
+//	
+//	// DE61.1 = versao do Software     
+//	// DE 48.1 = VERSAO DAS TABELAS
+//	
+//		CustomTLVList tlvList61 = new CustomTLVList();
+//		byte[] genericData61 = request.getBytes(61);
+//		tlvList61.unpack(genericData61);
+//		CustomTLVMsg tag001 = tlvList61.find(1);
+//	
+//		String SWversion = null;
+//		if (tag001 != null) {
+//			SWversion = new String(tag001.getValue());
+//			System.out.println(SWversion);
+//		}
+//		else 
+//			throw new ISOException("DE61 tag 1: campo obrigatório ausente!");
+//	
+//		if (responseIndex == 5) {     // --- na versão de SW 1.02, enviar tabela com 5 chaves
+//			if (SWversion.substring(2,6).equals("0101") ) 
+//				responseIndex = 50;      // dados com formato HP (1 chave), para manter um único script
+//		}
+//	
+//	
+//if (errormsg != "") {    
+// 	response.set(39, failureResponseCode);
+//	response.set(38, null);
+//	response.set(60, null);
+//	response.set(62, "D" + errormsg + "#" + errormsg);	
+//} else {
+	ISOMsg response = mux.request(request, 100000);
+	
+		
+//}
+	
+	
+	/*
+	
+	    String responseFile = "resources/0810_" + responseIndex + ".xml"; 
+		response = FileReader.readXMLMsg(responseFile); 
+		response.set(7, request.getString(7));
+		response.set(11, request.getString(11));
+		response.set(12, request.getString(12));
+		response.set(13, request.getString(13));
+		response.set(41, request.getString(41));
+		response.set(42, request.getString(42));
+		response.set(39, "00");
+
+	    logger.info("DE 48= " + response.getString(48));     
+		logger.info("DE 62= " + response.getString(62));     
+		logger.info("DE 63= " + response.getString(63));     
+		*/
+	
+//}   // campos obrigat�rios presentes
+
+	
+//	
+//response.set(127, nsu);
+socket.send (response);

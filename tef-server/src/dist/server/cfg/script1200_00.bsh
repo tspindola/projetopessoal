@@ -1,0 +1,59 @@
+import java.lang.*;
+import org.jpos.iso.*;
+import org.jpos.tlv.*;
+import org.jpos.emv.*;
+import com.bravado.util.*;
+import com.bravado.gp.*;
+import com.bravado.tlv.*;
+import net.hairi.Thales.*;
+
+logger.warn(" >>>>>>> ****** Script 1200 - response code = 00 ****** <<<<<<");
+
+ISOMsg response;
+
+response = FileReader.readXMLMsg("resources/1210.xml");   
+
+int[] fieldsToCopy = new int[] {
+    2,  // documentação diz que o host sempre retorna  PAC
+    3,  // processing code(debit or credit)
+    4,  // amount, transaction
+    11, // system trace audit number
+    12, // date and time, local transaction
+    14, // only manual pan entry
+    35, // track 2 (tarja e ICC)
+    41, // terminal ID
+    42, // card aceptor ID
+    52, // PIN Data
+    53  // Security related control
+};
+
+ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+
+response.set(7, ISODate.getDateTime(new Date()));
+response.set(28, request.getString(12).substring(0,6));   		// date reconciliation, coloquei uma data qualquer
+
+byte[] additionalData = (byte[])request.getValue(48);
+AdditionalDataAnalyser AdditionalDataAnalyser = new AdditionalDataAnalyser(additionalData);
+
+KLVList structureData = AdditionalDataAnalyser.getStructureData();
+KLVMsg dataDE35 = structureData.find("RT:DE35");
+
+String zekLmk = config.get("hsm-zek-lmk");
+String zekDESMode = config.get("hsm-zek-des-mode");
+
+String cryptCardData = dataDE35.getValue();
+
+String cardData = CryptoUtil.decryptData(hsm, zekDESMode, zekLmk, cryptCardData);
+
+String primaryAccountNumber = CardUtil.extractPan(StringUtil.hex2str(cardData));
+
+logger.warn("PAN " + primaryAccountNumber);
+
+byte[] iccDataRequest = (byte[])request.getBytes(55);
+String failureActionCode = "103";  // contact acquirer
+
+response = CryptoUtil.verifyApplicationCryptogram(hsm, primaryAccountNumber, iccDataRequest, failureActionCode, response);
+
+logger.warn(" ****** Mensagem montada ****** ");
+
+socket.send (response);

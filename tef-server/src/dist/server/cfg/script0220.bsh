@@ -1,0 +1,160 @@
+import org.jpos.iso.*;
+import com.bravado.gp.pdv.*;
+import net.hairi.Thales.*;
+import com.bravado.gp.*;
+import com.bravado.util.*;
+import com.bravado.tlv.*;
+
+logger.trace("Script 0220 Advice offline e confirm. pre");
+
+ISOMsg response;
+String chipData = request.getString(55);
+String psn = request.getString(23);
+String entryMode = request.getString(22);
+
+response = FileReader.readXMLMsg("resources/0230.xml");   
+
+String successResponseCode = "00";  
+String failureResponseCode = "01";
+String data = ISODate.getDateTime(new Date());
+String nsu = "00" + data;   	// monto um campo de 12 dígitos com valores crescentes
+
+response.set(127, nsu);         // DE 127 = NSU (vai no comprovante, apos "CV:")
+
+// ==================== Verifica se existem todos os campos obrigatorios:
+
+int[] mandatoryFields = new int[] {
+	3,  // processing code(debit or credit)
+    4,  // amount, transaction
+	7,  // transmission  date
+    11, // system trace audit number
+    12, // date , local transaction
+	13, // hora local
+	// 22, // modo de entrada (chip, tarja, digitada)
+    41, // terminal ID
+    42, // card aceptor ID
+    48, // dados adicionais - pelo menos tag 3
+	49,
+	61 // tags 1, 5, 6, 7
+};	
+
+String mandatory = ISOMsgUtil.verifyMandatoryFields(request, mandatoryFields);
+
+if (mandatory != "") {
+	String errormsg = mandatory + ":@ campos obrigatorios ausentes!";
+	
+	logger.warn(request.getString(42) + ":" + request.getString(41) + ": ***************** " + errormsg + " ***************** ");
+	
+	response.set(39, failureResponseCode);
+	response.set (38, null);
+	response.set(60, null);
+	response.set(62, "D" + errormsg + "#" + errormsg);	
+		
+	socket.send (response);
+}
+else {
+	logger.info(" ***************** TODOS OS CAMPOS OBRIGATORIOS ESTAO PRESENTES ***************** ");
+
+
+	//===========================================================================
+	
+	int[] fieldsToCopy = new int[] {
+		3,  // processing code(debit or credit)
+	    4,  // amount, transaction
+		7,  // transmission  date
+	    11, // system trace audit number
+	    41, // terminal ID
+	    42, // card aceptor ID
+		49
+	};
+	
+	ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+
+	//response.set(3, request.getString(3));
+	//response.set(4, request.getString(4));
+	//response.set(7, request.getString(7));
+	//response.set(11, request.getString(11));
+	
+	response.set (39, "00");
+	
+	//response.set(41, request.getString(41));
+	//response.set(42, request.getString(42));
+	//response.set(49, request.getString(49));
+	
+	// se confirmacao de pre (se DE 90 existe na 220)
+	
+	 if (request.hasField(90) )  {   // confirmacao de pre (ACHO que isto � na 0200, n�o aqui...)
+		//      DE 12, 13, 38 e 62 sao obrigatorios e tem cupom
+	    response.set(12, request.getString(12));
+		response.set(13, request.getString(13));
+		response.set(38, request.getString(38));
+		
+		//comprovante:
+		//-------------- DESCOBRIR A BANDEIRA ----------------------
+		String trackData, bin;
+		
+		if (request.hasField(35)) {   // chip ou tarja
+		    trackData = request.getString(35);
+			logger.info("TrackData 35: " + trackData);
+		}
+		else {      // digitada
+			trackData = request.getString(2); 
+			logger.info("TrackData 2: " + trackData);
+		}
+		
+		if (trackData.equals(null)) {
+		   bin = "1234";    // assumo um default, ao inves de parar a msg...   bandeira = Mastercard
+		}
+	    else {
+			bin = CardUtil.extractBinFromTrack(trackData);
+		}
+		
+		logger.info("BIN " + bin);
+		String bandeira = bin.substring(0,1);
+		if (bandeira.equals("4")) {
+			bandeira = "Visa";
+			if (request.getString(3).equals("002000"))
+			    bandeira = "Visa Electron";
+		} 
+		else {
+			if (bandeira.equals("6")) 
+				bandeira = "Maestro";
+			else 
+				bandeira = "Mastercard";
+		}
+		logger.info("Bandeira " + bandeira);
+	    //-----------------------------------------------------------
+	
+		String strValor, dig;
+		int i, j;
+		String amount = request.getString(4);
+	
+		// amount tem 12 dígitos, sendo os 2 últimos, centavos. Procuro o 1o. não zero.
+		// se for tudo zero, uso os 3 últimos: 0,00 (daí a busca ser até o 9o. dígito)
+		for (i=0; i < 9; i++) {
+			 j=i+1;
+			 dig = amount.substring(i,j);
+			 if ( ! dig.equals("0"))
+				 break;
+		}
+		strValor=amount.substring(i,10) + "," + amount.substring(10,12);
+	
+		String cupom = "Nome Estabelecimento    @Av Do Estado 1315 - Bloco 2       SPBR@";
+		cupom = cupom + "CNPJ: 01006074/0001-06     1 4399 0000@EC:000006510                          @@";
+		cupom = cupom + "CONFIRMACAO DE PRE-AUTORIZACAO ";
+		cupom = cupom + "@************0029   @";
+		cupom = cupom + data.substring(02,04) + "/" + data.substring(00,02) + "/15        ";   
+		cupom = cupom + data.substring(04,06) + ":" + data.substring(6,8);      //   "11/07/14                         14:51";
+		cupom = cupom + "@VALOR APROVADO: R$ " + strValor;
+		cupom = cupom + "@@CV:" + nsu + "            AUTO: 000000";
+		cupom = cupom + "@ @@TERM:SE000000       @";
+	
+		String cupomEstab  =   "C@@    " + bandeira + " - Via Estabelecimento   @@" + cupom;
+		cupomEstab = cupomEstab + "@@---------------------------------@";
+		cupomEstab = cupomEstab + "ASSINATURA DO CLIENTE@(Nome do Cliente)@";
+	
+		response.set(62, cupomEstab);
+	}
+	
+	socket.send (response);
+}

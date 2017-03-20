@@ -1,0 +1,17 @@
+<server class="org.jpos.q2.iso.QServer" logger="Q2" name="MyISOServer">
+    <attr name="port" type="java.lang.Integer">6666</attr>
+    <attr name="maxSessions" type="java.lang.Integer">20</attr>	
+    <attr name="minSessions" type="java.lang.Integer">10</attr>
+
+    <channel name="ClientChannel" class="org.jpos.iso.channel.XMLChannel" logger="Q2"
+             packager="org.jpos.iso.packager.XMLPackager"
+             header="000000000000">
+    </channel>
+
+    <request-listener class="br.listofacil.ServerListener" logger="Q2">
+        <property name="space" value="ts:default" />
+        <property name="queue" value="TransactionQueue" />
+        <property name="timeout" value="10000" />
+    </request-listener>	 
+	
+</server>

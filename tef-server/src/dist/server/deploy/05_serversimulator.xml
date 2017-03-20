@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<server class="org.jpos.q2.iso.QServer" logger="Q2"
+	name="ListoFacil-Tef-server">
+	<attr name="port" type="java.lang.Integer">5790</attr>
+	 <channel class="org.jpos.iso.channel.XMLChannel" logger="Q2"
+       packager="org.jpos.iso.packager.XMLPackager">
+	</channel>
+	<request-listener class="com.bravado.bsh.ListoBSHRequestListener"
+		logger="Q2">
+		<property name="mux" value="clientsimulator-mux" />
+	</request-listener>
+</server>

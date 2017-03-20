@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+
+<channel-adaptor name='clientsimulator-adaptor' class="org.jpos.q2.iso.ChannelAdaptor"
+	logger="Q2">
+	 <channel class="org.jpos.iso.channel.XMLChannel" logger="Q2"
+       packager="org.jpos.iso.packager.XMLPackager">
+		<!-- property name="host" value="200.204.163.104" / -->
+		<!-- property name="port" value="34040" / -->
+		<property name="host" value="192.168.25.204" />
+		<property name="port" value="6666" />
+	</channel>
+	<in>clientsimulator-send</in>
+	<out>clientsimulator-receive</out>
+	<reconnect-delay>10008</reconnect-delay>
+</channel-adaptor>
+

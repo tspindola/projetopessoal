@@ -1,0 +1,247 @@
+import org.jpos.iso.*;
+import com.bravado.gp.pdv.*;
+import net.hairi.Thales.*;
+import com.bravado.gp.*;
+import com.bravado.util.*;
+
+ISOMsg response = FileReader.readRawMsg("resources/0210_chip.iso");   
+response.setPackager(request.getPackager());
+
+response.setMTI("0210");
+
+int[] fieldsToCopy = new int[] {
+    3,  // processing code(debit or credit)
+    4,  // amount, transaction
+	7,  // transmission date and time
+    11, // system trace audit number
+    12, // date , local transaction
+	13, // hora local
+    41, // terminal ID
+    42, // card aceptor ID
+	49
+};
+
+ISOMsgUtil.copyFields(request, response, fieldsToCopy);
+
+String data = ISODate.getDateTime(new Date());
+
+String transactionAmount = request.getString(4);
+String DE62;
+
+	response.set (38, null);
+	response.set(60, null);
+
+	switch (transactionAmount.substring(10, 12)) {
+		case "01":
+			failureRespCode="54";
+			DE62 = "D 'CARTAO VENCIDO  '#'CRT VENCIDO - 54'";
+			break;
+		case "02":
+			failureRespCode="59";
+			DE62 = "D 'NAO AUTORIZADA  '#'CRT SUSPENSO-59 '";
+			break;
+		case "03":
+			failureRespCode="60";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 60 '";
+			break;
+		case "04":
+			failureRespCode="62";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 62 '";
+			break;
+		case "05":
+			failureRespCode="66";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 66 '";
+			break;
+		case "06":
+			failureRespCode="75";
+			DE62 = "D 'SENHA INVALIDA  '#'SENHA INVAL.-75 '";
+			break;
+		case "07":
+			failureRespCode="01";
+			DE62 = "D  'TRANS. REFERIDA '#'LIGAR EMISSOR-01'";
+			break;
+		case "08":
+			failureRespCode="02";
+			DE62 = "D  'TRANS. REFERIDA '#'LIGAR EMISSOR-02'";
+			break;
+		case "09":
+			failureRespCode="03";
+			DE62 = "D 'NAO AUTORIZADA  '#'ESTAB. INVAL.-03'";
+			break;
+		case "10":
+			failureRespCode="13";
+			DE62 = "D 'VALOR INVALIDO  '#'VALOR INVAL.-13 '";
+			break; 
+		case "11":
+			failureRespCode="14";
+			DE62 = "D 'CARTAO INVALIDO '#'CARTAO INVAL.-14'";
+			break;
+		case "12":
+			failureRespCode="23";
+			DE62 = "D 'NAO AUTORIZADA  '#'ESTAB. INVAL.-23'";
+			break;
+		case "13":
+			failureRespCode="42";
+			DE62 = "D 'NAO AUTORIZADA  '#'ESTAB. INVAL.-42'";
+			break;
+		case "14":
+			failureRespCode="40";
+			DE62 = "D 'NAO AUTORIZADA  '#'ESTAB. INVAL.-40'";
+			break;
+		case "15":
+			failureRespCode="51";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 51 '";
+			break;
+		case "16":
+			failureRespCode="55";
+			DE62 = "D 'SENHA INVALIDA  '#'SENHA INVAL.-55 '";
+			break;
+		case "17":
+			failureRespCode="56";
+			DE62 = "D 'DADOS INVALIDOS '#'DADOS INVAL.-56 '";
+			break;
+		case "18":
+			failureRespCode="57";
+			DE62 = "D 'NAO PERMITIDA   '#'NAO PERMIT CRT57'";
+			break;
+		case "19":
+			failureRespCode="58";
+			DE62 = "D 'NAO PERMITIDA   '#'NAO PERMIT EST58'";
+			break;
+		case "20":
+			failureRespCode="61";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 61 '";
+			break;
+		case "21":
+			failureRespCode="63";
+			DE62 = "D 'SENHA INVALIDA  '#'SENHA INVAL.-63 '";
+			break;
+		case "22":
+			failureRespCode="65";
+			DE62 = "D 'NAO AUTORIZADA  '#'LIGAR EMISSOR-65'";
+			break;
+		case "23":
+			failureRespCode="93";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 93 '";
+			break;
+		case "24":
+			failureRespCode="33";
+			DE62 = "D  'NAO AUTORIZADA  '#'NAO AUTOR. - 33 '";
+			break;
+		case "25":
+			failureRespCode="34";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 34 '";
+			break;
+		case "26":
+			failureRespCode="35";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 35 '";
+			break;
+		case "27":
+			failureRespCode="36";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 36 '";
+			break;
+		case "28":
+			failureRespCode="37";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 37 '";
+			break;
+		case "29":
+			failureRespCode="38";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 38 '";
+			break;
+		case "30":
+			failureRespCode="07";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 07 '";
+			break;
+		case "31":
+			failureRespCode="41";
+			DE62 = "D  'NAO AUTORIZADA  '#'CRT BLOQUEADO-41'";
+			break;
+		case "32":
+			failureRespCode="43";
+			DE62 = "D 'NAO AUTORIZADA  '#'CRT BLOQUEADO-43'";
+			break;
+		case "33":
+			failureRespCode="24";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 24 '";
+			break;
+		case "34":
+			failureRespCode="25";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 25 '";
+			break;
+		case "35":
+			failureRespCode="27";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 27 '";
+			break;
+		case "36":
+			failureRespCode="28";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 28 '";
+			break;
+		case "37":
+			failureRespCode="29";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 29 '";
+			break;
+		case "38":
+			failureRespCode="26";
+			DE62 = "D 'TRANS. DUPLICADA'#'TRANS. DUPLIC-26'";
+			break;
+		case "39":
+			failureRespCode="12";
+			DE62 = "D 'TRANS. INVALIDA '#'TRANS. INVAL.-12'";
+			break;
+		case "40":
+			failureRespCode="19";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 19 ";
+			break;
+		case "41":
+			failureRespCode="30";
+			DE62 = "D 'TRANS. INVALIDA '#'TRANS. INVAL.-30'";
+			break;
+		case "42":
+			failureRespCode="31";
+			DE62 = "D 'TRANS. INVALIDA '#'TRANS. INVAL.-31'";
+			break;
+		case "43":
+			failureRespCode="90";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 90 '";
+			break;
+		case "44":
+			failureRespCode="91";
+			DE62 = "D 'EMISSOR INDISP. '#'EMISS. INDISP-91'";
+			break;
+		case "45":
+			failureRespCode="92";
+			DE62 = "D 'NAO AUTORIZADA  '#'NAO AUTOR. - 92 '";
+			break;
+		case "46":
+			failureRespCode="96";
+			DE62 = "D 'INSTIT. INDISP  '#'INST. INDISP.-96'";
+			break;
+		case "47":
+			failureRespCode="68";
+			DE62 = "D 'TENTE NOVAMENTE '#'TENTE DE NOVO-68'";
+			break;
+		case "48":
+			failureRespCode="94";
+			DE62 = "D 'TRANS. DUPLICADA'#'TRANS. DUPLIC-94'";
+			break;
+		case "49":
+			failureRespCode="95";
+			DE62 = "D 'LIG. ATENDIMENTO'#'LIGAR ATEND.-95 '";
+			break;
+		case "50":
+			failureRespCode="21";
+			DE62 = "D 'LIG. ATENDIMENTO'#'LIGAR ATEND.-21 '";
+			break;
+		case "51":
+			failureRespCode="09";
+			DE62 = "D 'LIG. ATENDIMENTO'#'LIGAR ATEND.-09 '";
+			break;
+			
+	}
+	response.set(39, failureRespCode);
+	response.set(62, DE62);
+
+	String nsu = "00" + data;   	// monto um campo de 12 dígitos com valores crescentes
+	response.set(127, nsu);         // DE 127 = NSU (vai no comprovante, após "CV:")
+
+socket.send (response);

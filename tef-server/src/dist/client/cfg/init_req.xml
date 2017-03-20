@@ -1,0 +1,13 @@
+ <isomsg>
+      <!-- org.jpos.iso.packager.XMLPackager -->
+      <field id="0" value="0800"/>
+      <field id="3" value="900000"/>
+      <field id="7" value="0718120300"/>
+      <field id="11" value="000001"/>
+      <field id="12" value="120300"/>
+      <field id="13" value="0718"/>
+      <field id="41" value="00000001"/>
+      <field id="42" value="012000006020001"/>
+      <field id="48" value="00100800000100"/>
+      <field id="61" value="001008GP0102LI005020INGENICO            006019iPP320             00702038068407467127204204"/>
+    </isomsg>

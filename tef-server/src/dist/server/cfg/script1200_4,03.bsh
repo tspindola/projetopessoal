@@ -1,0 +1,66 @@
+import org.jpos.iso.*;
+Random random = new Random(System.currentTimeMillis());
+
+logger.warn(" >>>>>>> ****** Script 1200_4,02 - response code = 013 ****** <<<<<<");
+
+ISOMsg response;
+String cupom_DE123;
+
+//String chipData = request.getString(55);
+//String psn = request.getString(23);
+//String entryMode = request.getString(22);
+
+response = FileReader.readXMLMsg("resources/1210.xml");   
+logger.warn("Carregou layout iso da 1210 (10/outubro)");
+
+response.set(4, "000000003500");
+//response.set(4, request.getString((4));
+response.set(7, ISODate.getDateTime(new Date()));
+response.set(11, request.getString(11));
+response.set(12, request.getString(12));
+
+// ---------------- inclusões feitas por Marli:  ------------------------------
+
+response.set(2, request.getString(2));     		// documentação diz que o host sempre retorna  PAC
+response.set(3, request.getString(3));			// processing code(debit or credit)
+response.set(14, request.getString(14));   		// only manual pan entry
+
+response.set(28, request.getString(12).substring(0,6));   		// date reconciliation, coloquei uma data qualquer
+response.set(35, request.getString(35));   		// track 2 (tarja e ICC)
+//response.set(39, "013");
+
+response.set(38, Integer.toString(Math.abs(random.nextInt()) % 1000000));	// 38: Approval code - only if approved (authorization code)
+
+response.set(41, request.getString(41));   		// terminal ID
+response.set(42, request.getString(42));   		// card aceptor ID (merchant number)
+//response.set(49, request.getString(49));        // M, transaction currency code
+response.set(52, request.getBytes(52));   		// PIN data (if PIN was entered)
+response.set(53, request.getBytes(53));   		// obrigatório, se PIN presente
+response.set(55, request.getBytes(55));   		// obrigatório, se EMV
+//response.set(60,"");
+//response.set(123,"");
+response.set(124,"Valor de transacao invalido.");
+
+
+logger.warn(" ****** Mensagem 4,01 montada ****** ");
+
+socket.send (response);
+
+cupom_DE123 = "      VISA - Via Cliente      \n" + 
+        "     TEL: 1142999769\n" + 
+        "NR_PAR   :     05\n" + 
+        "ENC_MEN  :     777,77\n" + 
+        "VAL_PARC :     99,999,99\n" + 
+        "VAL_TOT  :     666,666,66\n" + 
+        "CET ANUAL:     88,888,88\n" + 
+        "VAL_TRI  :     22,222,22\n" + 
+        "VAL_TAR  :     11,111,11\n" + 
+        "VAL_SEG  :     33,333,33\n" + 
+        "VAL_OUT  :     55,555,55\n" + 
+        "TOT_EC   :     -\n" + 
+        "TRIB     :   -\n" + 
+        "TAR      :   -\n" + 
+        "SEG      :   -\n" + 
+        "OUT      :   -\n" + 
+        "MER      :   -\n" + 
+        "CET      :   -\n";
