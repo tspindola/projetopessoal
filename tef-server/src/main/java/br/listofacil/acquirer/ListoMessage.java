@@ -100,13 +100,20 @@ public class ListoMessage {
 				return getErrorMessage(m);
 			
 			//Formata NSU e horario transacao
-			isomsg = getCommonBitsFormatted(isomsg, AcquirerSettings.getIncrementNSU());
+			isomsg = getCommonBitsFormatted(m, AcquirerSettings.getIncrementNSU());
+		
+			//Obtem os dados de inicializacao do adquirente
+			ListoData listoData = AcquirerSettings.getInitializationTables(acquirer, logicalNumber);		
+			if (listoData == null) {			
+				isomsg = getWaitLogon(isomsg);				
+				if (!AcquirerSettings.loadAcquirerTables(acquirer, logicalNumber, m.getString(FIELD_TERMINAL_CODE)))
+					isomsg = getErrorMessage(isomsg);
+				return isomsg;
+			}
 			
 			switch (m.getMTI()) {
 			case ListoData.REQ_LOGON_INIT:
-				{
-					ListoData listoData = AcquirerSettings.getInitializationTables(acquirer, logicalNumber);		
-					
+				{	
 					switch (m.getValue(3).toString()) {
 					case ListoData.PROC_REQ_LOGON:
 						isomsg = getLogon(listoData, m);
@@ -123,7 +130,7 @@ public class ListoMessage {
 				break;
 			
 			case ListoData.REQ_PAYMENT:
-				isomsg = getPayment(getCommonBitsFormatted(m, AcquirerSettings.getIncrementNSU()));
+				isomsg = getPayment(m);
 				break;
 
 			default:
@@ -264,26 +271,13 @@ public class ListoMessage {
 			isomsg.set(FIELD_SHOP_CODE, m.getString(FIELD_SHOP_CODE)); 	   	   //Codigo da loja
 			isomsg.set(FIELD_ACQUIRER_CODE, m.getString(FIELD_ACQUIRER_CODE)); //Codigo do adquirente
 			
-			if (listoData != null)
-			{
-				if (!listoData.smid.equals("")) 
-					isomsg.set(FIELD_SMID, listoData.smid);
-				if (!listoData.versaoTabelas.equals("")) 
-					isomsg.set(FIELD_TABLES_VERSION, listoData.versaoTabelas);
-				//if (!listoData.workingKey.equals("")) 
-				//	isomsg.set(FIELD_WORKING_KEY, listoData.workingKey);
-			}
-			else
-			{
-				String acquirer = m.getString(FIELD_ACQUIRER_CODE);
-				String logicalNumber = m.getString(FIELD_MERCHANT_CODE);
-				
-				isomsg = getWaitLogon(m);
-				
-				if (!AcquirerSettings.loadAcquirerTables(acquirer, logicalNumber, m.getString(FIELD_TERMINAL_CODE)))
-					isomsg = getErrorMessage(m);
-			}
-
+			if (!listoData.smid.equals("")) 
+				isomsg.set(FIELD_SMID, listoData.smid);
+			if (!listoData.versaoTabelas.equals("")) 
+				isomsg.set(FIELD_TABLES_VERSION, listoData.versaoTabelas);
+			//if (!listoData.workingKey.equals("")) 
+			//	isomsg.set(FIELD_WORKING_KEY, listoData.workingKey);
+	
 		} catch (Exception e) {
 			e.printStackTrace();
 			isomsg = getErrorMessage(m);
@@ -648,6 +642,12 @@ public class ListoMessage {
 			if (map.containsKey(TAG_ENCRYPTION_CVD))
 				data.cardVerificationData = map.get(TAG_ENCRYPTION_CVD);
 		}
+		
+		Calendar trsdate = cf.getCurrentDate();		
+		data.brazilianDate = cf.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0") + "/" +
+				   			 cf.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") + "/" +
+				   			 trsdate.get(Calendar.YEAR);							
+			
 		return data;
 	}
 	
@@ -662,8 +662,11 @@ public class ListoMessage {
 		response.set(FIELD_NSU_TEF, dataResponse.nsuTef);
 		response.set(FIELD_DATE, dataResponse.date);
 		response.set(FIELD_TIME, dataResponse.time);
-		response.set(FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
-		response.set(FIELD_RESPONSE_CODE, dataResponse.responseCode);
+		
+		if (dataResponse.authorizationCode.trim().length() > 0)
+			response.set(FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
+		if (dataResponse.responseCode.trim().length() > 0)
+			response.set(FIELD_RESPONSE_CODE, dataResponse.responseCode);
 		
 		response.set(FIELD_TERMINAL_CODE, dataRequest.terminalCode);
 		response.set(FIELD_MERCHANT_CODE, dataRequest.merchantCode);
@@ -671,12 +674,14 @@ public class ListoMessage {
 		response.set(FIELD_ACQUIRER_CODE, dataRequest.acquirerCode);
 		response.set(FIELD_EQUIPMENT_TYPE, dataRequest.equipmentType);
 		
-		if (dataResponse.emvData.length() > 0)
+		if (dataResponse.emvData.trim().length() > 0)
 			response.set(FIELD_EMV_DATA, dataResponse.emvData);
-		response.set(FIELD_GENERIC_DATA_1, dataResponse.cardholderReceipt);
-		if (dataResponse.merchantReceipt.length() > 0)
+		if (dataResponse.cardholderReceipt.trim().length() > 0)
+			response.set(FIELD_GENERIC_DATA_1, dataResponse.cardholderReceipt);
+		if (dataResponse.merchantReceipt.trim().length() > 0)
 			response.set(FIELD_GENERIC_DATA_2, dataResponse.merchantReceipt);
-		response.set(FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
+		if (dataResponse.nsuAcquirer.length() > 0)
+			response.set(FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
 
 		return response;
 	}

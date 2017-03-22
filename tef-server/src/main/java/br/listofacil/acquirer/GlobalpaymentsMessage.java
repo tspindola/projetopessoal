@@ -92,7 +92,8 @@ public class GlobalpaymentsMessage {
 	private final String TAG_ENCRYPTION_PIN_KSN = "002";
 	private final String TAG_ENCRYPTION_CARD_TYPE = "003";
 	private final String TAG_ENCRYPTION_CARD_KSN = "004";
-	private final String TAG_CARD_VERIFICATION_DATA = "005";
+	private final String TAG_TYPE_CARD_VERIFICATION_DATA = "005";
+	private final String TAG_CARD_VERIFICATION_DATA = "006";
 	private final String TAG_SECURITY_CODE_DEBIT = "010";
 	
 	private String PARAM_41 = "00000000"; //terminal number
@@ -279,7 +280,7 @@ public class GlobalpaymentsMessage {
 				return null;
 			}
 			//Request acquirer
-			response = mux.request(request, 30 * 1000);
+			response = mux.request(request, 50 * 1000);
 			
 		} catch (NotFoundException | ISOException e) {
 			// TODO Auto-generated catch block
@@ -887,8 +888,10 @@ public class GlobalpaymentsMessage {
 				data.encryptionCardType = map.get(TAG_ENCRYPTION_CARD_TYPE);	
 			if (map.containsKey(TAG_ENCRYPTION_CARD_KSN))
 				data.ksnCard = map.get(TAG_ENCRYPTION_CARD_KSN);	
+			if (map.containsKey(TAG_TYPE_CARD_VERIFICATION_DATA))
+				data.typeCardVerificationData = map.get(TAG_TYPE_CARD_VERIFICATION_DATA);
 			if (map.containsKey(TAG_CARD_VERIFICATION_DATA))
-				data.cardVerificationData = map.get(TAG_CARD_VERIFICATION_DATA).substring(2, 6);	
+				data.cardVerificationData = map.get(TAG_CARD_VERIFICATION_DATA);
 		}
 		
 		if (message.hasField(FIELD_ADDITIONAL_DATA_2))
@@ -927,7 +930,7 @@ public class GlobalpaymentsMessage {
 		request.setMTI(REQ_GP_PAYMENT);
 		
 		if ((requestData.pan.length() > 0) && 
-			(requestData.typeCardRead.equals(ListoData.MAGNETIC))) {
+			(requestData.typeCardRead.equals(ListoData.TRANSACTION_ENTERED))) {
 			String pan = requestData.pan.substring(0, 6);
 			pan += cf.padLeft(new String(), requestData.pan.length() - 6, "0");
 			request.set(FIELD_PAN, pan);
@@ -1094,9 +1097,9 @@ public class GlobalpaymentsMessage {
                 bit126 += "0" + especificChar + "    "; //CVV2/CVC2/CID desconsiderado ou nao fornecido (nao eh necessario para EMV)                
             else
             {
-                if (data.cardVerificationData.trim().equals("1")) //inexistente
+                if (data.typeCardVerificationData.equals("1")) //inexistente
                     bit126 += "9" + especificChar + "    ";
-                else if (data.cardVerificationData.trim().equals("2")) //ilegivel
+                else if (data.typeCardVerificationData.equals("2")) //ilegivel
                     bit126 += "2" + especificChar + "    ";
                 else //captura do cvv
                 {
@@ -1108,7 +1111,7 @@ public class GlobalpaymentsMessage {
                     bit126 += especificChar + cf.padLeft(data.cardVerificationData, 4, " ");               
                 }
                 //Envia o subcampo 010
-                if (data.processingCode.equals(PROC_CODE_DEBIT))
+                if (data.processingCode.equals(ListoData.PROC_REQ_DEBIT))
                 	bit126 += "010005" + cf.padLeft(data.cardVerificationData, 5, "0");
             }
         }

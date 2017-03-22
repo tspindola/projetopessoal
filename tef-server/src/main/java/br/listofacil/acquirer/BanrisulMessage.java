@@ -1,6 +1,8 @@
 package br.listofacil.acquirer;
 
+import java.math.BigInteger;
 import java.util.Calendar;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,8 +21,13 @@ import br.listofacil.tefserver.iso.ISO93EPackagerBanrisul;
 public class BanrisulMessage {
 
 	private final String MERCHANT = "LISTO FACIL";
-	private final static String BANRISUL = "02";
+	private final String BANRISUL = "02";
 	private final String CURRENCY_SYMBOL = "R$  ";
+	
+	//Comprovante
+	private final String RCP_ACQUIRER_NAME = "VERO";
+	private final String RCP_CREDIT = "VENDA CREDITO A VISTA";
+	
 	private final String BYTE_1 = "11111101";
 	private final String BYTE_2 = "10000000";
 	private final String BYTE_3 = "00000000";
@@ -61,8 +68,8 @@ public class BanrisulMessage {
 	private final int FIELD_SMID = 53;
 	private final int FIELD_EMV_DATA = 55;
 	private final int FIELD_TERMINAL_TYPE = 61;
-	private final int FIELD_MERCHANT_DATA = 62;
-	private final int FIELD_TERMINAL_DATA = 63;
+	private final int FIELD_GENERIC_DATA_62 = 62;
+	private final int FIELD_GENERIC_DATA_63 = 63;
 	private final int FIELD_INSTALLMENTS = 67;
 	private final int FIELD_SECURITY_CODE = 122;
 	private final int FIELD_NSU_ACQUIRER = 127;
@@ -811,39 +818,37 @@ public class BanrisulMessage {
 	
 	private ISOMsg getCommonBitsFormatted(ISOMsg msg, int nsu) throws ISOException {
 		ISOMsg isomsg = msg;
-		
-		CommonFunctions commonFunctions =  new CommonFunctions();
-		Calendar trsdate = commonFunctions.getCurrentDate();		
+		Calendar trsdate = cf.getCurrentDate();		
 		
 		if (!msg.hasField(7))
 		{			
-			isomsg.set(7, commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") +			
-						commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0") + 
-						commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.HOUR_OF_DAY)), 2, "0") + 
-						commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.MINUTE)), 2, "0") +
-						commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.SECOND)), 2, "0"));								
+			isomsg.set(7, cf.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") +			
+						cf.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0") + 
+						cf.padLeft(String.valueOf(trsdate.get(Calendar.HOUR_OF_DAY)), 2, "0") + 
+						cf.padLeft(String.valueOf(trsdate.get(Calendar.MINUTE)), 2, "0") +
+						cf.padLeft(String.valueOf(trsdate.get(Calendar.SECOND)), 2, "0"));								
 		}		
 		else
 			isomsg.set(7, msg.getValue(7).toString());
 		
 		if (!msg.hasField(11)) //NSU TEF
-			isomsg.set(11, commonFunctions.padLeft(String.valueOf(nsu), 6, "0"));
+			isomsg.set(11, cf.padLeft(String.valueOf(nsu), 6, "0"));
 		else
 			isomsg.set(11, msg.getValue(11).toString());
 		
 		if (!msg.hasField(12)) //hora local
 		{
-			isomsg.set(12, commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.HOUR_OF_DAY)), 2, "0") + 
-					commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.MINUTE)), 2, "0") +
-					commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.SECOND)), 2, "0"));		
+			isomsg.set(12, cf.padLeft(String.valueOf(trsdate.get(Calendar.HOUR_OF_DAY)), 2, "0") + 
+					cf.padLeft(String.valueOf(trsdate.get(Calendar.MINUTE)), 2, "0") +
+					cf.padLeft(String.valueOf(trsdate.get(Calendar.SECOND)), 2, "0"));		
 		}	
 		else
 			isomsg.set(12, msg.getValue(12).toString());
 		
 		if (!msg.hasField(13)) //data local
 		{
-			isomsg.set(13, commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") +			
-					commonFunctions.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0"));
+			isomsg.set(13, cf.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") +			
+						   cf.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0"));
 		}
 		else
 			isomsg.set(13, msg.getValue(13).toString());
@@ -888,10 +893,11 @@ public class BanrisulMessage {
 		
 		if (data.zipCode.length() > 8)
 			data.zipCode = data.zipCode.substring(0, 8);
+		bit062 += cf.padRight(data.zipCode, 8, " ");
 		
 		if (data.mcc.length() > 4)
 			data.mcc = data.mcc.substring(0, 4);
-		bit062 += data.mcc;
+		bit062 += cf.padRight(data.phone, 4, " ");
 		
 		if (data.cnpjcpf.length() > 14)
 			data.cnpjcpf = data.cnpjcpf.substring(0, 14);
@@ -977,17 +983,14 @@ public class BanrisulMessage {
 		
 		//Adiciona o zero no inicio - pre-autorizacao (0 = nao e pre-autorizacao)
 		String merchantData = "0" + getMerchantData(requestData);
-		merchantData = cf.padLeft(String.valueOf(merchantData.length()), 3, "0") + merchantData;
-		//TESTE
-		merchantData = "0XXXXXXXXXXXX*JOJOAOZIN                                    SAOPAULO          0145200258120000000616123400000000000";
-		request.set(FIELD_MERCHANT_DATA, merchantData);
-
-		String terminalData = getTerminalData();
-		terminalData = cf.padLeft(String.valueOf(terminalData.length()), 3, "0") + terminalData;
 		
 		//TESTE
-		terminalData = "014000100003***XXXXXXXXX TEF****0001";
-		request.set(FIELD_TERMINAL_DATA, terminalData);
+		//merchantData = "0XXXXXXXXXXXX*JOJOAOZIN                                    SAOPAULO          0145200258120000000616123400000000000";
+		request.set(FIELD_GENERIC_DATA_62, merchantData);
+		
+		//TESTE
+		//terminalData = "014000100003***XXXXXXXXX TEF****0001";
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
 		
 		if (requestData.installments.length() > 0)
 			request.set(FIELD_INSTALLMENTS, cf.padLeft(requestData.installments, 2, "0"));
@@ -1006,7 +1009,7 @@ public class BanrisulMessage {
 		return request;
 	}
 	
-	public TransactionData getResponseData(ISOMsg message) {
+	public TransactionData getResponseData(TransactionData requestData, ISOMsg message) {
 		TransactionData data = new TransactionData();
 		
 		if (message.hasField(FIELD_PAN))
@@ -1029,31 +1032,143 @@ public class BanrisulMessage {
 			data.panSequence = message.getString(FIELD_PAN_SEQUENCE);
 		if (message.hasField(FIELD_TRACK_2))
 			data.cardTrack2 = message.getString(FIELD_TRACK_2);
+		if (message.hasField(FIELD_RESPONSE_CODE))
+			data.responseCode = message.getString(FIELD_RESPONSE_CODE);		
+		if (message.hasField(FIELD_AUTHORIZATION_CODE))
+			data.authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE);		
 		if (message.hasField(FIELD_TERMINAL_CODE))
 			data.terminalCode = message.getString(FIELD_TERMINAL_CODE);
 		if (message.hasField(FIELD_MERCHANT_CODE))
 			data.merchantCode = message.getString(FIELD_MERCHANT_CODE);		
 		if (message.hasField(FIELD_CURRENCY_CODE))
 			data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
-		if (message.hasField(FIELD_PIN))
-			data.pin = message.getString(FIELD_PIN);
 		if (message.hasField(FIELD_EMV_DATA))
 			data.emvData = message.getString(FIELD_EMV_DATA);
-		if (message.hasField(FIELD_MERCHANT_DATA)) 
-			data.merchantReceipt = message.getString(FIELD_MERCHANT_DATA);
+		
+		if (!data.responseCode.equals("00")) {
+			String msg = "TRANSACAO NEGADA"; 
+			if ((listoData.messages != null) && 
+				(listoData.messages.containsKey(data.responseCode)))
+				msg = listoData.messages.get(data.responseCode).trim();
+			data.cardholderReceipt = msg;
+		} else {
+			data.merchantReceipt = getMerchantReceipt(requestData, message);
+			data.cardholderReceipt = getCardholderReceipt(requestData, message);
+		}
+
 		if (message.hasField(FIELD_NSU_ACQUIRER))
 			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
+		
+		
 		return data;
+	}
+	
+	private String getMerchantReceipt(TransactionData requestData, ISOMsg message) {
+		String receipt = new String();
+		try {
+	
+			//Formatar comprovante
+			if (message.hasField(FIELD_GENERIC_DATA_62)) { 
+				String flag = message.getString(FIELD_GENERIC_DATA_62).substring(0, 15).trim();
+				receipt += "@------------ 1ª via – loja -----------"; 
+				receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
+				receipt += "@"; //quebra linha
+				receipt += "@" + cf.padRight(getTypePaymentDescription(requestData.processingCode), 39, " ");
+				
+				String merchant = requestData.merchantName.toUpperCase();
+				if (merchant.length() > 38) merchant = merchant.substring(0,  38);
+				
+				receipt += "@" + cf.padRight(merchant, 39, " ");
+				receipt += "@CNPJ: " + cf.padRight(requestData.cnpjcpf, 39, " ");
+				receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39, " ");
+				receipt += "@"; //quebra linha
+				receipt += "@" + cf.padRight(requestData.merchantCode + " " + 
+											 requestData.equipmentType, 39, " ");
+				receipt += "@";
+				String date = 
+				receipt += "@DATA: " + requestData.brazilianDate + "        HORA: " +
+						   requestData.time.substring(0, 2) + ":" +
+						   requestData.time.substring(2, 4) + ":" +
+						   requestData.time.substring(4, 6);
+				receipt += "@NSU BERGS:" + requestData.nsuAcquirer + " NSU BANDEIRA:" + requestData.authorizationCode;
+				receipt += "CARTAO: 9999   VALOR: " + (Long.valueOf(requestData.amount) / 100);
+				
+				//TERMINAR FORMATACAO DO COMPROVANTE
+				/*
+				if (message.hasField(FIELD_GENERIC_DATA_63)) 
+					data.merchantReceipt = message.getString(FIELD_GENERIC_DATA_63); */
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	
+		return receipt;
+	}
+	
+	private String getCardholderReceipt(TransactionData requestData, ISOMsg message) {
+		String receipt = new String();
+		try {
+	
+			//Formatar comprovante
+			if (message.hasField(FIELD_GENERIC_DATA_62)) { 
+				String flag = message.getString(FIELD_GENERIC_DATA_62).substring(0, 15).trim();
+				receipt += "@----------- 2ª via – cliente ---------"; 
+				receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
+				receipt += "@"; //quebra linha
+				receipt += "@" + cf.padRight(getTypePaymentDescription(requestData.processingCode), 39, " ");
+				
+				String merchant = requestData.merchantName.toUpperCase();
+				if (merchant.length() > 38) merchant = merchant.substring(0,  38);
+				
+				receipt += "@" + cf.padRight(merchant, 39, " ");
+				receipt += "@CNPJ: " + cf.padRight(requestData.cnpjcpf, 39, " ");
+				receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39, " ");
+				receipt += "@"; //quebra linha
+				receipt += "@" + cf.padRight(requestData.merchantCode + " " + 
+											 requestData.equipmentType, 39, " ");
+				receipt += "@";
+				String date = 
+				receipt += "@DATA: " + requestData.brazilianDate + "        HORA: " +
+						   requestData.time.substring(0, 2) + ":" +
+						   requestData.time.substring(2, 4) + ":" +
+						   requestData.time.substring(4, 6);
+				receipt += "@NSU BERGS:" + requestData.nsuAcquirer + " NSU BANDEIRA:" + requestData.authorizationCode;
+				receipt += "CARTAO: 9999   VALOR: " + (Long.valueOf(requestData.amount) / 100);
+				
+				//TERMINAR FORMATACAO DO COMPROVANTE
+				/*
+				if (message.hasField(FIELD_GENERIC_DATA_63)) 
+					data.merchantReceipt = message.getString(FIELD_GENERIC_DATA_63); */
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	
+		return receipt;
+	}
+	
+	private String getTypePaymentDescription(String type){
+		switch (type) {
+		case ListoData.PROC_REQ_CREDIT:
+			return "VENDA CREDITO A VISTA";
+		case ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST:
+			return "VENDA CREDITO PARCELADO LOJISTA";
+		case ListoData.PROC_REQ_CREDIT_WITH_INTEREST:
+			return "VENDA CREDITO PARCELADO EMISSOR";
+		}
+		return "VENDA DEBITO A VISTA";
 	}
 	
 	public TransactionData requestPayment(TransactionData requestData){
 		TransactionData responseData = null;
 		
 		try {
+			//Seta os dados de inicializacao do adquirente
+			listoData = AcquirerSettings.getInitializationTables(BANRISUL, requestData.merchantCode);
 			
 			ISOMsg request = getTransactionFormatted(requestData);
 			ISOMsg response = requestAcquirer(request);	
-			responseData = getResponseData(response);
+			responseData = getResponseData(requestData, response);
 			
 		} catch (Exception e) {
 			// TODO: handle exception

@@ -58,5 +58,6 @@ public class TransactionData {
 	public String responseCode = new String();
 	public String cardholderReceipt = new String();
 	public String merchantReceipt = new String();
+	public String brazilianDate = new String();
 	
 }
