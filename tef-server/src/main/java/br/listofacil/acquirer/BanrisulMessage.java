@@ -72,6 +72,7 @@ public class BanrisulMessage {
 	private final int FIELD_GENERIC_DATA_63 = 63;
 	private final int FIELD_INSTALLMENTS = 67;
 	private final int FIELD_SECURITY_CODE = 122;
+	private final int FIELD_LAST_TRANSACTION = 125;
 	private final int FIELD_NSU_ACQUIRER = 127;
 	
 	private String BANRISUL_PINPAD_DATA = "14";					//Posicao da chave de criptografia de dados
@@ -81,7 +82,7 @@ public class BanrisulMessage {
 	private final String PARAM_62a = "00000000"; 				//timestamp-1-Data Tabela EMV - ‘00000000’ se 1a. vez
 	private final String PARAM_62b = "00"; 						//num. sequencial da versao em uso - ‘00000000’ se 1a. vez
 	
-	private final String PARAM_63a = "01";						//master key Banrisul
+	private final String PARAM_63a = "11";						//DUKPT e Master Key Banrisul
 	private final String PARAM_63b = "50";						//forma de comunicacao (50 - TCP/IP)
 	private final String PARAM_63c = "001";						//tipo do equipamento - DEVERA VIR DO CLIENT		
 	private final String PARAM_63d = "00003";					//versao do buffer
@@ -122,7 +123,7 @@ public class BanrisulMessage {
 		AcquirerSettings.setStatusLoadingBanrisul(logicalNumber);
 			
 		//Efetuar o logon
-		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSU());
+		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
 
 		if (response != null) {
 			
@@ -134,7 +135,7 @@ public class BanrisulMessage {
 				
 				while(true) {
 					
-					response = requestTable(response, AcquirerSettings.getIncrementNSU());
+					response = requestTable(response, AcquirerSettings.getIncrementNSUBanrisul());
 					
 					//Timeout
 					if (response == null)
@@ -410,7 +411,7 @@ public class BanrisulMessage {
 			
 			request.setPackager(new ISO93EPackagerBanrisul());
 			//Obtem os bits 007, 011, 012 e 013
-			request = getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSU());	
+			request = getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul());	
 			request.set(42, PARAM_42);
 			
 			tableCode = response.getValue(70).toString();
@@ -510,11 +511,12 @@ public class BanrisulMessage {
 		try {
 			
 			//Registra os dados retornados no logon
-			listoData.smid = response.getValue(53).toString();	
+			listoData.smid = response.getValue(53).toString().trim();	
 			String bit62 = response.getString(62);
-			listoData.workingKey = bit62.substring(0, 32);
-			listoData.versaoTabelas = bit62.substring(32, bit62.length());	
-			
+			if (bit62.trim().length() > 0) {
+				listoData.workingKey = bit62.substring(0, 32);
+				listoData.versaoTabelas = bit62.substring(32, bit62.length());	
+			}
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -806,7 +808,7 @@ public class BanrisulMessage {
 				return null;
 			}
 			//Request acquirer
-			response = mux.request(request, 30 * 1000);
+			response = mux.request(request, ListoData.SERVER_TIMEOUT * 1000);
 			
 		} catch (NotFoundException | ISOException e) {
 			// TODO Auto-generated catch block
@@ -930,8 +932,8 @@ public class BanrisulMessage {
 			request.set(FIELD_PAN, cf.padLeft(String.valueOf(requestData.pan.length()), 2, "0") + 
 					    requestData.pan);
 		*/
-		if (requestData.pan.length() > 0)
-			request.set(FIELD_PAN, requestData.pan);
+		//if (requestData.pan.length() > 0)
+			//request.set(FIELD_PAN, requestData.pan);
 		
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
 		request.set(FIELD_AMOUNT, requestData.amount);
@@ -940,8 +942,8 @@ public class BanrisulMessage {
 		request.set(FIELD_DATE, requestData.date);
 		request.set(FIELD_TIME, requestData.time);
 		
-		if (requestData.expirationDateCard.length() > 0)
-			request.set(FIELD_CARD_EXPIRATION_DATE, requestData.expirationDateCard);
+		//if (requestData.expirationDateCard.length() > 0)
+			//request.set(FIELD_CARD_EXPIRATION_DATE, requestData.expirationDateCard);
 		
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 		
@@ -951,8 +953,8 @@ public class BanrisulMessage {
 		//request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
 		request.set(FIELD_FINANCIAL_INSTITUTION, "0800000000");
 		
-		if (requestData.cardTrack2.length() > 0)
-			request.set(FIELD_TRACK_2, requestData.cardTrack2);		
+		//if (requestData.cardTrack2.length() > 0)
+			//request.set(FIELD_TRACK_2, requestData.cardTrack2);		
 		
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);		
 		request.set(FIELD_MERCHANT_CODE, "041003500000100");
@@ -976,6 +978,8 @@ public class BanrisulMessage {
 				    cf.padLeft(String.valueOf(bit055.length()), 3, "0") + bit055);	*/
 			request.set(FIELD_EMV_DATA, bit055);
 		}
+		
+		
 		request.set(FIELD_INSTALLMENTS, "01");
 		
 		//BIT061 - Tipo de terminal - opcional
@@ -983,10 +987,14 @@ public class BanrisulMessage {
 		
 		//Adiciona o zero no inicio - pre-autorizacao (0 = nao e pre-autorizacao)
 		String merchantData = "0" + getMerchantData(requestData);
+		String securityData = requestData.ksnPin;
+		securityData += "00000000000000000000"; //ksn dados
+		securityData += requestData.encryptedCardData;
 		
 		//TESTE
 		//merchantData = "0XXXXXXXXXXXX*JOJOAOZIN                                    SAOPAULO          0145200258120000000616123400000000000";
-		request.set(FIELD_GENERIC_DATA_62, merchantData);
+		
+		request.set(FIELD_GENERIC_DATA_62, merchantData + securityData);
 		
 		//TESTE
 		//terminalData = "014000100003***XXXXXXXXX TEF****0001";
@@ -996,7 +1004,7 @@ public class BanrisulMessage {
 			request.set(FIELD_INSTALLMENTS, cf.padLeft(requestData.installments, 2, "0"));
 		
 		if (requestData.typeCardRead.equals(ListoData.MAGNETIC)) {
-			String securityData = "0";
+			securityData = "0";
 			if (!requestData.typeCardVerificationData.equals(ListoData.SECURITY_CODE_INFORMED)) {
 				if (requestData.typeCardVerificationData.equals(ListoData.SECURITY_CODE_UNREADABLE))
 					securityData = "1";
@@ -1005,6 +1013,14 @@ public class BanrisulMessage {
 				securityData = requestData.cardVerificationData;
 			request.set(FIELD_SECURITY_CODE, securityData);
 		}
+		
+		
+		
+		//Prencher com os dados da ultima transacao valida
+		//salvar em memoria a data e o NSU do banrisul
+		//Somente enviar valores da data e NSU banrisul da transacao 
+		//realizada e confirmada com o host
+		request.set(FIELD_LAST_TRANSACTION, "0000000000000000");		
 		
 		return request;
 	}

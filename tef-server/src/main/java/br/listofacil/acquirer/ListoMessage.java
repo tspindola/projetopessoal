@@ -48,6 +48,7 @@ public class ListoMessage {
 	private final int FIELD_EMV_DATA = 55;
 	private final int FIELD_REGISTRY_INDEX = 56;
 	private final int FIELD_REGISTRY_CODE = 57;
+	private final int FIELD_ENCRYPTED_CARD_DATA = 60;
 	private final int FIELD_TERMINAL_DATA = 61;
 	private final int FIELD_GENERIC_DATA_1 = 62;
 	private final int FIELD_GENERIC_DATA_2 = 63;
@@ -100,7 +101,7 @@ public class ListoMessage {
 				return getErrorMessage(m);
 			
 			//Formata NSU e horario transacao
-			isomsg = getCommonBitsFormatted(m, AcquirerSettings.getIncrementNSU());
+			isomsg = getCommonBitsFormatted(m, AcquirerSettings.getIncrementNSUBanrisul());
 		
 			//Obtem os dados de inicializacao do adquirente
 			ListoData listoData = AcquirerSettings.getInitializationTables(acquirer, logicalNumber);		
@@ -494,7 +495,7 @@ public class ListoMessage {
 		try {
 			String acquirer = request.getString(FIELD_ACQUIRER_CODE);
 			
-			request = getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSU());
+			request = getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul());
 			
 			TransactionData dataResponse = null;
 			TransactionData dataRequest = new TransactionData();
@@ -583,6 +584,8 @@ public class ListoMessage {
 			if (map.containsKey(TAG_PAN_PART_ENCRYPTED))
 				data.panPartEncrypted = map.get(TAG_PAN_PART_ENCRYPTED);
 		}
+		if (message.hasField(FIELD_ENCRYPTED_CARD_DATA))
+			data.encryptedCardData = message.getString(FIELD_ENCRYPTED_CARD_DATA);
 		if (message.hasField(FIELD_TERMINAL_DATA)) {
 			HashMap<String, String> map = cf.tlvExtractData(message.getString(FIELD_TERMINAL_DATA));
 			if (map.containsKey(TAG_PINPAD_SERIAL_NUMBER))
@@ -656,7 +659,7 @@ public class ListoMessage {
 
 		response.setPackager(new XMLPackager());
 		response.setMTI(ListoData.RES_PAYMENT);
-		response.set(FIELD_PROCESSING_CODE, ListoData.PROC_RES_PAYMENT);
+		response.set(FIELD_PROCESSING_CODE, dataRequest.processingCode);
 		response.set(FIELD_AMOUNT, dataResponse.amount);
 		response.set(FIELD_DATE_TIME, dataResponse.dateTime);
 		response.set(FIELD_NSU_TEF, dataResponse.nsuTef);

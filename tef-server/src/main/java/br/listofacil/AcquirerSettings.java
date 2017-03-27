@@ -36,13 +36,19 @@ public class AcquirerSettings {
 	//NSU Acquirer and NSU TEF original
 	private static HashMap<String, InfoTransaction> transactions = null;
 	private static CommonFunctions common = new CommonFunctions();
-	private static int nsu = 0;
+	private static int nsuBanrisul = 0;
+	private static int nsuGlobalpayments = 0;
 
 	//COLOCAR UM NSU PARA CADA NUMERO LOGICO E ADQUIRENTE
 	
-	public static synchronized int getIncrementNSU(){
+	public static synchronized int getIncrementNSUBanrisul(){
 		//Incrementa o NSU
-		return nsu++;
+		return nsuBanrisul++;
+	}
+	
+	public static synchronized int getIncrementNSUGlobalpayments(){
+		//Incrementa o NSU
+		return nsuGlobalpayments++;
 	}
 	
 	public static void loadLastNsu(){			
@@ -51,7 +57,8 @@ public class AcquirerSettings {
 
 		Calendar nsucalendaraux = common.getCurrentDate();
 		
-		nsu = 1;
+		nsuBanrisul = 1;
+		nsuGlobalpayments = 1;
 		
 		try {
 			
@@ -64,7 +71,12 @@ public class AcquirerSettings {
     		    String line = txtFile.readLine();    		    
     		    String[] nsudata = line.split("[\"]");
     		    
-    		    if (nsudata[0].contains("NSU")){
+    		    if (nsudata[0].contains("NSU_BANRISUL")){
+    		    	nsuaux = Integer.parseInt(nsudata[1]);
+    		    	continue;
+    		    }
+    		    
+    		    if (nsudata[0].contains("NSU_GLOBALPAYMENTS")){
     		    	nsuaux = Integer.parseInt(nsudata[1]);
     		    	continue;
     		    }
@@ -81,7 +93,7 @@ public class AcquirerSettings {
     		
     		if(flagnsu)
     		{
-	    		nsu = nsuaux;
+	    		nsuBanrisul = nsuaux;
     		}
     		
     		txtFile.closeTextFile();	 

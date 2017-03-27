@@ -38,6 +38,8 @@ public class ListoData {
 	public final static String PROC_REQ_CREDIT_WITHOUT_INTEREST = "30002";
 	public final static String PROC_REQ_DEBIT = "30003";
 	public final static String PROC_RES_PAYMENT = "31000";
+	
+	public final static int SERVER_TIMEOUT = 50; //segundos
 	/*
 	public final static int FIELD_PROCESSING_CODE = 3;
 	public final static int FIELD_AMOUNT = 4;

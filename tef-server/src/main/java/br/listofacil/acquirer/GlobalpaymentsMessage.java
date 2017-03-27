@@ -158,13 +158,13 @@ public class GlobalpaymentsMessage {
 		AcquirerSettings.setStatusLoadingGlobalpayments(logicalNumber);
 			
 		//Efetuar o logon
-		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSU());
+		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
 
 		if (response != null)
 		{
 			while(true)
 			{
-				response = requestTable(logicalNumber, AcquirerSettings.getIncrementNSU());
+				response = requestTable(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
 				
 				//Timeout
 				if (response == null)
@@ -280,7 +280,7 @@ public class GlobalpaymentsMessage {
 				return null;
 			}
 			//Request acquirer
-			response = mux.request(request, 50 * 1000);
+			response = mux.request(request, ListoData.SERVER_TIMEOUT * 1000);
 			
 		} catch (NotFoundException | ISOException e) {
 			// TODO Auto-generated catch block

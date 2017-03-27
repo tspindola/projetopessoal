@@ -48,8 +48,8 @@ public class TransactionData {
 	public String installmentValue = new String();
 	public String installments = new String();
 	public String encryptionPinType = new String();
-	public String ksnPin = new String();
 	public String encryptionCardType = new String();
+	public String ksnPin = new String();
 	public String ksnCard = new String();
 	public String typeCardVerificationData = new String();
 	public String cardVerificationData = new String();
@@ -59,5 +59,6 @@ public class TransactionData {
 	public String cardholderReceipt = new String();
 	public String merchantReceipt = new String();
 	public String brazilianDate = new String();
-	
+	public String encryptedCardData = new String();
+
 }
