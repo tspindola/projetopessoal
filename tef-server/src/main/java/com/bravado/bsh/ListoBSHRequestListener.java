@@ -54,7 +54,6 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 		
 		//Load data and NSU
 		AcquirerSettings.loadLastNsu();
-
 		// try {
 		// mux = (MUX) NameRegistrar.get("mux." + cfg.get("mux"));
 		// packager = new ISO87APackagerGP();
@@ -114,6 +113,9 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 			}
 			*/
 			source.send(response);
+			
+			//Registra os NSUs
+			AcquirerSettings.writeDataFile();
 
 		} catch (Exception e) {
 			warn(e);

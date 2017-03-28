@@ -146,7 +146,7 @@ public class ListoMessage {
 		return isomsg;
 	}
 	
-	public ISOMsg getCommonBitsFormatted(ISOMsg msg, int nsu) throws ISOException {
+	public ISOMsg getCommonBitsFormatted(ISOMsg msg, long nsu) throws ISOException {
 		ISOMsg isomsg = msg;
 		Calendar trsdate = cf.getCurrentDate();		
 		

@@ -1,5 +1,7 @@
 package br.listofacil;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,23 +38,46 @@ public class AcquirerSettings {
 	//NSU Acquirer and NSU TEF original
 	private static HashMap<String, InfoTransaction> transactions = null;
 	private static CommonFunctions common = new CommonFunctions();
-	private static int nsuBanrisul = 0;
-	private static int nsuGlobalpayments = 0;
-
-	//COLOCAR UM NSU PARA CADA NUMERO LOGICO E ADQUIRENTE
+	private static long nsuBanrisul = 1;
+	private static long nsuGlobalpayments = 1;
 	
-	public static synchronized int getIncrementNSUBanrisul(){
+	public static synchronized void writeDataFile(){
+		
+		Calendar cal = common.getCurrentDate();
+		
+		String dateReg = common.padLeft(String.valueOf(cal.get(Calendar.DAY_OF_MONTH)), 2, "0") + 
+						 common.padLeft(String.valueOf(cal.get(Calendar.MONTH) + 1), 2, "0") +
+						 String.valueOf(cal.get(Calendar.YEAR));	
+		
+		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" +
+						  "NSU_BA=\"" + nsuBanrisul + "\"\n" +
+						  "DATE=\"" + dateReg + "\"\n";
+		try {
+
+	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\nsuconfig.data");
+	        BufferedWriter bw = new BufferedWriter(fw);
+	        bw.write(register);
+	        bw.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static synchronized long getIncrementNSUBanrisul(){
 		//Incrementa o NSU
 		return nsuBanrisul++;
 	}
 	
-	public static synchronized int getIncrementNSUGlobalpayments(){
+	public static synchronized long getIncrementNSUGlobalpayments(){
 		//Incrementa o NSU
 		return nsuGlobalpayments++;
 	}
 	
-	public static void loadLastNsu(){			
-		int nsuaux = 1;
+	public static synchronized void loadLastNsu(){			
+		int nsuGP = 1;
+		int nsuBA = 1;
 		Boolean flagnsu = false;
 
 		Calendar nsucalendaraux = common.getCurrentDate();
@@ -60,24 +85,24 @@ public class AcquirerSettings {
 		nsuBanrisul = 1;
 		nsuGlobalpayments = 1;
 		
-		try {
+		try {		
 			
 			TextFile txtFile = new TextFile(System.getProperty("user.dir") + "\\nsuconfig.data");
-			
-			txtFile.openTextFile();		
+
+			txtFile.openTextFile();
     		
     		while (txtFile.next()) 
     		{    			
     		    String line = txtFile.readLine();    		    
     		    String[] nsudata = line.split("[\"]");
     		    
-    		    if (nsudata[0].contains("NSU_BANRISUL")){
-    		    	nsuaux = Integer.parseInt(nsudata[1]);
+    		    if (nsudata[0].contains("NSU_GP")){
+    		    	nsuGP = Integer.parseInt(nsudata[1]);
     		    	continue;
     		    }
     		    
-    		    if (nsudata[0].contains("NSU_GLOBALPAYMENTS")){
-    		    	nsuaux = Integer.parseInt(nsudata[1]);
+    		    if (nsudata[0].contains("NSU_BA")){
+    		    	nsuBA = Integer.parseInt(nsudata[1]);
     		    	continue;
     		    }
     		    
@@ -93,7 +118,8 @@ public class AcquirerSettings {
     		
     		if(flagnsu)
     		{
-	    		nsuBanrisul = nsuaux;
+    			nsuGlobalpayments = nsuGP;
+	    		nsuBanrisul = nsuBA;
     		}
     		
     		txtFile.closeTextFile();	 

@@ -192,12 +192,13 @@ public class GlobalpaymentsMessage {
 		}
 		
 		AcquirerSettings.removeStatusLoadingGlobalpayments(logicalNumber);
+		AcquirerSettings.writeDataFile();
 		
 		return ret;
 	}
 
 
-	public ISOMsg requestLogon(String logicalNumber, int nsu)
+	public ISOMsg requestLogon(String logicalNumber, long nsu)
 	{
 		ISOMsg request = new ISOMsg();
 		ISOMsg response = null;
@@ -223,7 +224,7 @@ public class GlobalpaymentsMessage {
 		return response;
 	}
 	
-	public ISOMsg requestTable(String logicalNumber, int nsu)
+	public ISOMsg requestTable(String logicalNumber, long nsu)
 	{
 		ISOMsg request = new ISOMsg();
 		ISOMsg response = null;
@@ -777,7 +778,7 @@ public class GlobalpaymentsMessage {
         return data;
 	}
 	
-	private ISOMsg getCommonBitsFormatted(ISOMsg msg, int nsu) throws ISOException {
+	private ISOMsg getCommonBitsFormatted(ISOMsg msg, long nsu) throws ISOException {
 		ISOMsg isomsg = msg;
 		
 		CommonFunctions commonFunctions =  new CommonFunctions();

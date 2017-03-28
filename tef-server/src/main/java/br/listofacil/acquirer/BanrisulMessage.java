@@ -165,6 +165,7 @@ public class BanrisulMessage {
 		}
 		
 		AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
+		AcquirerSettings.writeDataFile();
 		
 		return ret;
 	}
@@ -401,7 +402,7 @@ public class BanrisulMessage {
 		return isomsg;
 	}
 	
-	public ISOMsg requestTable(ISOMsg response, int nsu)
+	public ISOMsg requestTable(ISOMsg response, long nsu)
 	{
 		String tableCode = PROC_CODE_LOGON_A;
 		ISOMsg request = new ISOMsg();
@@ -467,7 +468,7 @@ public class BanrisulMessage {
 		return isomsg;
 	}
 	
-	public ISOMsg requestLogon(String logicalNumber, int nsu)
+	public ISOMsg requestLogon(String logicalNumber, long nsu)
 	{
 		ISOMsg request = new ISOMsg();
 		ISOMsg response = null;
@@ -818,7 +819,7 @@ public class BanrisulMessage {
 		return response;
 	}
 	
-	private ISOMsg getCommonBitsFormatted(ISOMsg msg, int nsu) throws ISOException {
+	private ISOMsg getCommonBitsFormatted(ISOMsg msg, long nsu) throws ISOException {
 		ISOMsg isomsg = msg;
 		Calendar trsdate = cf.getCurrentDate();		
 		
@@ -899,7 +900,7 @@ public class BanrisulMessage {
 		
 		if (data.mcc.length() > 4)
 			data.mcc = data.mcc.substring(0, 4);
-		bit062 += cf.padRight(data.phone, 4, " ");
+		bit062 += cf.padRight(data.mcc, 4, " ");
 		
 		if (data.cnpjcpf.length() > 14)
 			data.cnpjcpf = data.cnpjcpf.substring(0, 14);
@@ -989,6 +990,7 @@ public class BanrisulMessage {
 		String merchantData = "0" + getMerchantData(requestData);
 		String securityData = requestData.ksnPin;
 		securityData += "00000000000000000000"; //ksn dados
+		//securityData += requestData.ksnCard;
 		securityData += requestData.encryptedCardData;
 		
 		//TESTE
