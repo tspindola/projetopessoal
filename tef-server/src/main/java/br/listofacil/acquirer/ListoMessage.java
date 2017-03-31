@@ -22,8 +22,8 @@ public class ListoMessage {
 	private final int FIELD_AMOUNT = 4;
 	private final int FIELD_DATE_TIME = 7;
 	private final int FIELD_NSU_TEF = 11;
-	private final int FIELD_DATE = 12;
-	private final int FIELD_TIME = 13;
+	private final int FIELD_TIME = 12;
+	private final int FIELD_DATE = 13;
 	private final int FIELD_CARD_EXP_DATE = 14;
 	private final int FIELD_RELEASE_DATE = 15;
 	private final int FIELD_ENTRY_MODE = 22;
@@ -31,6 +31,7 @@ public class ListoMessage {
 	private final int FIELD_PRODUCT_DESCRIPTION = 33;
 	private final int FIELD_TRACK_1 = 34;
 	private final int FIELD_TRACK_2 = 35;
+	private final int FIELD_EMV_AID = 36;
 	private final int FIELD_AUTHORIZATION_CODE = 38;
 	private final int FIELD_RESPONSE_CODE = 39;
 	private final int FIELD_TERMINAL_CODE = 41;
@@ -234,8 +235,8 @@ public class ListoMessage {
 			isomsg.set(FIELD_PROCESSING_CODE, ListoData.getProcessCode(mti, procCode)); 
 			isomsg.set(FIELD_DATE_TIME, m.getString(FIELD_DATE_TIME));
 			isomsg.set(FIELD_NSU_TEF, m.getString(FIELD_NSU_TEF));
-			isomsg.set(FIELD_DATE, m.getString(FIELD_DATE));
 			isomsg.set(FIELD_TIME, m.getString(FIELD_TIME));
+			isomsg.set(FIELD_DATE, m.getString(FIELD_DATE));
 			
 			//Autorizado a transacionar
 			isomsg.set(FIELD_RESPONSE_CODE, ListoData.RES_CODE_WAIT_TABLES); 
@@ -261,8 +262,8 @@ public class ListoMessage {
 			isomsg.set(FIELD_PROCESSING_CODE, ListoData.PROC_RES_LOGON);
 			isomsg.set(FIELD_DATE_TIME, m.getString(FIELD_DATE_TIME));
 			isomsg.set(FIELD_NSU_TEF, m.getString(FIELD_NSU_TEF));
-			isomsg.set(FIELD_DATE, m.getString(FIELD_DATE));
 			isomsg.set(FIELD_TIME, m.getString(FIELD_TIME));
+			isomsg.set(FIELD_DATE, m.getString(FIELD_DATE));
 			
 			//Autorizado a transacionar
 			isomsg.set(FIELD_RESPONSE_CODE, ListoData.RES_CODE_AUTHORIZED); 
@@ -299,8 +300,8 @@ public class ListoMessage {
 			isomsg.set(FIELD_PROCESSING_CODE, ListoData.PROC_RES_INIT);
 			isomsg.set(FIELD_DATE_TIME, m.getString(FIELD_DATE_TIME));
 			isomsg.set(FIELD_NSU_TEF, m.getString(FIELD_NSU_TEF));
-			isomsg.set(FIELD_DATE, m.getString(FIELD_DATE));
 			isomsg.set(FIELD_TIME, m.getString(FIELD_TIME));
+			isomsg.set(FIELD_DATE, m.getString(FIELD_DATE));
 			isomsg.set(FIELD_RESPONSE_CODE, ListoData.RES_CODE_AUTHORIZED); 
 			
 			//Responde os mesmos valores dos campos enviados (eco)
@@ -539,10 +540,10 @@ public class ListoMessage {
 			data.dateTime = message.getString(FIELD_DATE_TIME);
 		if (message.hasField(FIELD_NSU_TEF))
 			data.nsuTef = message.getString(FIELD_NSU_TEF);
-		if (message.hasField(FIELD_DATE))
-			data.date = message.getString(FIELD_DATE);
 		if (message.hasField(FIELD_TIME))
 			data.time = message.getString(FIELD_TIME);
+		if (message.hasField(FIELD_DATE))
+			data.date = message.getString(FIELD_DATE);
 		if (message.hasField(FIELD_CARD_EXP_DATE))
 			data.expirationDateCard = message.getString(FIELD_CARD_EXP_DATE);
 		if (message.hasField(FIELD_RELEASE_DATE))
@@ -557,6 +558,8 @@ public class ListoMessage {
 			data.cardTrack1 = message.getString(FIELD_TRACK_1);
 		if (message.hasField(FIELD_TRACK_2))
 			data.cardTrack2 = message.getString(FIELD_TRACK_2);
+		if (message.hasField(FIELD_EMV_AID))
+			data.emvAID = message.getString(FIELD_EMV_AID);			
 		if (message.hasField(FIELD_TERMINAL_CODE))
 			data.terminalCode = message.getString(FIELD_TERMINAL_CODE);
 		if (message.hasField(FIELD_MERCHANT_CODE))
@@ -663,8 +666,8 @@ public class ListoMessage {
 		response.set(FIELD_AMOUNT, dataResponse.amount);
 		response.set(FIELD_DATE_TIME, dataResponse.dateTime);
 		response.set(FIELD_NSU_TEF, dataResponse.nsuTef);
-		response.set(FIELD_DATE, dataResponse.date);
 		response.set(FIELD_TIME, dataResponse.time);
+		response.set(FIELD_DATE, dataResponse.date);
 		
 		if (dataResponse.authorizationCode.trim().length() > 0)
 			response.set(FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
@@ -679,10 +682,10 @@ public class ListoMessage {
 		
 		if (dataResponse.emvData.trim().length() > 0)
 			response.set(FIELD_EMV_DATA, dataResponse.emvData);
-		if (dataResponse.cardholderReceipt.trim().length() > 0)
-			response.set(FIELD_GENERIC_DATA_1, dataResponse.cardholderReceipt);
 		if (dataResponse.merchantReceipt.trim().length() > 0)
-			response.set(FIELD_GENERIC_DATA_2, dataResponse.merchantReceipt);
+			response.set(FIELD_GENERIC_DATA_1, dataResponse.merchantReceipt);
+		if (dataResponse.cardholderReceipt.trim().length() > 0)
+			response.set(FIELD_GENERIC_DATA_2, dataResponse.cardholderReceipt);
 		if (dataResponse.nsuAcquirer.length() > 0)
 			response.set(FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
 

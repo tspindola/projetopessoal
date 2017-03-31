@@ -15,6 +15,12 @@ public class ListoData {
 	public final static String RES_CODE_AUTHORIZED = "00";
 	public final static String RES_CODE_ERROR = "05";
 	public final static String RES_CODE_WAIT_TABLES = "10";
+	
+	public final static String ENTRY_MODE_MAGNETIC_WITH_PIN = "021";
+	public final static String ENTRY_MODE_MAGNETIC_WITHOUT_PIN = "028";
+	public final static String ENTRY_MODE_CHIP_WITH_PIN = "051";
+	public final static String ENTRY_MODE_CHIP_VALIDATED_PIN = "059";
+	public final static String ENTRY_MODE_FALLBACK_WITH_PIN = "801";
 
 	public final static String REQ_LOGON_INIT = "0800";
 	public final static String RES_LOGON_INIT = "0810";

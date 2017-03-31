@@ -82,4 +82,15 @@ public class CommonFunctions {
 		int value = Integer.parseInt(hex, 16);  
 		return String.valueOf(value);
 	}
+	
+	public String convertHexString(String hex) {
+	    String str = "";
+	    for(int i=0;i<hex.length();i+=2)
+	    {
+	        String s = hex.substring(i, (i + 2));
+	        int decimal = Integer.parseInt(s, 16);
+	        str = str + (char) decimal;
+	    }       
+	    return str;
+	}
 }

@@ -15,6 +15,7 @@ public class TransactionData {
 	public String releaseDate = new String();
 	public String entryMode = new String();
 	public String panSequence = new String();
+	public String emvAID = new String();
 	public String cardTrack1 = new String();
 	public String cardTrack2 = new String();
 	public String terminalCode = new String();
@@ -60,5 +61,4 @@ public class TransactionData {
 	public String merchantReceipt = new String();
 	public String brazilianDate = new String();
 	public String encryptedCardData = new String();
-
 }

@@ -2,6 +2,7 @@ package com.bravado.bsh;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -20,6 +21,7 @@ import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
 import br.listofacil.AcquirerSettings;
+import br.listofacil.CommonFunctions;
 import br.listofacil.acquirer.ListoMessage;
 import br.listofacil.tefserver.iso.ISO87APackagerGP;
 import bsh.EvalError;
@@ -45,7 +47,7 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 		// file " + contextFile);
 		// }
 	}
-
+	
 	@Override
 	public void setConfiguration(Configuration cfg) throws ConfigurationException {
 		super.setConfiguration(cfg);
@@ -54,6 +56,7 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 		
 		//Load data and NSU
 		AcquirerSettings.loadLastNsu();
+		
 		// try {
 		// mux = (MUX) NameRegistrar.get("mux." + cfg.get("mux"));
 		// packager = new ISO87APackagerGP();
