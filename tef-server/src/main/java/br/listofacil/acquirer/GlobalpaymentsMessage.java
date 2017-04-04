@@ -42,8 +42,8 @@ public class GlobalpaymentsMessage {
 	private final int FIELD_AMOUNT = 4;
 	private final int FIELD_DATE_TIME = 7;
 	private final int FIELD_NSU_TEF = 11;
-	private final int FIELD_DATE = 12;
-	private final int FIELD_TIME = 13;
+	private final int FIELD_TIME = 12;
+	private final int FIELD_DATE = 13;
 	private final int FIELD_CARD_EXPIRATION_DATE = 14;
 	private final int FIELD_ENTRY_MODE = 22;
 	private final int FIELD_PAN_SEQUENCE = 23;
@@ -912,7 +912,7 @@ public class GlobalpaymentsMessage {
 		
 		try {
 			
-			ISOMsg request = getTransactionFormatted(requestData);
+			ISOMsg request = getMessage0200(requestData);
 			ISOMsg response = requestAcquirer(request);	
 			responseData = getResponseData(response);
 			
@@ -924,7 +924,41 @@ public class GlobalpaymentsMessage {
 		return responseData;
 	}
 	
-	private ISOMsg getTransactionFormatted(TransactionData requestData) throws ISOException {
+	public TransactionData requestConfirmation(TransactionData requestData) {
+		TransactionData responseData = null;
+		
+		try {
+			
+			ISOMsg request = getMessage9820(requestData);
+			ISOMsg response = requestAcquirer(request);	
+			responseData = getResponseData(response);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		return responseData;
+	}
+	
+	public TransactionData requestAdvice(TransactionData requestData) {
+		TransactionData responseData = null;
+		
+		try {
+			
+			ISOMsg request = getMessage0220(requestData);
+			ISOMsg response = requestAcquirer(request);	
+			responseData = getResponseData(response);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		return responseData;
+	}
+	
+	private ISOMsg getMessage0200(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 		
 		request.setPackager(new ISO87APackagerGP());
@@ -971,6 +1005,77 @@ public class GlobalpaymentsMessage {
 
 		if (requestData.pin.length() > 0)
 			request.set(FIELD_PIN, requestData.pin);
+		
+		if (requestData.emvData.length() > 0)
+			request.set(FIELD_EMV_DATA, requestData.emvData);
+		
+		request.set(FIELD_TERMINAL_DATA, getTerminalData(REQ_GP_PAYMENT, requestData));
+		request.set(FIELD_SECURITY_DATA, getDataEncrypted(REQ_GP_PAYMENT, requestData));
+		
+		return request;
+	}
+	
+	private ISOMsg getMessage9820(TransactionData requestData) throws ISOException {
+		ISOMsg request = new ISOMsg();
+		
+		request.setPackager(new ISO87APackagerGP());
+		request.setMTI(REQ_GP_CONFIRMATION);
+		
+		if ((requestData.pan.length() > 0) && 
+			(requestData.typeCardRead.equals(ListoData.TRANSACTION_ENTERED))) {
+			String pan = requestData.pan.substring(0, 6);
+			pan += cf.padLeft(new String(), requestData.pan.length() - 6, "0");
+			request.set(FIELD_PAN, pan);
+		}
+		
+		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
+		request.set(FIELD_DATE_TIME, requestData.dateTime);
+		request.set(FIELD_NSU_TEF, requestData.nsuTef);
+		request.set(FIELD_DATE, requestData.date);
+		request.set(FIELD_TIME, requestData.time);
+		
+		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
+		
+		request.set(FIELD_TERMINAL_DATA, getTerminalData(REQ_GP_CONFIRMATION, requestData));
+		request.set(FIELD_CONFIRMATION_DATA, requestData.confirmationData);
+		
+		return request;
+	}
+	
+	private ISOMsg getMessage0220(TransactionData requestData) throws ISOException {
+		ISOMsg request = new ISOMsg();
+		
+		request.setPackager(new ISO87APackagerGP());
+		request.setMTI(REQ_GP_PAYMENT);
+		
+		if ((requestData.pan.length() > 0) && 
+			(requestData.typeCardRead.equals(ListoData.TRANSACTION_ENTERED))) {
+			String pan = requestData.pan.substring(0, 6);
+			pan += cf.padLeft(new String(), requestData.pan.length() - 6, "0");
+			request.set(FIELD_PAN, pan);
+		}
+		
+		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
+		request.set(FIELD_AMOUNT, requestData.amount);
+		request.set(FIELD_DATE_TIME, requestData.dateTime);
+		request.set(FIELD_NSU_TEF, requestData.nsuTef);
+		request.set(FIELD_DATE, requestData.date);
+		request.set(FIELD_TIME, requestData.time);
+		
+		if ((requestData.expirationDateCard.length() > 0) &&
+			(requestData.typeCardRead.equals(ListoData.MAGNETIC)))
+			request.set(FIELD_CARD_EXPIRATION_DATE, requestData.expirationDateCard);
+		
+		request.set(FIELD_ENTRY_MODE, "010"); //Advice
+		
+		if (requestData.panSequence.length() > 0)
+			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
+		
+		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
+		request.set(FIELD_ADDITIONAL_DATA_1, getTransactionAdditionalData(REQ_GP_PAYMENT, requestData));
+		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
 		
 		if (requestData.emvData.length() > 0)
 			request.set(FIELD_EMV_DATA, requestData.emvData);

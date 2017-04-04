@@ -48,6 +48,8 @@ public class BanrisulMessage {
 	private final String RES_BA_LOGON_INIT = "0810";
 	private final String REQ_BA_PAYMENT = "0200";
 	private final String RES_BA_PAYMENT = "0210";
+	private final String REQ_BA_CONFIRMATION = "0202";
+
 
 	private final int FIELD_PAN = 2;
 	private final int FIELD_PROC_CODE = 3;
@@ -102,11 +104,12 @@ public class BanrisulMessage {
 												// o BANRISUL
 
 	private final String FINANCIAL_INSTITUTION_CODE = "00410035000"; // Codigo
-																		// fornecido
-																		// pelo
-																		// BANRISUL
-																		// (testes)
-	private final String TAGS_EMV_MASTERCARD_VISA = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";
+																	 // fornecido
+																	 // pelo
+																	 // BANRISUL
+																	 // (testes)
+	private final String TAGS_EMV_REQUIRED = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";
+	private final String TAGS_EMV_OPTIONAL = "9F12";
 	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F3784";
 
 	/*
@@ -449,7 +452,7 @@ public class BanrisulMessage {
 				break;
 			}
 
-			response = requestAcquirer(request);
+			response = requestAcquirer(request, true);
 
 		} catch (ISOException e) {
 			// TODO Auto-generated catch block
@@ -488,7 +491,7 @@ public class BanrisulMessage {
 			request.set(70, PROC_CODE_LOGON_A); // Codigo de gerenciamento = 001
 												// Abertura
 
-			response = requestAcquirer(request);
+			response = requestAcquirer(request, true);
 
 		} catch (ISOException e) {
 			// TODO Auto-generated catch block
@@ -554,12 +557,22 @@ public class BanrisulMessage {
 		// Seta as tags emv obrigatorias referentes ao aid
 		String tab12 = new String();
 		for (Entry<Integer, String> entry : listoData.L009_emv.entrySet())
-			tab12 += getTagsEmv(entry.getValue());
+			tab12 += getTagsEmvRequired(entry.getValue());
 
 		if (tab12.length() > 0) {
 			listoData.L012_TagsReq1ndGenerateAC.put(listoData.L012_TagsReq1ndGenerateAC.size(), tab12);
 			if (!listoData.tableSequence.contains(ListoData.REG_CODE_REQ_TAGS_1ND_GEN))
 				listoData.tableSequence.add(ListoData.REG_CODE_REQ_TAGS_1ND_GEN);
+		}
+		// Seta as tags emv obrigatorias referentes ao aid
+		String tab13 = new String();
+		for (Entry<Integer, String> entry : listoData.L009_emv.entrySet())
+			tab13 += getTagsEmvOptional(entry.getValue());
+
+		if (tab13.length() > 0) {
+			listoData.L013_TagsOpt1ndGenerateAC.put(listoData.L013_TagsOpt1ndGenerateAC.size(), tab13);
+			if (!listoData.tableSequence.contains(ListoData.REG_CODE_OPT_TAGS_1ND_GEN))
+				listoData.tableSequence.add(ListoData.REG_CODE_OPT_TAGS_1ND_GEN);
 		}
 
 		// Criptografia
@@ -665,7 +678,7 @@ public class BanrisulMessage {
 		return true;
 	}
 
-	private String getTagsEmv(String emvAid) {
+	private String getTagsEmvRequired(String emvAid) {
 		// Mastercard e visa
 		// 9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884
 		// Banrisul
@@ -675,12 +688,31 @@ public class BanrisulMessage {
 
 		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
 				|| emvAid.contains("MAESTRO")) {
-			length = cf.padLeft(String.valueOf(TAGS_EMV_MASTERCARD_VISA.length()), 3, "0");
-			return index + length + TAGS_EMV_MASTERCARD_VISA;
+			length = cf.padLeft(String.valueOf(TAGS_EMV_REQUIRED.length()), 3, "0");
+			return index + length + TAGS_EMV_REQUIRED;
 		}
 
-		length = cf.padLeft(String.valueOf(TAGS_EMV_MASTERCARD_VISA.length()), 3, "0");
-		return index + length + TAGS_EMV_MASTERCARD_VISA;
+		length = cf.padLeft(String.valueOf(TAGS_EMV_REQUIRED.length()), 3, "0");
+		return index + length + TAGS_EMV_REQUIRED;
+		// return index + length + TAGS_EMV_BANRISUL;
+	}
+	
+	private String getTagsEmvOptional(String emvAid) {
+		// Mastercard e visa
+		// 9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884
+		// Banrisul
+		// 9F1A959C829F109F269F279F369F3784
+		String index = emvAid.substring(6, 8);
+		String length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
+
+		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
+				|| emvAid.contains("MAESTRO")) {
+			length = cf.padLeft(String.valueOf(TAGS_EMV_OPTIONAL.length()), 3, "0");
+			return index + length + TAGS_EMV_OPTIONAL;
+		}
+
+		length = cf.padLeft(String.valueOf(TAGS_EMV_OPTIONAL.length()), 3, "0");
+		return index + length + TAGS_EMV_OPTIONAL;
 		// return index + length + TAGS_EMV_BANRISUL;
 	}
 
@@ -803,10 +835,15 @@ public class BanrisulMessage {
 		return registry;
 	}
 
-	private ISOMsg requestAcquirer(ISOMsg request) {
+	private ISOMsg requestAcquirer(ISOMsg request, boolean enableTimeout) {
 		ISOMsg response = null;
+		long timeout = ListoData.SERVER_TIMEOUT * 1000;
 
 		try {
+			
+			//Desabilita o timeout
+			if (!enableTimeout)
+				timeout = 0;
 
 			MUX mux = (MUX) NameRegistrar.get(idMUXBanrisul);
 			if (!mux.isConnected()) // VERIFICAR OUTRA FORMA
@@ -815,7 +852,7 @@ public class BanrisulMessage {
 				return null;
 			}
 			// Request acquirer
-			response = mux.request(request, ListoData.SERVER_TIMEOUT * 1000);
+			response = mux.request(request, timeout);
 
 		} catch (NotFoundException | ISOException e) {
 			// TODO Auto-generated catch block
@@ -928,7 +965,7 @@ public class BanrisulMessage {
 		return bit63;
 	}
 
-	private ISOMsg getTransactionFormatted(TransactionData requestData) throws ISOException {
+	private ISOMsg getMessage0200(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 
 		request.setPackager(new ISO87APackagerGP());
@@ -1031,8 +1068,82 @@ public class BanrisulMessage {
 
 		return request;
 	}
+	
+	private ISOMsg getMessage0202(TransactionData requestData) throws ISOException {
+		ISOMsg request = new ISOMsg();
 
-	public TransactionData getResponseData(TransactionData requestData, ISOMsg message) {
+		request.setPackager(new ISO87APackagerGP());
+		request.setMTI(REQ_BA_CONFIRMATION);
+		/*
+		 * if (requestData.pan.length() > 0) request.set(FIELD_PAN,
+		 * cf.padLeft(String.valueOf(requestData.pan.length()), 2, "0") +
+		 * requestData.pan);
+		 */
+		// if (requestData.pan.length() > 0)
+		// request.set(FIELD_PAN, requestData.pan);
+
+		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
+		request.set(FIELD_AMOUNT, requestData.amount);
+		request.set(FIELD_DATE_TIME, requestData.dateTime);
+		request.set(FIELD_NSU_TEF, requestData.nsuTef);
+		request.set(FIELD_DATE, requestData.date);
+		request.set(FIELD_TIME, requestData.time);
+
+		// if (requestData.expirationDateCard.length() > 0)
+		// request.set(FIELD_CARD_EXPIRATION_DATE,
+		// requestData.expirationDateCard);
+
+		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
+
+		if (requestData.panSequence.length() > 0)
+			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
+
+		// request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
+		request.set(FIELD_FINANCIAL_INSTITUTION, "0800000000");
+
+		// if (requestData.cardTrack2.length() > 0)
+		// request.set(FIELD_TRACK_2, requestData.cardTrack2);
+
+		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
+		request.set(FIELD_MERCHANT_CODE, "041003500000100");
+
+		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
+
+		if (requestData.emvData.length() > 0) {
+			String bit055 = requestData.emvData.substring(6, requestData.emvData.length());
+			/*
+			 * request.set(FIELD_EMV_DATA,
+			 * cf.padLeft(String.valueOf(bit055.length()), 3, "0") + bit055);
+			 */
+			request.set(FIELD_EMV_DATA, bit055);
+		}
+
+		// BIT061 - Tipo de terminal - opcional
+		// request.set(FIELD_TERMINAL_TYPE, "00811111111");
+
+		// Adiciona o zero no inicio - pre-autorizacao (0 = nao e
+		// pre-autorizacao)
+		String securityData = requestData.ksnPin;
+		securityData += "00000000000000000000"; // ksn dados
+		// securityData += requestData.ksnCard;
+		securityData += requestData.encryptedCardData;
+
+		// TESTE
+		// merchantData = "0XXXXXXXXXXXX*JOJOAOZIN SAOPAULO
+		// 0145200258120000000616123400000000000";
+
+		request.set(FIELD_GENERIC_DATA_62, securityData);
+
+		// Prencher com os dados da ultima transacao valida
+		// salvar em memoria a data e o NSU do banrisul
+		// Somente enviar valores da data e NSU banrisul da transacao
+		// realizada e confirmada com o host
+		request.set(FIELD_NSU_ACQUIRER, requestData.nsuAcquirer);
+
+		return request;
+	}
+
+	public TransactionData getResponseData(String mti, TransactionData requestData, ISOMsg message) {
 		TransactionData data = new TransactionData();
 
 		if (message.hasField(FIELD_PAN))
@@ -1065,23 +1176,24 @@ public class BanrisulMessage {
 			data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
 		if (message.hasField(FIELD_EMV_DATA))
 			data.emvData = message.getString(FIELD_EMV_DATA);
-
-		if (!data.responseCode.equals("00")) {
-			String msg = "TRANSACAO NEGADA";
-			if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
-				msg = listoData.messages.get(data.responseCode).trim();
-			data.cardholderReceipt = msg;
-		} else {
-			data.merchantReceipt = getMerchantReceipt(requestData, message);
-			data.cardholderReceipt = getCardholderReceipt(requestData, message);
+		
+		if (mti.equals(RES_BA_PAYMENT)) {
+			if (!data.responseCode.equals("00")) {
+				String msg = "TRANSACAO NEGADA";
+				if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
+					msg = listoData.messages.get(data.responseCode).trim();
+				data.cardholderReceipt = msg;
+			} else {
+				data.merchantReceipt = getMerchantReceipt(requestData, message);
+				data.cardholderReceipt = getCardholderReceipt(requestData, message);
+			}
 		}
-
 		if (message.hasField(FIELD_NSU_ACQUIRER))
 			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
 
 		return data;
 	}
-
+	
 	private String getMerchantReceipt(TransactionData requestData, ISOMsg message) {
 		String receipt = new String();
 		String dataStr = new String();
@@ -1099,10 +1211,10 @@ public class BanrisulMessage {
 				if (merchant.length() > 38)
 					merchant = merchant.substring(0, 38);
 
-				receipt += "@" + cf.padRight(merchant, 39 - dataStr.length(), " ");
+				receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
 				
 				dataStr = "@CNPJ: " + requestData.cnpjcpf;
-				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+				receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
 				
 				receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 				receipt += "@"; // quebra linha
@@ -1111,14 +1223,14 @@ public class BanrisulMessage {
 				receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				receipt += "@";
 
-				dataStr = "@DATA: " + requestData.brazilianDate + "        HORA: " + requestData.time.substring(0, 2)
+				dataStr = "@DATA: " + requestData.brazilianDate + "         HORA: " + requestData.time.substring(0, 2)
 						+ ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
 				String authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE).substring(3, message.getString(FIELD_AUTHORIZATION_CODE).length());
 				String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
 				
-				dataStr = "@NSU BERGS:" + nsuAcquirer + " NSU BANDEIRA:" + cf.padLeft(authorizationCode, 6, "0");
+				dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + cf.padLeft(authorizationCode, 6, "0");
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
 				dataStr = "@CARTAO: ";
@@ -1168,30 +1280,13 @@ public class BanrisulMessage {
 				} else if ((requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_VALIDATED_PIN)
 						|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
 						&& requestData.emvData.length() > 0) {
-					String cardPreferredName = new String();
-					String cardATC = new String();
-					String cardAC = new String();
-					if (requestData.emvData.contains("9F12")) {
-						int index = requestData.emvData.indexOf("9F12");
-						cardPreferredName = requestData.emvData.substring(index + 4, requestData.emvData.length());
-						int size = Integer.parseInt(cf.convertHexToInt(cardPreferredName.substring(0, 2))) * 2;
-						cardPreferredName = cf.convertHexString(cardPreferredName.substring(2, size + 2));
-					}
-					if (requestData.emvData.contains("9F36")) {
-						int index = requestData.emvData.indexOf("9F36");
-						cardATC = requestData.emvData.substring(index + 4, requestData.emvData.length());
-						int size = Integer.parseInt(cf.convertHexToInt(cardATC.substring(0, 2))) * 2;
-						cardATC = cardATC.substring(2, size + 2);
-					}
-					if (requestData.emvData.contains("9F26")) {
-						int index = requestData.emvData.indexOf("9F26");
-						cardAC = requestData.emvData.substring(index + 4, requestData.emvData.length());
-						int size = Integer.parseInt(cf.convertHexToInt(cardAC.substring(0, 2))) * 2;
-						cardAC = cardAC.substring(2, size + 2);
-					}
-					receipt += cf.padRight(cardPreferredName.toUpperCase(), 39 - cardPreferredName.toUpperCase().length(), " ");
 					
-					dataStr = "@" + requestData.panSequence + "-" + cardATC + "-" + cardAC;
+					receipt += "@" + cf.padRight(requestData.cardPreferredName.toUpperCase(), 
+												 39 - requestData.cardPreferredName.toUpperCase().length(), " ");
+					
+					dataStr = "@" + requestData.panSequence + "-" + 
+									requestData.cardApplicationTransactionCounter + "-" + 
+									requestData.cardApplicationCryptogram;
 					receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 					
 					dataStr = "@" + requestData.emvAID.substring(0,  14);
@@ -1214,7 +1309,7 @@ public class BanrisulMessage {
 			// Formatar comprovante
 			if (message.hasField(FIELD_GENERIC_DATA_62)) {
 				String flag = message.getString(FIELD_GENERIC_DATA_62).substring(0, 15).trim();
-				receipt += new String("@@------------ 1ª via – loja -----------".getBytes(), Charset.forName("ISO-8859-1"));
+				receipt += new String("@@---------- 2ª via – cliente ----------".getBytes(), Charset.forName("ISO-8859-1"));
 				receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
 				receipt += "@"; // quebra linha
 				receipt += "@" + cf.padRight(getTypePaymentDescription(requestData.processingCode), 39, " ");
@@ -1223,10 +1318,10 @@ public class BanrisulMessage {
 				if (merchant.length() > 38)
 					merchant = merchant.substring(0, 38);
 
-				receipt += "@" + cf.padRight(merchant, 39 - dataStr.length(), " ");
+				receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
 				
 				dataStr = "@CNPJ: " + requestData.cnpjcpf;
-				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+				receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
 				
 				receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 				receipt += "@"; // quebra linha
@@ -1235,14 +1330,14 @@ public class BanrisulMessage {
 				receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				receipt += "@";
 
-				dataStr = "@DATA: " + requestData.brazilianDate + "        HORA: " + requestData.time.substring(0, 2)
+				dataStr = "@DATA: " + requestData.brazilianDate + "         HORA: " + requestData.time.substring(0, 2)
 						+ ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
 				String authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE).substring(3, message.getString(FIELD_AUTHORIZATION_CODE).length());
 				String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
 				
-				dataStr = "@NSU BERGS:" + nsuAcquirer + " NSU BANDEIRA:" + cf.padLeft(authorizationCode, 6, "0");
+				dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + cf.padLeft(authorizationCode, 6, "0");
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
 				dataStr = "@CARTAO: ";
@@ -1268,30 +1363,13 @@ public class BanrisulMessage {
 				if ((requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_VALIDATED_PIN)
 						|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
 						&& requestData.emvData.length() > 0) {
-					String cardPreferredName = new String();
-					String cardATC = new String();
-					String cardAC = new String();
-					if (requestData.emvData.contains("9F12")) {
-						int index = requestData.emvData.indexOf("9F12");
-						cardPreferredName = requestData.emvData.substring(index + 4, requestData.emvData.length());
-						int size = Integer.parseInt(cf.convertHexToInt(cardPreferredName.substring(0, 2))) * 2;
-						cardPreferredName = cf.convertHexString(cardPreferredName.substring(2, size + 2));
-					}
-					if (requestData.emvData.contains("9F36")) {
-						int index = requestData.emvData.indexOf("9F36");
-						cardATC = requestData.emvData.substring(index + 4, requestData.emvData.length());
-						int size = Integer.parseInt(cf.convertHexToInt(cardATC.substring(0, 2))) * 2;
-						cardATC = cardATC.substring(2, size + 2);
-					}
-					if (requestData.emvData.contains("9F26")) {
-						int index = requestData.emvData.indexOf("9F26");
-						cardAC = requestData.emvData.substring(index + 4, requestData.emvData.length());
-						int size = Integer.parseInt(cf.convertHexToInt(cardAC.substring(0, 2))) * 2;
-						cardAC = cardAC.substring(2, size + 2);
-					}
-					receipt += cf.padRight(cardPreferredName.toUpperCase(), 39 - cardPreferredName.toUpperCase().length(), " ");
 					
-					dataStr = "@" + requestData.panSequence + "-" + cardATC + "-" + cardAC;
+					receipt += "@" + cf.padRight(requestData.cardPreferredName.toUpperCase(), 
+												 39 - requestData.cardPreferredName.toUpperCase().length(), " ");
+					
+					dataStr = "@" + requestData.panSequence + "-" + 
+									requestData.cardApplicationTransactionCounter + "-" + 
+									requestData.cardApplicationCryptogram;
 					receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 					
 					dataStr = "@" + requestData.emvAID.substring(0,  14);
@@ -1325,9 +1403,9 @@ public class BanrisulMessage {
 			// Seta os dados de inicializacao do adquirente
 			listoData = AcquirerSettings.getInitializationTables(BANRISUL, requestData.merchantCode);
 
-			ISOMsg request = getTransactionFormatted(requestData);
-			ISOMsg response = requestAcquirer(request);
-			responseData = getResponseData(requestData, response);
+			ISOMsg request = getMessage0200(requestData);
+			ISOMsg response = requestAcquirer(request, true);
+			responseData = getResponseData(REQ_BA_PAYMENT, requestData, response);
 
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -1336,4 +1414,25 @@ public class BanrisulMessage {
 
 		return responseData;
 	}
+	
+	public TransactionData requestConfirmation(TransactionData requestData) {
+		TransactionData responseData = null;
+
+		try {
+			// Seta os dados de inicializacao do adquirente
+			listoData = AcquirerSettings.getInitializationTables(BANRISUL, requestData.merchantCode);
+
+			ISOMsg request = getMessage0202(requestData);
+			//No Banrisul nao ha resposta da transacao de confirmacao
+			//Os dados enviados no request sao utilizados para resposta
+			requestAcquirer(request, false);
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+
+		return requestData;
+	}
+	
 }

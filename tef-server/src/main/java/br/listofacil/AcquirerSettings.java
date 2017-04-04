@@ -40,6 +40,7 @@ public class AcquirerSettings {
 	private static CommonFunctions common = new CommonFunctions();
 	private static long nsuBanrisul = 1;
 	private static long nsuGlobalpayments = 1;
+	private static String dateDataUpdate = new String();
 	
 	public static synchronized void writeDataFile(){
 		
@@ -63,6 +64,14 @@ public class AcquirerSettings {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static synchronized String getDateDataUpdate(){
+		return dateDataUpdate;
+	}
+	
+	public static synchronized void setDateDataUpdate(String date){
+		dateDataUpdate = date;
 	}
 	
 	public static synchronized long getIncrementNSUBanrisul(){
@@ -107,17 +116,16 @@ public class AcquirerSettings {
     		    }
     		    
     		    if (nsudata[0].contains("DATE")){   
-    		    	if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) == Integer.parseInt(nsudata[1].substring(0,  2)) &&
-    		    	   (nsucalendaraux.get(Calendar.MONTH) + 1) == Integer.parseInt(nsudata[1].substring(2,  4)))
-    		    	{
-	    		    	flagnsu = true;
+    		    	if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0,  2)) &&
+    		    	   (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer.parseInt(nsudata[1].substring(2,  4))) {
+	    		    	flagnsu = false;
     		    	}
+    		    	setDateDataUpdate(nsudata[1]);
     		    	continue;
     		    }    		    
     		}
     		
-    		if(flagnsu)
-    		{
+    		if(flagnsu) {
     			nsuGlobalpayments = nsuGP;
 	    		nsuBanrisul = nsuBA;
     		}

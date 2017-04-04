@@ -44,6 +44,10 @@ public class ListoData {
 	public final static String PROC_REQ_CREDIT_WITHOUT_INTEREST = "30002";
 	public final static String PROC_REQ_DEBIT = "30003";
 	public final static String PROC_RES_PAYMENT = "31000";
+	public final static String PROC_REQ_ADVICE = "40000";
+	public final static String PROC_RES_ADVICE = "41000";
+	public final static String PROC_REQ_CANCEL = "50000";
+	public final static String PROC_RES_CANCEL = "51000";
 	
 	public final static int SERVER_TIMEOUT = 50; //segundos
 	/*

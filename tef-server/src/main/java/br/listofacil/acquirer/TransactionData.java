@@ -61,4 +61,8 @@ public class TransactionData {
 	public String merchantReceipt = new String();
 	public String brazilianDate = new String();
 	public String encryptedCardData = new String();
+	public String cardApplicationCryptogram = new String();
+	public String cardApplicationTransactionCounter = new String();
+	public String cardPreferredName = new String();
+	public String confirmationData = new String(); //Bit120 - padrao GP
 }

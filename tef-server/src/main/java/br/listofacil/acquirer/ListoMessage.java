@@ -57,6 +57,7 @@ public class ListoMessage {
 	private final int FIELD_SUGGEST_DATE = 65;
 	private final int FIELD_INSTALLMENT_VALUE = 66;
 	private final int FIELD_INSTALLMENTS = 67;
+	private final int FIELD_CONFIRMATION_DATA = 120;
 	private final int FIELD_ENCRYPTION_DATA = 126;
 	private final int FIELD_NSU_ACQUIRER = 127;
 	
@@ -133,6 +134,14 @@ public class ListoMessage {
 			
 			case ListoData.REQ_PAYMENT:
 				isomsg = getPayment(m);
+				break;
+				
+			case ListoData.REQ_CONFIRMATION:
+				isomsg = getConfirmation(m);
+				break;
+				
+			case ListoData.REQ_ADVICE:
+				isomsg = getAdvice(m);
 				break;
 
 			default:
@@ -495,29 +504,100 @@ public class ListoMessage {
 		
 		try {
 			String acquirer = request.getString(FIELD_ACQUIRER_CODE);
-			
-			request = getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul());
-			
 			TransactionData dataResponse = null;
-			TransactionData dataRequest = new TransactionData();
-			dataRequest = getTransactionData(request);
+			TransactionData dataRequest = null;
 			
 			switch (acquirer) {
 			case ListoData.GLOBAL_PAYMENTS:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUGlobalpayments()));
 				GlobalpaymentsMessage globalPayments = new GlobalpaymentsMessage();
 				dataResponse = globalPayments.requestPayment(dataRequest);
 				break;
 
 			case ListoData.BANRISUL:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul()));
 				BanrisulMessage banrisul = new BanrisulMessage();
 				dataResponse = banrisul.requestPayment(dataRequest);
 				break;
+				
 			default:
 				response = getErrorMessage(request);
 				break;
 			}
 			
-			response = getResponsePaymentFormatted(dataRequest, dataResponse);
+			response = getResponseFormatted(ListoData.RES_PAYMENT, dataRequest, dataResponse);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = getErrorMessage(request);
+		}
+	
+		return response;
+	}
+	
+	private ISOMsg getConfirmation(ISOMsg request) {
+		ISOMsg response = new ISOMsg();
+		
+		try {
+			String acquirer = request.getString(FIELD_ACQUIRER_CODE);
+			TransactionData dataResponse = null;
+			TransactionData dataRequest = null;
+			
+			switch (acquirer) {
+			case ListoData.GLOBAL_PAYMENTS:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUGlobalpayments()));
+				GlobalpaymentsMessage globalPayments = new GlobalpaymentsMessage();
+				dataResponse = globalPayments.requestConfirmation(dataRequest);
+				break;
+
+			case ListoData.BANRISUL:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul()));
+				BanrisulMessage banrisul = new BanrisulMessage();
+				dataResponse = banrisul.requestConfirmation(dataRequest);
+				break;
+				
+			default:
+				response = getErrorMessage(request);
+				break;
+			}
+			
+			response = getResponseFormatted(ListoData.RES_CONFIRMATION, dataRequest, dataResponse);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = getErrorMessage(request);
+		}
+	
+		return response;
+	}
+	
+	private ISOMsg getAdvice(ISOMsg request) {
+		ISOMsg response = new ISOMsg();
+		
+		try {
+			String acquirer = request.getString(FIELD_ACQUIRER_CODE);
+			TransactionData dataResponse = null;
+			TransactionData dataRequest = null;
+			
+			switch (acquirer) {
+			case ListoData.GLOBAL_PAYMENTS:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUGlobalpayments()));
+				GlobalpaymentsMessage globalPayments = new GlobalpaymentsMessage();
+				dataResponse = globalPayments.requestAdvice(dataRequest);
+				break;
+
+			case ListoData.BANRISUL:
+				//Nao ha mensagem de Advice para o Banrisul
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul()));
+				dataResponse = dataRequest;
+				break;
+				
+			default:
+				response = getErrorMessage(request);
+				break;
+			}
+			
+			response = getResponseFormatted(ListoData.RES_ADVICE, dataRequest, dataResponse);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -578,8 +658,10 @@ public class ListoMessage {
 			data.countryCode = message.getString(FIELD_COUNTRY_CODE);
 		if (message.hasField(FIELD_PIN))
 			data.pin = message.getString(FIELD_PIN);
-		if (message.hasField(FIELD_EMV_DATA))
+		if (message.hasField(FIELD_EMV_DATA)) {
 			data.emvData = message.getString(FIELD_EMV_DATA);
+			data = setDataTAGs(data);
+		}
 		if (message.hasField(FIELD_TYPE_CARD_READ))
 			data.typeCardRead = message.getString(FIELD_TYPE_CARD_READ);
 		if (message.hasField(FIELD_TRANSACTION_DATA)) {
@@ -633,6 +715,8 @@ public class ListoMessage {
 			data.installmentValue = message.getString(FIELD_INSTALLMENT_VALUE);
 		if (message.hasField(FIELD_INSTALLMENTS))
 			data.installments = message.getString(FIELD_INSTALLMENTS);
+		if (message.hasField(FIELD_CONFIRMATION_DATA))
+			data.confirmationData = message.getString(FIELD_CONFIRMATION_DATA);	
 		if (message.hasField(FIELD_ENCRYPTION_DATA)) {
 			HashMap<String, String> map = cf.tlvExtractData(message.getString(FIELD_ENCRYPTION_DATA));
 			if (map.containsKey(TAG_ENCRYPTION_PIN))
@@ -648,6 +732,8 @@ public class ListoMessage {
 			if (map.containsKey(TAG_ENCRYPTION_CVD))
 				data.cardVerificationData = map.get(TAG_ENCRYPTION_CVD);
 		}
+		if (message.hasField(FIELD_NSU_ACQUIRER)) 
+			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
 		
 		Calendar trsdate = cf.getCurrentDate();		
 		data.brazilianDate = cf.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0") + "/" +
@@ -657,11 +743,37 @@ public class ListoMessage {
 		return data;
 	}
 	
-	private ISOMsg getResponsePaymentFormatted(TransactionData dataRequest, TransactionData dataResponse) throws ISOException {
+	private TransactionData setDataTAGs(TransactionData data) {
+		String bit055 = new String();
+		if (data.emvData.contains("9F12")) {
+			int index = data.emvData.indexOf("9F12");
+			data.cardPreferredName = data.emvData.substring(index + 4, data.emvData.length());
+			int size = Integer.parseInt(cf.convertHexToInt(data.cardPreferredName.substring(0, 2))) * 2;
+			data.cardPreferredName = cf.convertHexString(data.cardPreferredName.substring(2, size + 2));
+			//Remove dos dados EMV
+			bit055 = data.emvData.substring(0, index);
+			data.emvData = bit055 + data.emvData.substring(index + (size + 6), data.emvData.length());
+		}
+		if (data.emvData.contains("9F26")) {
+			int index = data.emvData.indexOf("9F26");
+			data.cardApplicationCryptogram = data.emvData.substring(index + 4, data.emvData.length());
+			int size = Integer.parseInt(cf.convertHexToInt(data.cardApplicationCryptogram.substring(0, 2))) * 2;
+			data.cardApplicationCryptogram = data.cardApplicationCryptogram.substring(2, size + 2);
+		}
+		if (data.emvData.contains("9F36")) {
+			int index = data.emvData.indexOf("9F36");
+			data.cardApplicationTransactionCounter = data.emvData.substring(index + 4, data.emvData.length());
+			int size = Integer.parseInt(cf.convertHexToInt(data.cardApplicationTransactionCounter.substring(0, 2))) * 2;
+			data.cardApplicationTransactionCounter = data.cardApplicationTransactionCounter.substring(2, size + 2);
+		}
+		return data;
+	}
+	
+	private ISOMsg getResponseFormatted(String mti, TransactionData dataRequest, TransactionData dataResponse) throws ISOException {
 		ISOMsg response = new ISOMsg();
 
 		response.setPackager(new XMLPackager());
-		response.setMTI(ListoData.RES_PAYMENT);
+		response.setMTI(mti);
 		response.set(FIELD_PROCESSING_CODE, dataRequest.processingCode);
 		response.set(FIELD_AMOUNT, dataResponse.amount);
 		response.set(FIELD_DATE_TIME, dataResponse.dateTime);
