@@ -57,6 +57,7 @@ public class ListoMessage {
 	private final int FIELD_SUGGEST_DATE = 65;
 	private final int FIELD_INSTALLMENT_VALUE = 66;
 	private final int FIELD_INSTALLMENTS = 67;
+	private final int FIELD_ORIGINAL_TRANSACTION = 90;
 	private final int FIELD_CONFIRMATION_DATA = 120;
 	private final int FIELD_ENCRYPTION_DATA = 126;
 	private final int FIELD_NSU_ACQUIRER = 127;
@@ -87,6 +88,11 @@ public class ListoMessage {
 	private final String TAG_ENCRYPTION_KSN_CARD = "004";
 	private final String TAG_ENCRYPTION_TYPE_CVD = "005";
 	private final String TAG_ENCRYPTION_CVD = "006";
+	
+	private final String TAG_ORIGINAL_MESSAGE_CODE = "001";
+	private final String TAG_ORIGINAL_NSU_TEF = "002";
+	private final String TAG_ORIGINAL_TRANSACTION_DATE = "003";
+	private final String TAG_ORIGINAL_CV = "004";
 	
 	CommonFunctions cf =  new CommonFunctions();
 	
@@ -143,6 +149,14 @@ public class ListoMessage {
 			case ListoData.REQ_ADVICE:
 				isomsg = getAdvice(m);
 				break;
+				
+			case ListoData.REQ_UNMAKING:
+				isomsg = getUnmaking(m);
+				break;
+				
+			case ListoData.REQ_CANCELLATION:
+				isomsg = getCancellation(m);
+				break;
 
 			default:
 				break;
@@ -150,7 +164,6 @@ public class ListoMessage {
 			
 		} catch (ISOException e) {
 			// TODO Auto-generated catch block
-			String erro = e.getMessage();
 			isomsg = getErrorMessage(m);
 		}
 		return isomsg;
@@ -607,6 +620,78 @@ public class ListoMessage {
 		return response;
 	}
 	
+	private ISOMsg getCancellation(ISOMsg request) {
+		ISOMsg response = new ISOMsg();
+		
+		try {
+			String acquirer = request.getString(FIELD_ACQUIRER_CODE);
+			TransactionData dataResponse = null;
+			TransactionData dataRequest = null;
+			
+			switch (acquirer) {
+			case ListoData.GLOBAL_PAYMENTS:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUGlobalpayments()));
+				GlobalpaymentsMessage globalPayments = new GlobalpaymentsMessage();
+				dataResponse = globalPayments.requestCancellation(dataRequest);
+				break;
+
+			case ListoData.BANRISUL:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul()));
+				BanrisulMessage banrisul = new BanrisulMessage();
+				dataResponse = banrisul.requestCancellation(dataRequest);
+				break;
+				
+			default:
+				response = getErrorMessage(request);
+				break;
+			}
+			
+			response = getResponseFormatted(ListoData.RES_CANCELLATION, dataRequest, dataResponse);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = getErrorMessage(request);
+		}
+	
+		return response;
+	}
+	
+	private ISOMsg getUnmaking(ISOMsg request) {
+		ISOMsg response = new ISOMsg();
+		
+		try {
+			String acquirer = request.getString(FIELD_ACQUIRER_CODE);
+			TransactionData dataResponse = null;
+			TransactionData dataRequest = null;
+			
+			switch (acquirer) {
+			case ListoData.GLOBAL_PAYMENTS:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUGlobalpayments()));
+				GlobalpaymentsMessage globalPayments = new GlobalpaymentsMessage();
+				dataResponse = globalPayments.requestUnmaking(dataRequest);
+				break;
+
+			case ListoData.BANRISUL:
+				dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul()));
+				BanrisulMessage banrisul = new BanrisulMessage();
+				dataResponse = banrisul.requestUnmaking(dataRequest);
+				break;
+				
+			default:
+				response = getErrorMessage(request);
+				break;
+			}
+			
+			response = getResponseFormatted(ListoData.RES_ADVICE, dataRequest, dataResponse);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			response = getErrorMessage(request);
+		}
+	
+		return response;
+	}
+	
 	private TransactionData getTransactionData(ISOMsg message) {
 		TransactionData data = new TransactionData();
 		
@@ -715,6 +800,17 @@ public class ListoMessage {
 			data.installmentValue = message.getString(FIELD_INSTALLMENT_VALUE);
 		if (message.hasField(FIELD_INSTALLMENTS))
 			data.installments = message.getString(FIELD_INSTALLMENTS);
+		if (message.hasField(FIELD_ORIGINAL_TRANSACTION)) {
+			HashMap<String, String> map = cf.tlvExtractData(message.getString(FIELD_ORIGINAL_TRANSACTION));
+			if (map.containsKey(TAG_ORIGINAL_MESSAGE_CODE))
+				data.originalMessageCode = map.get(TAG_ORIGINAL_MESSAGE_CODE);
+			if (map.containsKey(TAG_ORIGINAL_NSU_TEF))
+				data.originalNSUTEF = map.get(TAG_ORIGINAL_NSU_TEF);
+			if (map.containsKey(TAG_ORIGINAL_TRANSACTION_DATE))
+				data.originalDateTime = map.get(TAG_ORIGINAL_TRANSACTION_DATE);
+			if (map.containsKey(TAG_ORIGINAL_CV))
+				data.originalCV = map.get(TAG_ORIGINAL_CV);
+		}
 		if (message.hasField(FIELD_CONFIRMATION_DATA))
 			data.confirmationData = message.getString(FIELD_CONFIRMATION_DATA);	
 		if (message.hasField(FIELD_ENCRYPTION_DATA)) {
@@ -751,8 +847,8 @@ public class ListoMessage {
 			int size = Integer.parseInt(cf.convertHexToInt(data.cardPreferredName.substring(0, 2))) * 2;
 			data.cardPreferredName = cf.convertHexString(data.cardPreferredName.substring(2, size + 2));
 			//Remove dos dados EMV
-			bit055 = data.emvData.substring(0, index);
-			data.emvData = bit055 + data.emvData.substring(index + (size + 6), data.emvData.length());
+			//bit055 = data.emvData.substring(0, index);
+			//data.emvData = bit055 + data.emvData.substring(index + (size + 6), data.emvData.length());
 		}
 		if (data.emvData.contains("9F26")) {
 			int index = data.emvData.indexOf("9F26");
@@ -775,7 +871,7 @@ public class ListoMessage {
 		response.setPackager(new XMLPackager());
 		response.setMTI(mti);
 		response.set(FIELD_PROCESSING_CODE, dataRequest.processingCode);
-		response.set(FIELD_AMOUNT, dataResponse.amount);
+		response.set(FIELD_AMOUNT, dataRequest.amount);
 		response.set(FIELD_DATE_TIME, dataResponse.dateTime);
 		response.set(FIELD_NSU_TEF, dataResponse.nsuTef);
 		response.set(FIELD_TIME, dataResponse.time);

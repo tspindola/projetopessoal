@@ -61,7 +61,7 @@ public class GlobalpaymentsMessage {
 	private final int FIELD_TERMINAL_DATA = 61;
 	private final int FIELD_TRANSACTION_DATA_1 = 62;
 	private final int FIELD_TRANSACTION_DATA_2 = 63;
-	private final int FIELD_ORIGINAL_TRANSACTION = 90;
+	private final int FIELD_ORIGINAL_DATA = 90;
 	private final int FIELD_CONFIRMATION_DATA = 120;
 	private final int FIELD_SECURITY_DATA = 126;
 	private final int FIELD_NSU_ACQUIRER = 127;
@@ -958,6 +958,40 @@ public class GlobalpaymentsMessage {
 		return responseData;
 	}
 	
+	public TransactionData requestCancellation(TransactionData requestData) {
+		TransactionData responseData = null;
+		
+		try {
+			
+			ISOMsg request = getMessage0400(requestData);
+			ISOMsg response = requestAcquirer(request);	
+			responseData = getResponseData(response);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		return responseData;
+	}
+	
+	public TransactionData requestUnmaking(TransactionData requestData) {
+		TransactionData responseData = null;
+		
+		try {
+			
+			ISOMsg request = getMessage0420(requestData);
+			ISOMsg response = requestAcquirer(request);	
+			responseData = getResponseData(response);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		return responseData;
+	}
+	
 	private ISOMsg getMessage0200(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 		
@@ -966,9 +1000,7 @@ public class GlobalpaymentsMessage {
 		
 		if ((requestData.pan.length() > 0) && 
 			(requestData.typeCardRead.equals(ListoData.TRANSACTION_ENTERED))) {
-			String pan = requestData.pan.substring(0, 6);
-			pan += cf.padLeft(new String(), requestData.pan.length() - 6, "0");
-			request.set(FIELD_PAN, pan);
+			request.set(FIELD_PAN, requestData.pan);	
 		}
 		
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
@@ -1047,15 +1079,9 @@ public class GlobalpaymentsMessage {
 		ISOMsg request = new ISOMsg();
 		
 		request.setPackager(new ISO87APackagerGP());
-		request.setMTI(REQ_GP_PAYMENT);
+		request.setMTI(REQ_GP_ADVICE);
 		
-		if ((requestData.pan.length() > 0) && 
-			(requestData.typeCardRead.equals(ListoData.TRANSACTION_ENTERED))) {
-			String pan = requestData.pan.substring(0, 6);
-			pan += cf.padLeft(new String(), requestData.pan.length() - 6, "0");
-			request.set(FIELD_PAN, pan);
-		}
-		
+		request.set(FIELD_PAN, requestData.pan);	
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
 		request.set(FIELD_AMOUNT, requestData.amount);
 		request.set(FIELD_DATE_TIME, requestData.dateTime);
@@ -1072,16 +1098,108 @@ public class GlobalpaymentsMessage {
 		if (requestData.panSequence.length() > 0)
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 		
+		//Se a transacao foi aprovada, enviar o codigo
+		if (requestData.responseCode.equals("00"))
+			request.set(FIELD_AUTHORIZATION_CODE, requestData.authorizationCode);
+		
+		if ((requestData.responseCode.length() > 0) &&
+			(!requestData.responseCode.equals("00")))
+			request.set(FIELD_RESPONSE_CODE, requestData.responseCode);
+		
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
-		request.set(FIELD_ADDITIONAL_DATA_1, getTransactionAdditionalData(REQ_GP_PAYMENT, requestData));
+		request.set(FIELD_ADDITIONAL_DATA_1, getTransactionAdditionalData(REQ_GP_ADVICE, requestData));
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
 		
 		if (requestData.emvData.length() > 0)
 			request.set(FIELD_EMV_DATA, requestData.emvData);
 		
-		request.set(FIELD_TERMINAL_DATA, getTerminalData(REQ_GP_PAYMENT, requestData));
-		request.set(FIELD_SECURITY_DATA, getDataEncrypted(REQ_GP_PAYMENT, requestData));
+		request.set(FIELD_TERMINAL_DATA, getTerminalData(REQ_GP_ADVICE, requestData));
+		request.set(FIELD_SECURITY_DATA, getDataEncrypted(REQ_GP_ADVICE, requestData));
+		
+		return request;
+	}
+	
+	private ISOMsg getMessage0400(TransactionData requestData) throws ISOException {	
+		ISOMsg request = new ISOMsg();
+		
+		request.setPackager(new ISO87APackagerGP());
+		request.setMTI(REQ_GP_CANCELLATION);
+		
+		if ((requestData.pan.length() > 0) && 
+			(requestData.typeCardRead.equals(ListoData.TRANSACTION_ENTERED))) {
+			request.set(FIELD_PAN, requestData.pan);	
+		}
+		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
+		request.set(FIELD_AMOUNT, requestData.amount);
+		request.set(FIELD_DATE_TIME, requestData.dateTime);
+		request.set(FIELD_NSU_TEF, requestData.nsuTef);
+		request.set(FIELD_DATE, requestData.date);
+		request.set(FIELD_TIME, requestData.time);
+		
+		if ((requestData.expirationDateCard.length() > 0) &&
+			(requestData.typeCardRead.equals(ListoData.MAGNETIC)))
+			request.set(FIELD_CARD_EXPIRATION_DATE, requestData.expirationDateCard);
+		
+		String entryMode = requestData.entryMode;
+		if (entryMode.equals("059"))
+			entryMode = "051";
+		request.set(FIELD_ENTRY_MODE, entryMode);
+		
+		if (requestData.panSequence.length() > 0)
+			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
+	
+		if (requestData.cardTrack2.length() > 0) {
+			int index = requestData.cardTrack2.indexOf("=");
+			String bin = requestData.cardTrack2.substring(0, 6);
+			String track2 = bin + cf.padLeft(new String(), index - 6, "0") +
+				   requestData.cardTrack2.substring(index, requestData.cardTrack2.length());
+			request.set(FIELD_TRACK_2, track2);
+		}
+		
+		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
+		request.set(FIELD_ADDITIONAL_DATA_1, getTransactionAdditionalData(REQ_GP_CANCELLATION, requestData));
+		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
+		request.set(FIELD_TERMINAL_DATA, getTerminalData(REQ_GP_CANCELLATION, requestData));
+		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
+		request.set(FIELD_SECURITY_DATA, getDataEncrypted(REQ_GP_CANCELLATION, requestData));
+		
+		return request;
+	}
+	
+	private ISOMsg getMessage0420(TransactionData requestData) throws ISOException {
+		ISOMsg request = new ISOMsg();
+		
+		request.setPackager(new ISO87APackagerGP());
+		request.setMTI(REQ_GP_UNMAKING);
+		
+		request.set(FIELD_PAN, requestData.pan);	
+		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
+		request.set(FIELD_AMOUNT, requestData.amount);
+		request.set(FIELD_DATE_TIME, requestData.dateTime);
+		request.set(FIELD_NSU_TEF, requestData.nsuTef);
+		request.set(FIELD_DATE, requestData.date);
+		request.set(FIELD_TIME, requestData.time);
+		
+		if ((requestData.expirationDateCard.length() > 0) &&
+			(requestData.typeCardRead.equals(ListoData.MAGNETIC)))
+			request.set(FIELD_CARD_EXPIRATION_DATE, requestData.expirationDateCard);
+		
+		String entryMode = requestData.entryMode;
+		if (entryMode.equals("059"))
+			entryMode = "051";
+		request.set(FIELD_ENTRY_MODE, entryMode);
+		
+		if (requestData.panSequence.length() > 0)
+			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
+		
+		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
+		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);		
+		request.set(FIELD_TERMINAL_DATA, getTerminalData(REQ_GP_UNMAKING, requestData));
+		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
+		request.set(FIELD_SECURITY_DATA, getDataEncrypted(REQ_GP_UNMAKING, requestData));
 		
 		return request;
 	}
@@ -1168,6 +1286,17 @@ public class GlobalpaymentsMessage {
         bit061 += "007020" + data.pinpadFirmware;       //Firmware Pinpad
         
         return bit061;
+	}
+	
+	private String getOriginalTransaction(TransactionData data){
+        String bit090 = new String();
+        
+        bit090 = data.originalMessageCode;		 //Codigo da mensagem original (0100, 0200 ou 0220)
+        bit090 += data.originalNSUTEF;   		 //NSU da transacao original
+        bit090 += data.originalDateTime;         //Data e hora da transacao original
+        bit090 += "0000000000000000000000";      //22 zeros RFU
+        
+        return bit090;
 	}
 	
 	private String getDataEncrypted(String mti, TransactionData data){

@@ -49,7 +49,10 @@ public class BanrisulMessage {
 	private final String REQ_BA_PAYMENT = "0200";
 	private final String RES_BA_PAYMENT = "0210";
 	private final String REQ_BA_CONFIRMATION = "0202";
-
+	private final String REQ_BA_CANCELLATION = "0400";
+	private final String RES_BA_CANCELLATION = "0410";
+	private final String REQ_BA_UNMAKING = "0420";
+	private final String RES_BA_UNMAKING = "0430";
 
 	private final int FIELD_PAN = 2;
 	private final int FIELD_PROC_CODE = 3;
@@ -77,6 +80,7 @@ public class BanrisulMessage {
 	private final int FIELD_GENERIC_DATA_62 = 62;
 	private final int FIELD_GENERIC_DATA_63 = 63;
 	private final int FIELD_INSTALLMENTS = 67;
+	private final int FIELD_ORIGINAL_DATA = 90;
 	private final int FIELD_SECURITY_CODE = 122;
 	private final int FIELD_LAST_TRANSACTION = 125;
 	private final int FIELD_NSU_ACQUIRER = 127;
@@ -117,10 +121,8 @@ public class BanrisulMessage {
 	 * 003800 – compra credito parcelado emissor 002000 – compra debito a vista
 	 */
 	private final String PROC_CODE_CREDIT = "003000";
-	private final String PROC_CODE_CREDIT_WITHOUT_INTEREST = "003100"; // Parcelado
-																		// lojista
-	private final String PROC_CODE_CREDIT_WITH_INTEREST = "003800"; // Parcelado
-																	// emissor
+	private final String PROC_CODE_CREDIT_WITHOUT_INTEREST = "003100"; // Parcelado lojista																		
+	private final String PROC_CODE_CREDIT_WITH_INTEREST = "003800"; // Parcelado emissor																	
 	private final String PROC_CODE_DEBIT = "002000";
 
 	private static final String idMUXBanrisul = "mux.clientsimulator-banrisul-mux";
@@ -1086,8 +1088,8 @@ public class BanrisulMessage {
 		request.set(FIELD_AMOUNT, requestData.amount);
 		request.set(FIELD_DATE_TIME, requestData.dateTime);
 		request.set(FIELD_NSU_TEF, requestData.nsuTef);
-		request.set(FIELD_DATE, requestData.date);
 		request.set(FIELD_TIME, requestData.time);
+		request.set(FIELD_DATE, requestData.date);
 
 		// if (requestData.expirationDateCard.length() > 0)
 		// request.set(FIELD_CARD_EXPIRATION_DATE,
@@ -1177,7 +1179,7 @@ public class BanrisulMessage {
 		if (message.hasField(FIELD_EMV_DATA))
 			data.emvData = message.getString(FIELD_EMV_DATA);
 		
-		if (mti.equals(RES_BA_PAYMENT)) {
+		if (mti.equals(REQ_BA_PAYMENT)) {
 			if (!data.responseCode.equals("00")) {
 				String msg = "TRANSACAO NEGADA";
 				if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
@@ -1227,10 +1229,9 @@ public class BanrisulMessage {
 						+ ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
-				String authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE).substring(3, message.getString(FIELD_AUTHORIZATION_CODE).length());
 				String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
 				
-				dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + cf.padLeft(authorizationCode, 6, "0");
+				dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + message.getString(FIELD_AUTHORIZATION_CODE);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
 				dataStr = "@CARTAO: ";
@@ -1334,10 +1335,9 @@ public class BanrisulMessage {
 						+ ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
-				String authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE).substring(3, message.getString(FIELD_AUTHORIZATION_CODE).length());
 				String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
 				
-				dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + cf.padLeft(authorizationCode, 6, "0");
+				dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + message.getString(FIELD_AUTHORIZATION_CODE);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				
 				dataStr = "@CARTAO: ";
@@ -1433,6 +1433,108 @@ public class BanrisulMessage {
 		}
 
 		return requestData;
+	}
+	
+	public TransactionData requestCancellation(TransactionData requestData) {
+		TransactionData responseData = null;
+		
+		try {
+			
+			ISOMsg request = getMessage0400(requestData);
+			ISOMsg response = requestAcquirer(request, true);	
+			responseData = getResponseData(RES_BA_CANCELLATION, requestData, response);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		return responseData;
+	}
+	
+	public TransactionData requestUnmaking(TransactionData requestData) {
+		TransactionData responseData = null;
+		
+		try {
+			
+			ISOMsg request = getMessage0420(requestData);
+			ISOMsg response = requestAcquirer(request, true);	
+			responseData = getResponseData(RES_BA_UNMAKING, requestData, response);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+		return responseData;
+	}
+	
+	
+	private ISOMsg getMessage0400(TransactionData requestData) throws ISOException {	
+		ISOMsg request = new ISOMsg();
+		
+		request.setPackager(new ISO87APackagerGP());
+		request.setMTI(REQ_BA_CANCELLATION);
+		
+		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
+		request.set(FIELD_AMOUNT, requestData.amount);
+		request.set(FIELD_DATE_TIME, requestData.dateTime);
+		request.set(FIELD_NSU_TEF, requestData.nsuTef);
+		request.set(FIELD_TIME, requestData.time);
+		request.set(FIELD_DATE, requestData.date);
+		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
+		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
+		request.set(FIELD_RESPONSE_CODE, "00"); //Transacao aprovada
+	
+		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
+		
+		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
+		
+		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
+		
+		return request;
+	}
+	
+	
+	private ISOMsg getMessage0420(TransactionData requestData) throws ISOException {	
+		ISOMsg request = new ISOMsg();
+		
+		request.setPackager(new ISO87APackagerGP());
+		request.setMTI(REQ_BA_CANCELLATION);
+		
+		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
+		request.set(FIELD_AMOUNT, requestData.amount);
+		request.set(FIELD_DATE_TIME, requestData.dateTime);
+		request.set(FIELD_NSU_TEF, requestData.nsuTef);
+		request.set(FIELD_TIME, requestData.time);
+		request.set(FIELD_DATE, requestData.date);
+		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
+		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
+		request.set(FIELD_RESPONSE_CODE, "00"); //Transacao aprovada
+	
+		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
+		
+		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
+		
+		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
+		
+		return request;
+	}
+	
+	
+	private String getOriginalTransaction(TransactionData requestData) {
+		String bit090 = new String();
+		
+		bit090 += requestData.originalMessageCode;
+		bit090 += requestData.originalNSUTEF;
+		bit090 += requestData.originalDateTime.substring(0,  4);
+		bit090 += "00000000000000000000000000";
+		
+		return bit090;
 	}
 	
 }
