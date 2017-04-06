@@ -1302,13 +1302,9 @@ public class GlobalpaymentsMessage {
 	private String getDataEncrypted(String mti, TransactionData data){
 		String bit126 = "";
 		String especificChar = " ";
-		boolean trsPayment = data.processingCode.equals(ListoData.PROC_REQ_CREDIT) ||
-				        	 data.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITH_INTEREST) ||
-				        	 data.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST) ||
-				             data.processingCode.equals(ListoData.PROC_REQ_DEBIT);
 
         //05 - Presente se solicitado PIN online para validação do portador do cartão.         
-        if ((trsPayment) && (data.pin.length() > 0)) {
+        if ((mti.equals(REQ_GP_PAYMENT)) && (data.pin.length() > 0)) {
             bit126 += "001001" + data.encryptionPinType;
             bit126 += "002020" + data.ksnPin; //Chave do pin
         }
@@ -1318,10 +1314,9 @@ public class GlobalpaymentsMessage {
         //37 - Presente se cartão (BIT002 ou 035) criptografado com chave DUKPT
         //A chave utilizada para dados eh 3DES somente
         //bit126 += "004020" + dataBC.KeyDUKPT3DES;     
-        
-        String bitAux5 = "005006"; //Subcampo 5        
 
-        if (trsPayment) {
+        if (mti.equals(REQ_GP_PAYMENT)) {
+        	String bitAux5 = "005006"; //Subcampo 5        
             bit126 += bitAux5; //adiciona o 005 e o tamanho 006
             if (data.productDescription.toUpperCase().contains("VISA") || 
                 data.productDescription.toUpperCase().contains("ELECTRON"))
