@@ -98,7 +98,9 @@ public class GlobalpaymentsMessage {
 	
 	private String PARAM_41 = "00000000"; //terminal number
 	private String PARAM_42 = "012000006020001";
-	private String ID_ACQUIRER_GP = "04";
+	
+	private String DATA_POSITION_GP_PINPAD = "04";
+	private String PIN_POSITION_GP_PINPAD = "317"; //DUKPT 3DES = 3-3DES 17-POSICAO
 	
 	//Versao do conteudo das tabelas = 0 (solicita tabelas)
 	private String PARAM_48001 = "00100800000000";
@@ -149,7 +151,6 @@ public class GlobalpaymentsMessage {
 	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber) throws ISOException, Exception{		
 		
 		ISOMsg response = null;
-		String timestampTables;
 		boolean ret = true;
 		
 		PARAM_41 = terminalNumber;
@@ -158,13 +159,13 @@ public class GlobalpaymentsMessage {
 		AcquirerSettings.setStatusLoadingGlobalpayments(logicalNumber);
 			
 		//Efetuar o logon
-		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
+		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUGlobalpayments());
 
 		if (response != null)
 		{
 			while(true)
 			{
-				response = requestTable(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
+				response = requestTable(logicalNumber, AcquirerSettings.getIncrementNSUGlobalpayments());
 				
 				//Timeout
 				if (response == null)
@@ -249,7 +250,7 @@ public class GlobalpaymentsMessage {
 		return response;
 	}
 	
-	private String getTimestampTables(ISOMsg m)
+	private String getAcquirerTimestampTables(ISOMsg m)
 	{	
 		try {
 			
@@ -311,13 +312,15 @@ public class GlobalpaymentsMessage {
 		try {		
 			
 			listoData.codigoAdquirente = ListoData.GLOBAL_PAYMENTS;
+			listoData.posicaoChaveDadosPinpad = DATA_POSITION_GP_PINPAD;
+			listoData.posicaoChaveSenhaPinpad = PIN_POSITION_GP_PINPAD;
 			listoData.gmtDataHora = m.getString(7);
 			listoData.nsuOrigem = m.getString(11);
 			listoData.horaLocal = m.getString(12);
 			listoData.dataLocal = m.getString(13);
 			listoData.codigoResposta = m.getString(39);
 			listoData.numeroLogico = m.getString(42);
-			listoData.versaoTabelas = getTimestampTables(m);
+			listoData.versaoTabelasAdquirente = getAcquirerTimestampTables(m);
 			listoData.smid = "";
 			listoData.workingKey = "";
 			
@@ -586,7 +589,7 @@ public class GlobalpaymentsMessage {
 		BCDataEmvAid paramEMV = getBCDataEmvAid(listoData.indiceTabEmvAid, value);
 
 		String registry = paramEMV.IdTable +
-						ID_ACQUIRER_GP + 
+						DATA_POSITION_GP_PINPAD + 
 	                    paramEMV.TableIndex +
 	                    paramEMV.AIDSize +
 	                    paramEMV.AID +
@@ -719,7 +722,7 @@ public class GlobalpaymentsMessage {
 		BCDataPublicKeys key = getBCDataPublicKeys(listoData.indiceTabPublicKeys, value);
 		
 		registry = key.IdTable +
-                ID_ACQUIRER_GP +
+                DATA_POSITION_GP_PINPAD +
                 key.TableIndex +
                 key.RID +
                 key.CAPublicKeyIndex +
@@ -822,6 +825,9 @@ public class GlobalpaymentsMessage {
 	
 	public TransactionData getResponseData(ISOMsg message) {
 		TransactionData data = new TransactionData();
+		
+		if (message == null)
+			return null;
 		
 		if (message.hasField(FIELD_PAN))
 			data.pan = message.getString(FIELD_PAN);
@@ -1089,8 +1095,7 @@ public class GlobalpaymentsMessage {
 		request.set(FIELD_DATE, requestData.date);
 		request.set(FIELD_TIME, requestData.time);
 		
-		if ((requestData.expirationDateCard.length() > 0) &&
-			(requestData.typeCardRead.equals(ListoData.MAGNETIC)))
+		if (requestData.expirationDateCard.length() > 0)
 			request.set(FIELD_CARD_EXPIRATION_DATE, requestData.expirationDateCard);
 		
 		request.set(FIELD_ENTRY_MODE, "010"); //Advice

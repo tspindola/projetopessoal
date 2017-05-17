@@ -137,12 +137,14 @@ public class ListoData {
 	public String numeroLogico = "";
 	public String smid = "";
 	public String workingKey = "";
-	public String versaoTabelas = "";
+	public String versaoTabelasAdquirente = "";
 	public String identificacaoRede = "";
 	public String currencyCode = "";
 	public String currencyExponent = "";
 	public String terminalCountryCode = "";
 	public String merchantCategoryCode = "";
+	public String posicaoChaveDadosPinpad = "";
+	public String posicaoChaveSenhaPinpad = "";
 	
 	
 	public ArrayList<String> tableSequence = new ArrayList<String>();
@@ -220,6 +222,7 @@ public class ListoData {
 	{	
 		switch (mti) {
 		case REQ_LOGON_INIT:
+		case RES_LOGON_INIT:
 			if ((procCode != null) && (procCode == PROC_REQ_LOGON))
 				return PROC_RES_LOGON;
 			return PROC_RES_INIT;

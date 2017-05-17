@@ -84,6 +84,10 @@ public class BanrisulMessage {
 	private final int FIELD_SECURITY_CODE = 122;
 	private final int FIELD_LAST_TRANSACTION = 125;
 	private final int FIELD_NSU_ACQUIRER = 127;
+	
+	private String DATA_POSITION_BA_PINPAD = "04";
+	private String PIN_POSITION_BA_PINPAD = "314"; //DUKPT 3DES = 3-3DES 14-POSICAO
+	
 
 	private String BANRISUL_PINPAD_DATA = "14"; // Posicao da chave de
 												// criptografia de dados
@@ -522,7 +526,7 @@ public class BanrisulMessage {
 			String bit62 = response.getString(62);
 			if (bit62.trim().length() > 0) {
 				listoData.workingKey = bit62.substring(0, 32);
-				listoData.versaoTabelas = bit62.substring(32, bit62.length());
+				listoData.versaoTabelasAdquirente = bit62.substring(32, bit62.length());
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -610,6 +614,8 @@ public class BanrisulMessage {
 			CommonFunctions common = new CommonFunctions();
 
 			listoData.codigoAdquirente = ListoData.BANRISUL;
+			listoData.posicaoChaveDadosPinpad = DATA_POSITION_BA_PINPAD;
+			listoData.posicaoChaveSenhaPinpad = PIN_POSITION_BA_PINPAD;
 			listoData.gmtDataHora = response.getString(7);
 			listoData.nsuOrigem = response.getString(11);
 			listoData.horaLocal = response.getString(12);

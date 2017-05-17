@@ -34,6 +34,7 @@ public class ListoMessage {
 	private final int FIELD_EMV_AID = 36;
 	private final int FIELD_AUTHORIZATION_CODE = 38;
 	private final int FIELD_RESPONSE_CODE = 39;
+	private final int FIELD_PINPAD_ACQUIRER_ID = 40;
 	private final int FIELD_TERMINAL_CODE = 41;
 	private final int FIELD_MERCHANT_CODE = 42;
 	private final int FIELD_SHOP_CODE = 43;
@@ -93,6 +94,9 @@ public class ListoMessage {
 	private final String TAG_ORIGINAL_NSU_TEF = "002";
 	private final String TAG_ORIGINAL_TRANSACTION_DATE = "003";
 	private final String TAG_ORIGINAL_CV = "004";
+	
+	private final String TAG_POSITION_DATA_PINPAD = "001";
+	private final String TAG_POSITION_PIN_PINPAD = "002";
 	
 	CommonFunctions cf =  new CommonFunctions();
 	
@@ -289,16 +293,21 @@ public class ListoMessage {
 			
 			//Autorizado a transacionar
 			isomsg.set(FIELD_RESPONSE_CODE, ListoData.RES_CODE_AUTHORIZED); 
+			
 			//Responde os mesmos valores dos campos enviados (eco)
-			isomsg.set(FIELD_TERMINAL_CODE, m.getString(FIELD_TERMINAL_CODE)); //Codigo do terminal
-			isomsg.set(FIELD_MERCHANT_CODE, m.getString(FIELD_MERCHANT_CODE)); //Codigo do estabelecimento
-			isomsg.set(FIELD_SHOP_CODE, m.getString(FIELD_SHOP_CODE)); 	   	   //Codigo da loja
-			isomsg.set(FIELD_ACQUIRER_CODE, m.getString(FIELD_ACQUIRER_CODE)); //Codigo do adquirente
+			isomsg.set(FIELD_PINPAD_ACQUIRER_ID, TAG_POSITION_DATA_PINPAD + "003" + listoData.posicaoChaveDadosPinpad +
+												 TAG_POSITION_PIN_PINPAD + "003" + listoData.posicaoChaveSenhaPinpad );
+			
+	
+			isomsg.set(FIELD_TERMINAL_CODE, m.getString(FIELD_TERMINAL_CODE)); 			//Codigo do terminal
+			isomsg.set(FIELD_MERCHANT_CODE, m.getString(FIELD_MERCHANT_CODE)); 			//Codigo do estabelecimento
+			isomsg.set(FIELD_SHOP_CODE, m.getString(FIELD_SHOP_CODE)); 	   	   			//Codigo da loja
+			isomsg.set(FIELD_ACQUIRER_CODE, m.getString(FIELD_ACQUIRER_CODE)); 			//Codigo do adquirente
 			
 			if (!listoData.smid.equals("")) 
 				isomsg.set(FIELD_SMID, listoData.smid);
-			if (!listoData.versaoTabelas.equals("")) 
-				isomsg.set(FIELD_TABLES_VERSION, listoData.versaoTabelas);
+			if (!listoData.versaoTabelasAdquirente.equals("")) 
+				isomsg.set(FIELD_TABLES_VERSION, listoData.versaoTabelasAdquirente);
 			//if (!listoData.workingKey.equals("")) 
 			//	isomsg.set(FIELD_WORKING_KEY, listoData.workingKey);
 	
@@ -867,6 +876,10 @@ public class ListoMessage {
 	
 	private ISOMsg getResponseFormatted(String mti, TransactionData dataRequest, TransactionData dataResponse) throws ISOException {
 		ISOMsg response = new ISOMsg();
+		
+		if ((dataResponse == null) ||
+			(dataRequest == null))	
+			return null;
 
 		response.setPackager(new XMLPackager());
 		response.setMTI(mti);

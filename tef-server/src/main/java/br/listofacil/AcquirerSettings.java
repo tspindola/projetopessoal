@@ -38,8 +38,10 @@ public class AcquirerSettings {
 	//NSU Acquirer and NSU TEF original
 	private static HashMap<String, InfoTransaction> transactions = null;
 	private static CommonFunctions common = new CommonFunctions();
+	
 	private static long nsuBanrisul = 1;
 	private static long nsuGlobalpayments = 1;
+	
 	private static String dateDataUpdate = new String();
 	
 	public static synchronized void writeDataFile(){
@@ -52,7 +54,7 @@ public class AcquirerSettings {
 		
 		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" +
 						  "NSU_BA=\"" + nsuBanrisul + "\"\n" +
-						  "DATE=\"" + dateReg + "\"\n";
+						  "DATE_UPDATE_NSU=\"" + dateReg + "\"\n";
 		try {
 
 	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\nsuconfig.data");
@@ -115,7 +117,7 @@ public class AcquirerSettings {
     		    	continue;
     		    }
     		    
-    		    if (nsudata[0].contains("DATE")){   
+    		    if (nsudata[0].contains("DATE_UPDATE_NSU")){   
     		    	if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0,  2)) &&
     		    	   (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer.parseInt(nsudata[1].substring(2,  4))) {
 	    		    	flagnsu = false;
