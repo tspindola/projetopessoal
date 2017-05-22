@@ -113,7 +113,10 @@ public class ListoMessage {
 				return getErrorMessage(m);
 			
 			//Formata NSU e horario transacao
-			isomsg = getCommonBitsFormatted(m, AcquirerSettings.getIncrementNSUBanrisul());
+			if (acquirer.equals(ListoData.BANRISUL))
+				isomsg = getCommonBitsFormatted(m, AcquirerSettings.getIncrementNSUBanrisul());
+			else
+				isomsg = getCommonBitsFormatted(m, AcquirerSettings.getIncrementNSUGlobalpayments());
 		
 			//Obtem os dados de inicializacao do adquirente
 			ListoData listoData = AcquirerSettings.getInitializationTables(acquirer, logicalNumber);		

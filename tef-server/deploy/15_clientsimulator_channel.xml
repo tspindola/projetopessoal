@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+
+<channel-adaptor name='clientsimulator-adaptor-globalpayments' class="org.jpos.q2.iso.ChannelAdaptor"
+	logger="Q2">
+	<channel class="br.listofacil.tefserver.iso.SimpleRawChannel"
+		logger="Q2" packager="br.listofacil.tefserver.iso.ISO87APackagerGP">
+		<property name="host" value="200.204.163.104" />
+		<property name="port" value="35019" />
+	</channel>
+	<in>clientsimulatorgp-send</in>
+	<out>clientsimulatorgp-receive</out>
+	<reconnect-delay>20008</reconnect-delay>
+</channel-adaptor>
+
