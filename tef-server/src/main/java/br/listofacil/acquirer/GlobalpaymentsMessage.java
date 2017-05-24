@@ -320,7 +320,7 @@ public class GlobalpaymentsMessage {
 			listoData.dataLocal = m.getString(13);
 			listoData.codigoResposta = m.getString(39);
 			listoData.numeroLogico = m.getString(42);
-			listoData.versaoTabelasAdquirente = getAcquirerTimestampTables(m);
+			listoData.versaoTabelasGlobalpayments = getAcquirerTimestampTables(m);
 			listoData.smid = "";
 			listoData.workingKey = "";
 			

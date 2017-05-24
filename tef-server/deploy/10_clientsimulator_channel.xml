@@ -5,7 +5,7 @@
 	<channel class="br.listofacil.tefserver.iso.SimpleRawChannel"
 		logger="Q2" packager="br.listofacil.tefserver.iso.ISO93EPackagerBanrisul">
 		<property name="host" value="52.67.150.185" />
-		<property name="port" value="5789" /> 
+		<property name="port" value="5788" /> 
 	</channel>
 	<in>clientsimulatorba-send</in>
 	<out>clientsimulatorba-receive</out>

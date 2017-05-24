@@ -1,13 +1,17 @@
 package br.listofacil;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.MUX;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
+
+import com.bravado.util.RabbitMQ;
 
 import br.listofacil.acquirer.BanrisulMessage;
 import br.listofacil.acquirer.GlobalpaymentsMessage;

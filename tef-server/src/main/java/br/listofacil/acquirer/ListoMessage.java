@@ -1,15 +1,18 @@
 package br.listofacil.acquirer;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.packager.XMLPackager;
 
 import com.bravado.bsh.InfoTransaction;
+import com.bravado.util.RabbitMQ;
 
 import br.listofacil.CommonFunctions;
 import br.listofacil.AcquirerProcess;
@@ -298,9 +301,8 @@ public class ListoMessage {
 			isomsg.set(FIELD_RESPONSE_CODE, ListoData.RES_CODE_AUTHORIZED); 
 			
 			//Responde os mesmos valores dos campos enviados (eco)
-			isomsg.set(FIELD_PINPAD_ACQUIRER_ID, TAG_POSITION_DATA_PINPAD + "003" + listoData.posicaoChaveDadosPinpad +
+			isomsg.set(FIELD_PINPAD_ACQUIRER_ID, TAG_POSITION_DATA_PINPAD + "002" + listoData.posicaoChaveDadosPinpad +
 												 TAG_POSITION_PIN_PINPAD + "003" + listoData.posicaoChaveSenhaPinpad );
-			
 	
 			isomsg.set(FIELD_TERMINAL_CODE, m.getString(FIELD_TERMINAL_CODE)); 			//Codigo do terminal
 			isomsg.set(FIELD_MERCHANT_CODE, m.getString(FIELD_MERCHANT_CODE)); 			//Codigo do estabelecimento
@@ -309,10 +311,28 @@ public class ListoMessage {
 			
 			if (!listoData.smid.equals("")) 
 				isomsg.set(FIELD_SMID, listoData.smid);
-			if (!listoData.versaoTabelasAdquirente.equals("")) 
-				isomsg.set(FIELD_TABLES_VERSION, listoData.versaoTabelasAdquirente);
+			
+			isomsg.set(FIELD_TABLES_VERSION, "00000000");
+			if (m.getValue(FIELD_ACQUIRER_CODE).equals(ListoData.GLOBAL_PAYMENTS)) {
+				if (!listoData.versaoTabelasGlobalpayments.equals("")) 
+					isomsg.set(FIELD_TABLES_VERSION, listoData.versaoTabelasGlobalpayments);				
+			} else {				
+				if (!listoData.versaoTabelasBanrisul.equals("")) 
+					isomsg.set(FIELD_TABLES_VERSION, listoData.versaoTabelasBanrisul);
+			}
+			
+			isomsg.set(FIELD_MERCHANT_DATA, m.getString(FIELD_MERCHANT_DATA)); //Dados do adquirente
+			
+			//Envia para o sistema que grava no banco de dados
+			byte[] messageData = m.pack();
+			RabbitMQ.Send(new String(messageData));
+			
 			//if (!listoData.workingKey.equals("")) 
 			//	isomsg.set(FIELD_WORKING_KEY, listoData.workingKey);
+			
+			//Envia para o sistema que grava no banco de dados
+			messageData = isomsg.pack();
+			RabbitMQ.Send(new String(messageData));
 	
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -511,10 +531,22 @@ public class ListoMessage {
 				}
 			}
 			
+			isomsg.set(FIELD_MERCHANT_DATA, m.getString(FIELD_MERCHANT_DATA)); 
 			isomsg.set(FIELD_REGISTRY_INDEX, cf.padLeft(String.valueOf(index), 3, "0"));
 			isomsg.set(FIELD_REGISTRY_CODE, registryCode);
 			isomsg.set(62, registryBIT62); 
 			registryBIT62 = "0";
+			
+			//Envia para o sistema que grava no banco de dados
+			byte[] messageData = m.pack();
+			RabbitMQ.Send(new String(messageData));
+			
+			//if (!listoData.workingKey.equals("")) 
+			//	isomsg.set(FIELD_WORKING_KEY, listoData.workingKey);
+			
+			//Envia para o sistema que grava no banco de dados
+			messageData = isomsg.pack();
+			RabbitMQ.Send(new String(messageData));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -550,7 +582,7 @@ public class ListoMessage {
 				break;
 			}
 			
-			response = getResponseFormatted(ListoData.RES_PAYMENT, dataRequest, dataResponse);
+			response = getResponseFormatted(ListoData.RES_PAYMENT, request, dataRequest, dataResponse);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -586,7 +618,7 @@ public class ListoMessage {
 				break;
 			}
 			
-			response = getResponseFormatted(ListoData.RES_CONFIRMATION, dataRequest, dataResponse);
+			response = getResponseFormatted(ListoData.RES_CONFIRMATION, request, dataRequest, dataResponse);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -622,7 +654,7 @@ public class ListoMessage {
 				break;
 			}
 			
-			response = getResponseFormatted(ListoData.RES_ADVICE, dataRequest, dataResponse);
+			response = getResponseFormatted(ListoData.RES_ADVICE, request, dataRequest, dataResponse);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -658,7 +690,7 @@ public class ListoMessage {
 				break;
 			}
 			
-			response = getResponseFormatted(ListoData.RES_CANCELLATION, dataRequest, dataResponse);
+			response = getResponseFormatted(ListoData.RES_CANCELLATION, request, dataRequest, dataResponse);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -694,7 +726,7 @@ public class ListoMessage {
 				break;
 			}
 			
-			response = getResponseFormatted(ListoData.RES_ADVICE, dataRequest, dataResponse);
+			response = getResponseFormatted(ListoData.RES_ADVICE, request, dataRequest, dataResponse);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -704,7 +736,7 @@ public class ListoMessage {
 		return response;
 	}
 	
-	private TransactionData getTransactionData(ISOMsg message) {
+	private TransactionData getTransactionData(ISOMsg message) throws IOException, TimeoutException, ISOException {
 		TransactionData data = new TransactionData();
 		
 		if (message.hasField(FIELD_PAN))
@@ -847,6 +879,10 @@ public class ListoMessage {
 		data.brazilianDate = cf.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0") + "/" +
 				   			 cf.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") + "/" +
 				   			 trsdate.get(Calendar.YEAR);							
+		
+		//Envia para o sistema que grava no banco de dados
+		byte[] messageData = message.pack();
+		RabbitMQ.Send(new String(messageData));
 			
 		return data;
 	}
@@ -877,24 +913,54 @@ public class ListoMessage {
 		return data;
 	}
 	
-	private ISOMsg getResponseFormatted(String mti, TransactionData dataRequest, TransactionData dataResponse) throws ISOException {
+	private ISOMsg getResponseFormatted(String mti, ISOMsg request, TransactionData dataRequest, 
+										TransactionData dataResponse) throws ISOException, IOException, TimeoutException {
 		ISOMsg response = new ISOMsg();
 		
 		if ((dataResponse == null) ||
 			(dataRequest == null))	
 			return null;
+		
+		if (dataResponse.dateTime.trim().equals(""))
+			dataResponse.dateTime = dataRequest.dateTime;
+		
+		if (dataResponse.time.trim().equals(""))
+			dataResponse.time = dataRequest.time;
 
+		if (dataResponse.date.trim().equals(""))
+			dataResponse.date = dataRequest.date;
+		
 		response.setPackager(new XMLPackager());
+		
 		response.setMTI(mti);
 		response.set(FIELD_PROCESSING_CODE, dataRequest.processingCode);
-		response.set(FIELD_AMOUNT, dataRequest.amount);
+		response.set(FIELD_AMOUNT, dataRequest.amount);		
 		response.set(FIELD_DATE_TIME, dataResponse.dateTime);
 		response.set(FIELD_NSU_TEF, dataResponse.nsuTef);
 		response.set(FIELD_TIME, dataResponse.time);
 		response.set(FIELD_DATE, dataResponse.date);
 		
+		if (dataResponse.expirationDateCard.trim().length() > 0)
+			response.set(FIELD_CARD_EXP_DATE, dataResponse.expirationDateCard);
+		
+		if (dataResponse.entryMode.trim().length() > 0)
+			response.set(FIELD_ENTRY_MODE, dataResponse.entryMode);
+		
+		if (dataResponse.panSequence.trim().length() > 0)
+			response.set(FIELD_PAN_SEQUENCE, dataResponse.panSequence);
+		
+		if (dataResponse.productDescription.trim().length() > 0)
+			response.set(FIELD_PRODUCT_DESCRIPTION, dataResponse.productDescription);
+		
+		if (dataResponse.cardTrack1.trim().length() > 0)
+			response.set(FIELD_TRACK_1, dataResponse.cardTrack1);
+		
+		if (dataResponse.cardTrack2.trim().length() > 0)
+			response.set(FIELD_TRACK_2, dataResponse.cardTrack2);
+		
 		if (dataResponse.authorizationCode.trim().length() > 0)
 			response.set(FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
+		
 		if (dataResponse.responseCode.trim().length() > 0)
 			response.set(FIELD_RESPONSE_CODE, dataResponse.responseCode);
 		
@@ -904,14 +970,45 @@ public class ListoMessage {
 		response.set(FIELD_ACQUIRER_CODE, dataRequest.acquirerCode);
 		response.set(FIELD_EQUIPMENT_TYPE, dataRequest.equipmentType);
 		
-		if (dataResponse.emvData.trim().length() > 0)
+		if (dataResponse.emvData.trim().length() > 0) {
+			
+			if (dataResponse.emvData.contains("9F26")) {
+				dataResponse.emvData = dataResponse.emvData.substring(6, dataResponse.emvData.length());
+			}
 			response.set(FIELD_EMV_DATA, dataResponse.emvData);
+			
+		}
+		
 		if (dataResponse.merchantReceipt.trim().length() > 0)
+		{
+			if (!dataResponse.responseCode.equals("00"))
+			{
+				dataResponse.merchantReceipt = dataResponse.merchantReceipt.trim();
+				
+				if(dataRequest.acquirerCode.equals(ListoData.GLOBAL_PAYMENTS))
+					dataResponse.merchantReceipt = dataResponse.merchantReceipt.substring(1, dataResponse.merchantReceipt.length());
+					
+				dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("'", "");
+				dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("#", "");
+			}
 			response.set(FIELD_GENERIC_DATA_1, dataResponse.merchantReceipt);
+		}
+		
 		if (dataResponse.cardholderReceipt.trim().length() > 0)
 			response.set(FIELD_GENERIC_DATA_2, dataResponse.cardholderReceipt);
-		if (dataResponse.nsuAcquirer.length() > 0)
+		
+		if (request.hasField(FIELD_MERCHANT_DATA))
+			response.set(FIELD_MERCHANT_DATA, request.getString(FIELD_MERCHANT_DATA));
+		
+		if (request.hasField(FIELD_TERMINAL_DATA))
+			response.set(FIELD_TERMINAL_DATA, request.getString(FIELD_TERMINAL_DATA));
+		
+		if (dataResponse.nsuAcquirer.trim().length() > 0)
 			response.set(FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
+		
+		//Envia para o sistema que grava no banco de dados
+		byte[] messageData = response.pack();
+		RabbitMQ.Send(new String(messageData));
 
 		return response;
 	}

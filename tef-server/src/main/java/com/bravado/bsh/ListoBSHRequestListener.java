@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.concurrent.TimeoutException;
 
 import org.jpos.bsh.BSHRequestListener;
 import org.jpos.core.Configuration;
@@ -19,6 +20,8 @@ import org.jpos.iso.MUX;
 import org.jpos.iso.packager.ISO93APackager;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
+
+import com.bravado.util.RabbitMQ;
 
 import br.listofacil.AcquirerSettings;
 import br.listofacil.CommonFunctions;
@@ -56,6 +59,17 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 		
 		//Load data and NSU
 		AcquirerSettings.loadLastNsu();
+		
+		//Colocar tratamento caso nao consiga conectar no host do BD
+		try {
+			RabbitMQ.Connect();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		// try {
 		// mux = (MUX) NameRegistrar.get("mux." + cfg.get("mux"));

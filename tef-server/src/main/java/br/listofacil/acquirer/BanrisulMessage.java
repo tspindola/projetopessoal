@@ -116,9 +116,10 @@ public class BanrisulMessage {
 																	 // pelo
 																	 // BANRISUL
 																	 // (testes)
-	private final String TAGS_EMV_REQUIRED = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";
-	private final String TAGS_EMV_OPTIONAL = "9F12";
+	private final String TAGS_EMV_REQUIRED = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";	
 	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F3784";
+	private final String TAGS_EMV_OPTIONAL = "9F12";
+	private final String TAGS_EMV_2ND_GEN  = "030109F279F1095040109F279F1095010109F279F1095020109F279F1095";
 
 	/*
 	 * 003000 – compra credito a vista 003100 – compra credito parcelado lojista
@@ -526,7 +527,7 @@ public class BanrisulMessage {
 			String bit62 = response.getString(62);
 			if (bit62.trim().length() > 0) {
 				listoData.workingKey = bit62.substring(0, 32);
-				listoData.versaoTabelasAdquirente = bit62.substring(32, bit62.length());
+				listoData.versaoTabelasBanrisul = bit62.substring(32, bit62.length());
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -579,6 +580,17 @@ public class BanrisulMessage {
 			listoData.L013_TagsOpt1ndGenerateAC.put(listoData.L013_TagsOpt1ndGenerateAC.size(), tab13);
 			if (!listoData.tableSequence.contains(ListoData.REG_CODE_OPT_TAGS_1ND_GEN))
 				listoData.tableSequence.add(ListoData.REG_CODE_OPT_TAGS_1ND_GEN);
+		}
+		
+		// Seta as tags emv obrigatorias referentes ao aid
+		String tab14 = new String();
+		for (Entry<Integer, String> entry : listoData.L009_emv.entrySet())
+			tab14 += getTagsEmv2ndGenAC(entry.getValue());
+
+		if (tab14.length() > 0) {
+			listoData.L014_TagsReq2ndGenerateAC.put(listoData.L014_TagsReq2ndGenerateAC.size(), tab14);
+			if (!listoData.tableSequence.contains(ListoData.REG_CODE_REQ_TAGS_2ND_GEN))
+				listoData.tableSequence.add(ListoData.REG_CODE_REQ_TAGS_2ND_GEN);
 		}
 
 		// Criptografia
@@ -694,8 +706,9 @@ public class BanrisulMessage {
 		String index = emvAid.substring(6, 8);
 		String length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
 
-		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
-				|| emvAid.contains("MAESTRO")) {
+		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || 
+			emvAid.contains("MASTER") || emvAid.contains("MAESTRO")) {
+			
 			length = cf.padLeft(String.valueOf(TAGS_EMV_REQUIRED.length()), 3, "0");
 			return index + length + TAGS_EMV_REQUIRED;
 		}
@@ -713,8 +726,9 @@ public class BanrisulMessage {
 		String index = emvAid.substring(6, 8);
 		String length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
 
-		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
-				|| emvAid.contains("MAESTRO")) {
+		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || 
+			emvAid.contains("MASTER") || emvAid.contains("MAESTRO")) {
+			
 			length = cf.padLeft(String.valueOf(TAGS_EMV_OPTIONAL.length()), 3, "0");
 			return index + length + TAGS_EMV_OPTIONAL;
 		}
@@ -722,6 +736,17 @@ public class BanrisulMessage {
 		length = cf.padLeft(String.valueOf(TAGS_EMV_OPTIONAL.length()), 3, "0");
 		return index + length + TAGS_EMV_OPTIONAL;
 		// return index + length + TAGS_EMV_BANRISUL;
+	}
+	
+	private String getTagsEmv2ndGenAC(String emvAid) {
+		// Mastercard e visa
+		// 9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884
+		// Banrisul
+		// 9F1A959C829F109F269F279F369F3784
+		String index = emvAid.substring(6, 8);
+
+		String length = cf.padLeft(String.valueOf(TAGS_EMV_2ND_GEN.length()), 3, "0");
+		return index + length + TAGS_EMV_2ND_GEN;
 	}
 
 	private void setTablesInitialization(String tab02, String tab04, String tab09, String tab10, String tab11) {
@@ -1024,8 +1049,12 @@ public class BanrisulMessage {
 			request.set(FIELD_SMID, requestData.smid);
 
 		if (requestData.emvData.length() > 0) {
+			
 			String bit055 = requestData.emvData.substring(6, requestData.emvData.length());
 			/*
+			if (bit055.contains("9F12")) {
+				bit055 = bit055.substring(0, bit055.indexOf("9F12"));				
+			}
 			 * request.set(FIELD_EMV_DATA,
 			 * cf.padLeft(String.valueOf(bit055.length()), 3, "0") + bit055);
 			 */

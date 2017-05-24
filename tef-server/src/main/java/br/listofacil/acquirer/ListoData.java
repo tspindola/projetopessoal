@@ -137,7 +137,8 @@ public class ListoData {
 	public String numeroLogico = "";
 	public String smid = "";
 	public String workingKey = "";
-	public String versaoTabelasAdquirente = "";
+	public String versaoTabelasGlobalpayments = "";
+	public String versaoTabelasBanrisul = "";
 	public String identificacaoRede = "";
 	public String currencyCode = "";
 	public String currencyExponent = "";
