@@ -948,12 +948,14 @@ public class BanrisulMessage {
 	}
 
 	private String getMerchantData(TransactionData data) {
+		
 		if (data.merchantName.length() > 22)
 			data.merchantName = data.merchantName.substring(0, 22);
-
+		
 		String bit062 = cf.padRight(data.merchantName, 22, " ");
+		
 		if (data.address.length() > 40)
-			data.address = data.merchantName.substring(0, 40);
+			data.address = data.address.substring(0, 40);
 		bit062 += cf.padRight(data.address, 40, " ");
 
 		if (data.city.length() > 13)
@@ -970,19 +972,24 @@ public class BanrisulMessage {
 
 		if (data.zipCode.length() > 8)
 			data.zipCode = data.zipCode.substring(0, 8);
-		bit062 += cf.padRight(data.zipCode, 8, " ");
+		bit062 += cf.padLeft(data.zipCode, 8, "0");
 
 		if (data.mcc.length() > 4)
 			data.mcc = data.mcc.substring(0, 4);
-		bit062 += cf.padRight(data.mcc, 4, " ");
+		bit062 += cf.padLeft(data.mcc, 4, "0");
 
+		data.cnpjcpf = data.cnpjcpf.replace(".", "");
+		data.cnpjcpf = data.cnpjcpf.replace("/", "");
+		data.cnpjcpf = data.cnpjcpf.replace("-", "");
+		data.cnpjcpf = data.cnpjcpf.replace(",", "");
+		
 		if (data.cnpjcpf.length() > 14)
 			data.cnpjcpf = data.cnpjcpf.substring(0, 14);
-		bit062 += cf.padRight(data.cnpjcpf, 14, " ");
+		bit062 += cf.padLeft(data.cnpjcpf, 14, "0");
 
 		if (data.phone.length() > 11)
 			data.phone = data.phone.substring(0, 11);
-		bit062 += cf.padRight(data.phone, 11, " ");
+		bit062 += cf.padLeft(data.phone, 11, "0");
 
 		return bit062;
 	}
@@ -1537,7 +1544,7 @@ public class BanrisulMessage {
 		ISOMsg request = new ISOMsg();
 		
 		request.setPackager(new ISO87APackagerGP());
-		request.setMTI(REQ_BA_CANCELLATION);
+		request.setMTI(REQ_BA_UNMAKING);
 		
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
 		request.set(FIELD_AMOUNT, requestData.amount);

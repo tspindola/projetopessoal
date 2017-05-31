@@ -1,16 +1,16 @@
 package com.bravado.util;
 
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.Connection;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 public class RabbitMQ {
 	private final static String QUEUE_NAME = "TransitionMQ";
-	private static Connection connection = null;
-	private static Channel channel = null;
+	private static Connection connection;
+	private static Channel channel;
 	private static boolean connected = false;
 
 	public static void Connect() throws IOException, TimeoutException {
@@ -38,7 +38,7 @@ public class RabbitMQ {
 				channel = connection.createChannel();
 				channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 				channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
-				System.out.println("----------\n" + message + "\n---------------");
+				//System.out.println("----------\n" + message + "\n---------------");
 			}
 		} catch (Exception e) {
 			// TODO: handle exception

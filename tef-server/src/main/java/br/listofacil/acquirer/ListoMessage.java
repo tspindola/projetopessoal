@@ -726,7 +726,7 @@ public class ListoMessage {
 				break;
 			}
 			
-			response = getResponseFormatted(ListoData.RES_ADVICE, request, dataRequest, dataResponse);
+			response = getResponseFormatted(ListoData.RES_UNMAKING, request, dataRequest, dataResponse);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

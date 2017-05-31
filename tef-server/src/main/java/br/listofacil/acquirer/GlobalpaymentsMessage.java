@@ -1179,7 +1179,6 @@ public class GlobalpaymentsMessage {
 		request.setPackager(new ISO87APackagerGP());
 		request.setMTI(REQ_GP_UNMAKING);
 		
-		request.set(FIELD_PAN, requestData.pan);	
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.processingCode));
 		request.set(FIELD_AMOUNT, requestData.amount);
 		request.set(FIELD_DATE_TIME, requestData.dateTime);
