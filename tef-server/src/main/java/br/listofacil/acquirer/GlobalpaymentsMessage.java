@@ -378,7 +378,7 @@ public class GlobalpaymentsMessage {
 						code = ListoData.REG_CODE_REQ_TAGS_1ND_GEN;
 						break;
 					case TAB_OPT_TAGS_1ND_GEN:
-						tab13 += getTagsFormatted(value);
+						tab13 += getTagsFormatted(value + "5F34");
 						code = ListoData.REG_CODE_OPT_TAGS_1ND_GEN;
 						break;
 					case TAB_REQ_TAGS_2ND_GEN:
@@ -870,8 +870,11 @@ public class GlobalpaymentsMessage {
 			data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
 		if (message.hasField(FIELD_PIN))
 			data.pin = message.getString(FIELD_PIN);
-		if (message.hasField(FIELD_EMV_DATA))
+		if (message.hasField(FIELD_EMV_DATA)) {
 			data.emvData = message.getString(FIELD_EMV_DATA);
+			//Remove os 6 primeiros digitos para o finishchip
+			data.emvData = data.emvData.substring(6,  data.emvData.length());
+		}
 		if (message.hasField(FIELD_TERMINAL_DATA)) {
 			HashMap<String, String> map = cf.tlvExtractData(message.getString(FIELD_TERMINAL_DATA));
 			if (map.containsKey(TAG_TD_PINPAD_SERIAL_NUMBER))

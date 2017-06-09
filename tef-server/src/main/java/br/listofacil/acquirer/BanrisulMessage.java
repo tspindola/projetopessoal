@@ -118,7 +118,7 @@ public class BanrisulMessage {
 																	 // (testes)
 	private final String TAGS_EMV_REQUIRED = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";	
 	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F3784";
-	private final String TAGS_EMV_OPTIONAL = "9F12";
+	private final String TAGS_EMV_OPTIONAL = "9F125F34";
 	private final String TAGS_EMV_2ND_GEN  = "030109F279F1095040109F279F1095010109F279F1095020109F279F1095";
 
 	/*
@@ -1075,7 +1075,10 @@ public class BanrisulMessage {
 
 		// Adiciona o zero no inicio - pre-autorizacao (0 = nao e
 		// pre-autorizacao)
-		String merchantData = "0" + getMerchantData(requestData);
+		String merchantData = getMerchantData(requestData);
+		if (!requestData.productDescription.contains("BANRISUL"))
+			merchantData = "0" + merchantData;
+			
 		String securityData = requestData.ksnPin;
 		securityData += "00000000000000000000"; // ksn dados
 		// securityData += requestData.ksnCard;
@@ -1084,6 +1087,8 @@ public class BanrisulMessage {
 		// TESTE
 		// merchantData = "0XXXXXXXXXXXX*JOJOAOZIN SAOPAULO
 		// 0145200258120000000616123400000000000";
+		
+		request.set(FIELD_TERMINAL_TYPE, requestData.equipmentType);
 
 		request.set(FIELD_GENERIC_DATA_62, merchantData + securityData);
 
