@@ -704,7 +704,7 @@ public class BanrisulMessage {
 		// Banrisul
 		// 9F1A959C829F109F269F279F369F3784
 		String index = emvAid.substring(6, 8);
-		String length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
+		String length = "0";
 
 		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || 
 			emvAid.contains("MASTER") || emvAid.contains("MAESTRO")) {
@@ -713,8 +713,8 @@ public class BanrisulMessage {
 			return index + length + TAGS_EMV_REQUIRED;
 		}
 
-		length = cf.padLeft(String.valueOf(TAGS_EMV_REQUIRED.length()), 3, "0");
-		return index + length + TAGS_EMV_REQUIRED;
+		length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
+		return index + length + TAGS_EMV_BANRISUL;
 		// return index + length + TAGS_EMV_BANRISUL;
 	}
 	
@@ -1034,8 +1034,7 @@ public class BanrisulMessage {
 		if (requestData.panSequence.length() > 0)
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 
-		// request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
-		request.set(FIELD_FINANCIAL_INSTITUTION, "0800000000");
+		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
 
 		// if (requestData.cardTrack2.length() > 0)
 		// request.set(FIELD_TRACK_2, requestData.cardTrack2);
@@ -1088,7 +1087,7 @@ public class BanrisulMessage {
 		// merchantData = "0XXXXXXXXXXXX*JOJOAOZIN SAOPAULO
 		// 0145200258120000000616123400000000000";
 		
-		request.set(FIELD_TERMINAL_TYPE, requestData.equipmentType);
+		//request.set(FIELD_TERMINAL_TYPE, requestData.equipmentType);
 
 		request.set(FIELD_GENERIC_DATA_62, merchantData + securityData);
 
@@ -1237,6 +1236,19 @@ public class BanrisulMessage {
 				data.cardholderReceipt = getCardholderReceipt(requestData, message);
 			}
 		}
+		
+		if (mti.equals(REQ_BA_CANCELLATION)) {
+			if (!data.responseCode.equals("00")) {
+				String msg = "TRANSACAO NEGADA";
+				if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
+					msg = listoData.messages.get(data.responseCode).trim();
+				data.cardholderReceipt = msg;
+			} else {
+				data.merchantReceipt = getMerchantCancelReceipt(requestData, message);
+				data.cardholderReceipt = getCardholderCancelReceipt(requestData, message);
+			}
+		}
+		
 		if (message.hasField(FIELD_NSU_ACQUIRER))
 			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
 
@@ -1249,8 +1261,9 @@ public class BanrisulMessage {
 		
 		try {
 			// Formatar comprovante
-			if (message.hasField(FIELD_GENERIC_DATA_62)) {
-				String flag = message.getString(FIELD_GENERIC_DATA_62).substring(0, 15).trim();
+			//if (message.hasField(FIELD_GENERIC_DATA_62)) {
+				//String flag = message.getString(FIELD_GENERIC_DATA_62).substring(0, 15).trim();
+				String flag = requestData.productDescription.trim();
 				receipt += new String("@@------------ 1ª via – loja -----------".getBytes(), Charset.forName("ISO-8859-1"));
 				receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
 				receipt += "@"; // quebra linha
@@ -1341,7 +1354,7 @@ public class BanrisulMessage {
 					receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				}
 
-			}
+			//}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -1355,8 +1368,9 @@ public class BanrisulMessage {
 		try {
 
 			// Formatar comprovante
-			if (message.hasField(FIELD_GENERIC_DATA_62)) {
-				String flag = message.getString(FIELD_GENERIC_DATA_62).substring(0, 15).trim();
+			//if (message.hasField(FIELD_GENERIC_DATA_62)) {
+				//String flag = message.getString(FIELD_GENERIC_DATA_62).substring(0, 15).trim();
+				String flag = requestData.productDescription.trim();
 				receipt += new String("@@---------- 2ª via – cliente ----------".getBytes(), Charset.forName("ISO-8859-1"));
 				receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
 				receipt += "@"; // quebra linha
@@ -1423,7 +1437,7 @@ public class BanrisulMessage {
 					receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 				}
 
-			}
+			//}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -1431,6 +1445,110 @@ public class BanrisulMessage {
 		return receipt;
 	}
 
+	private String getMerchantCancelReceipt(TransactionData requestData, ISOMsg message) {
+		String receipt = new String();
+		String dataStr = new String();
+		
+		try {
+			// Formatar comprovante
+			receipt += new String("@@------------ 1ª via – loja -----------".getBytes(), Charset.forName("ISO-8859-1"));
+			receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME, 39, " ");
+			receipt += "@"; // quebra linha
+			receipt += "@" + cf.padRight("DEMONSTRATIVO DE CANCELAMENTO", 39, " ");
+
+			String merchant = requestData.merchantName.toUpperCase();
+			if (merchant.length() > 38)
+				merchant = merchant.substring(0, 38);
+
+			receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
+			
+			dataStr = "@CNPJ: " + requestData.cnpjcpf;
+			receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
+			
+			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
+			receipt += "@"; // quebra linha
+			
+			dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			receipt += "@";
+
+			dataStr = "@DATA DO CANCELAMENTO: " + requestData.brazilianDate + "      ";
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
+			
+			dataStr = "@NSU BERGS: " + nsuAcquirer + "         HORA: "  + requestData.time.substring(0, 2)
+															  + ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			dataStr = "@VALOR: " + String.format("%.2f", (Double.parseDouble(requestData.amount) / 100));
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			dataStr = "@DATA OPERACAO CANCELADA: " + requestData.brazilianDate;
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			dataStr = "@NSU OPERACAO CANCELADA: " + requestData.nsuAcquirer;
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+		
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+		return receipt;
+	}
+
+	private String getCardholderCancelReceipt(TransactionData requestData, ISOMsg message) {
+		String receipt = new String();
+		String dataStr = new String();
+		try {
+
+			// Formatar comprovante
+			receipt += new String("@@---------- 2ª via – cliente ----------".getBytes(), Charset.forName("ISO-8859-1"));
+			receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME, 39, " ");
+			receipt += "@"; // quebra linha
+			receipt += "@" + cf.padRight("DEMONSTRATIVO DE CANCELAMENTO", 39, " ");
+
+			String merchant = requestData.merchantName.toUpperCase();
+			if (merchant.length() > 38)
+				merchant = merchant.substring(0, 38);
+
+			receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
+			
+			dataStr = "@CNPJ: " + requestData.cnpjcpf;
+			receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
+			
+			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
+			receipt += "@"; // quebra linha
+			
+			dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			receipt += "@";
+
+			dataStr = "@DATA DO CANCELAMENTO: " + requestData.brazilianDate + "      ";
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
+			
+			dataStr = "@NSU BERGS: " + nsuAcquirer + "         HORA: "  + requestData.time.substring(0, 2)
+															  + ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			dataStr = "@VALOR: " + String.format("%.2f", (Double.parseDouble(requestData.amount) / 100));
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			dataStr = "@DATA OPERACAO CANCELADA: " + requestData.brazilianDate;
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+			dataStr = "@NSU OPERACAO CANCELADA: " + requestData.nsuAcquirer;
+			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+		return receipt;
+	}
+	
 	private String getTypePaymentDescription(String type) {
 		switch (type) {
 		case ListoData.PROC_REQ_CREDIT:
@@ -1489,7 +1607,7 @@ public class BanrisulMessage {
 			
 			ISOMsg request = getMessage0400(requestData);
 			ISOMsg response = requestAcquirer(request, true);	
-			responseData = getResponseData(RES_BA_CANCELLATION, requestData, response);
+			responseData = getResponseData(REQ_BA_CANCELLATION, requestData, response);
 			
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -1535,6 +1653,7 @@ public class BanrisulMessage {
 	
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
+		//request.set(FIELD_TERMINAL_TYPE, "00811111111");
 		
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
 		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
@@ -1576,8 +1695,10 @@ public class BanrisulMessage {
 	private String getOriginalTransaction(TransactionData requestData) {
 		String bit090 = new String();
 		
+		String originalNsuAcquirer = requestData.originalNSUAcquirer.substring(3, requestData.originalNSUAcquirer.length());
+		
 		bit090 += requestData.originalMessageCode;
-		bit090 += requestData.originalNSUTEF;
+		bit090 += originalNsuAcquirer;
 		bit090 += requestData.originalDateTime.substring(0,  4);
 		bit090 += "00000000000000000000000000";
 		

@@ -1172,6 +1172,7 @@ public class GlobalpaymentsMessage {
 		request.set(FIELD_TERMINAL_DATA, getTerminalData(REQ_GP_CANCELLATION, requestData));
 		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
 		request.set(FIELD_SECURITY_DATA, getDataEncrypted(REQ_GP_CANCELLATION, requestData));
+		request.set(FIELD_NSU_ACQUIRER, requestData.nsuAcquirer);
 		
 		return request;
 	}

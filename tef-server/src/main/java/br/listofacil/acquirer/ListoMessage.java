@@ -95,8 +95,9 @@ public class ListoMessage {
 	
 	private final String TAG_ORIGINAL_MESSAGE_CODE = "001";
 	private final String TAG_ORIGINAL_NSU_TEF = "002";
-	private final String TAG_ORIGINAL_TRANSACTION_DATE = "003";
-	private final String TAG_ORIGINAL_CV = "004";
+	private final String TAG_ORIGINAL_NSU_ACQUIRER = "003";
+	private final String TAG_ORIGINAL_TRANSACTION_DATE = "004";
+	private final String TAG_ORIGINAL_CV = "005";
 	
 	private final String TAG_POSITION_DATA_PINPAD = "001";
 	private final String TAG_POSITION_PIN_PINPAD = "002";
@@ -850,6 +851,8 @@ public class ListoMessage {
 				data.originalMessageCode = map.get(TAG_ORIGINAL_MESSAGE_CODE);
 			if (map.containsKey(TAG_ORIGINAL_NSU_TEF))
 				data.originalNSUTEF = map.get(TAG_ORIGINAL_NSU_TEF);
+			if (map.containsKey(TAG_ORIGINAL_NSU_ACQUIRER))
+				data.originalNSUAcquirer = map.get(TAG_ORIGINAL_NSU_ACQUIRER);
 			if (map.containsKey(TAG_ORIGINAL_TRANSACTION_DATE))
 				data.originalDateTime = map.get(TAG_ORIGINAL_TRANSACTION_DATE);
 			if (map.containsKey(TAG_ORIGINAL_CV))
@@ -1003,8 +1006,16 @@ public class ListoMessage {
 		if (request.hasField(FIELD_TERMINAL_DATA))
 			response.set(FIELD_TERMINAL_DATA, request.getString(FIELD_TERMINAL_DATA));
 		
-		if (dataResponse.nsuAcquirer.trim().length() > 0)
+		if (dataResponse.nsuAcquirer.trim().length() > 0) {
 			response.set(FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
+			/*
+			if (dataRequest.acquirerCode.equals(ListoData.BANRISUL)) {
+				String nsuAcquirer = dataResponse.nsuAcquirer.substring(3, dataResponse.nsuAcquirer.length());
+				response.set(FIELD_NSU_ACQUIRER, nsuAcquirer);
+			} else {		
+				response.set(FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
+			}*/
+		}
 		
 		//Envia para o sistema que grava no banco de dados
 		byte[] messageData = response.pack();

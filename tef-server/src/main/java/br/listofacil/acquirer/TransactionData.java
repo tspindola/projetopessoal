@@ -67,6 +67,7 @@ public class TransactionData {
 	public String confirmationData = new String(); //Bit120 - padrao GP
 	public String originalMessageCode = new String();
 	public String originalNSUTEF = new String();
+	public String originalNSUAcquirer = new String();
 	public String originalDateTime = new String();
 	public String originalCV = new String();
 }
