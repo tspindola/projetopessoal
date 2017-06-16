@@ -740,8 +740,14 @@ public class ListoMessage {
 	private TransactionData getTransactionData(ISOMsg message) throws IOException, TimeoutException, ISOException {
 		TransactionData data = new TransactionData();
 		
-		if (message.hasField(FIELD_PAN))
+		if (message.hasField(FIELD_PAN)) {			
 			data.pan = message.getString(FIELD_PAN);
+			//Formato do PAN para globalpayments (ultimos 4 digitos com zero)
+			if (message.getValue(FIELD_ACQUIRER_CODE).equals(ListoData.GLOBAL_PAYMENTS)) {
+				data.pan = data.pan.substring(0, data.pan.length()-4);
+				data.pan += "0000"; 
+			}
+		}
 		if (message.hasField(FIELD_PROCESSING_CODE))
 			data.processingCode = message.getString(FIELD_PROCESSING_CODE);
 		if (message.hasField(FIELD_AMOUNT))
@@ -786,6 +792,10 @@ public class ListoMessage {
 			data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
 		if (message.hasField(FIELD_COUNTRY_CODE))
 			data.countryCode = message.getString(FIELD_COUNTRY_CODE);
+		if (message.hasField(FIELD_AUTHORIZATION_CODE))
+			data.authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE);
+		if (message.hasField(FIELD_RESPONSE_CODE))
+			data.responseCode = message.getString(FIELD_RESPONSE_CODE);
 		if (message.hasField(FIELD_PIN))
 			data.pin = message.getString(FIELD_PIN);
 		if (message.hasField(FIELD_EMV_DATA)) {

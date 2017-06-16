@@ -40,12 +40,12 @@ public class ListoData {
 	public final static String PROC_REQ_INIT = "20000";
 	public final static String PROC_RES_INIT = "21000";
 	public final static String PROC_REQ_CREDIT = "30000";
-	public final static String PROC_REQ_CREDIT_WITH_INTEREST = "30001";
-	public final static String PROC_REQ_CREDIT_WITHOUT_INTEREST = "30002";
+	public final static String PROC_REQ_CREDIT_WITHOUT_INTEREST = "30001";
+	public final static String PROC_REQ_CREDIT_WITH_INTEREST = "30002";
 	public final static String PROC_REQ_DEBIT = "30003";
 	public final static String PROC_RES_PAYMENT = "31000";
 	
-	public final static int SERVER_TIMEOUT = 50; //segundos
+	public final static int SERVER_TIMEOUT = 65; //segundos
 	/*
 	public final static int FIELD_PROCESSING_CODE = 3;
 	public final static int FIELD_AMOUNT = 4;

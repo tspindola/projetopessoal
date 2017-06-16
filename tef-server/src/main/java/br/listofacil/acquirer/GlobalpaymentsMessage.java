@@ -1026,6 +1026,10 @@ public class GlobalpaymentsMessage {
 		String entryMode = requestData.entryMode;
 		if (entryMode.equals("059"))
 			entryMode = "051";
+		
+		if (entryMode.equals("028"))
+			entryMode = "021";
+		
 		request.set(FIELD_ENTRY_MODE, entryMode);
 		
 		if (requestData.panSequence.length() > 0)
