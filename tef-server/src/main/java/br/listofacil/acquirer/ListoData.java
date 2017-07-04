@@ -2,11 +2,6 @@ package br.listofacil.acquirer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import br.listofacil.BCDataEmvAid;
-import br.listofacil.BCDataPublicKeys;
 
 public class ListoData {
 	public final static String GLOBAL_PAYMENTS = "01";
@@ -44,6 +39,8 @@ public class ListoData {
 	public final static String PROC_REQ_CREDIT_WITH_INTEREST = "30002";
 	public final static String PROC_REQ_DEBIT = "30003";
 	public final static String PROC_RES_PAYMENT = "31000";
+	
+	public final static String CODE_TRANSACTION_TIMEOUT = "86";
 	
 	public final static int SERVER_TIMEOUT = 65; //segundos
 	/*

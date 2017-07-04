@@ -22,6 +22,7 @@ import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
 import com.bravado.util.RabbitMQ;
+import com.sun.media.jfxmedia.track.Track.Encoding;
 
 import br.listofacil.AcquirerSettings;
 import br.listofacil.CommonFunctions;
@@ -35,7 +36,8 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 	Configuration cfg;
 	MUX mux;	
 
-	private void initContextBsh() throws ConfigurationException, NotFoundException {			
+	private void initContextBsh() throws ConfigurationException, NotFoundException {		
+		
 		// contextBsh = new Interpreter();
 		// String contextFile = cfg.get("context");
 		// if (contextFile.isEmpty()) {
@@ -115,10 +117,13 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 
 	@Override
 	public boolean process(ISOSource source, ISOMsg m) {
+		
+		ListoMessage listoMessage = new ListoMessage();
+		ISOMsg response = null; 
+				
 		try {			
 			
-			ListoMessage listoMessage = new ListoMessage();
-			ISOMsg response = listoMessage.getResponseMessage(m);
+			response = listoMessage.getResponseMessage(m);
 			/*
 			if (isomsg == null)
 				response = controlMessage.getListoResponseMessage(m);
@@ -129,13 +134,15 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 				controlMessage.setResponseTransaction(response);
 			}
 			*/
-			source.send(response);
+			
+			if (response != null)
+				source.send(response);
 			
 			//Registra os NSUs
 			AcquirerSettings.writeDataFile();
 
 		} catch (Exception e) {
-			warn(e);
+			listoMessage.SendUnmakingMessage(m, response);
 			return false;
 		}
 		return true;

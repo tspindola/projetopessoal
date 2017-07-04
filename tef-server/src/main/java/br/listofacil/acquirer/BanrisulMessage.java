@@ -1,13 +1,6 @@
 package br.listofacil.acquirer;
 
-import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Calendar;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jpos.iso.ISOException;
@@ -1161,7 +1154,9 @@ public class BanrisulMessage {
 		if (requestData.panSequence.length() > 0)
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 		
-		request.set(FIELD_AUTHORIZATION_CODE, requestData.authorizationCode);
+		if (requestData.authorizationCode.length() > 0)
+			request.set(FIELD_AUTHORIZATION_CODE, requestData.authorizationCode);
+		
 		request.set(FIELD_RESPONSE_CODE, requestData.responseCode);
 
 		// request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
@@ -1285,11 +1280,10 @@ public class BanrisulMessage {
 			if (message.hasField(FIELD_GENERIC_DATA_62) && 
 				message.getString(FIELD_GENERIC_DATA_62).trim().length() > 0)
 				flag = message.getString(FIELD_GENERIC_DATA_62).trim();
-			
 			receipt += "@@------------ 1^ via - loja -----------";
 			receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
+			receipt += "@" + cf.padRight(getTypePaymentDescription(requestData), 39, " ");
 			receipt += "@"; // quebra linha
-			receipt += "@" + cf.padRight(getTypePaymentDescription(requestData.processingCode), 39, " ");
 
 			String merchant = requestData.merchantName.toUpperCase();
 			if (merchant.length() > 38)
@@ -1313,7 +1307,10 @@ public class BanrisulMessage {
 			
 			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
 			
-			dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + message.getString(FIELD_AUTHORIZATION_CODE);
+			dataStr = "@NSU BERGS: " + nsuAcquirer;
+			if (!requestData.productDescription.contains("BANRISUL"))
+				dataStr += " NSU BANDEIRA: " + message.getString(FIELD_AUTHORIZATION_CODE);
+			
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			
 			dataStr = "@CARTAO: ";
@@ -1336,8 +1333,8 @@ public class BanrisulMessage {
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
 
-			if (requestData.entryMode.equals(ListoData.ENTRY_MODE_MAGNETIC_WITHOUT_PIN)
-					|| requestData.entryMode.equals(ListoData.TRANSACTION_ENTERED)) {
+			if (requestData.entryMode.equals(ListoData.ENTRY_MODE_MAGNETIC_WITHOUT_PIN) 
+				|| cardChipWithSignature(requestData.goOnChip)) {
 
 				String cardholder = "ASSINATURA DO CLIENTE";
 				if (message.hasField(FIELD_TRACK_1)) {
@@ -1352,17 +1349,25 @@ public class BanrisulMessage {
 				receipt += "@@      RECONHECO E PAGAREI A DIVIDA     ";
 				receipt +=  "@           AQUI REPRESENTADA           ";
 				receipt += "@@   ---------------------------------   ";
-
+				
 				int len = 39 - cardholder.length();
 				if (len % 2 != 0) len--;
 				
 				dataStr = cf.padLeft(cardholder, (len / 2) + cardholder.length(), " ");
 				receipt += "@" + cf.padRight(dataStr, (len / 2) + dataStr.length(), " ");
 				receipt += "@         CONFIRA A ASSINATURA          ";
-
-			} else if ((requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_VALIDATED_PIN)
-					|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
-					&& requestData.emvData.length() > 0) {
+				receipt += "@@";
+			}
+			
+			receipt += "@@";
+			
+			if (requestData.productDescription.contains("BANRISUL") && 
+				requestData.processingCode.equals(ListoData.PROC_REQ_DEBIT))
+				receipt += "DEBITO EM: " + requestData.brazilianDate;
+			
+			if ((requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_VALIDATED_PIN)
+				|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
+				&& requestData.emvData.length() > 0) {
 				
 				receipt += "@" + cf.padRight(requestData.cardPreferredName.toUpperCase(), 
 											 39 - requestData.cardPreferredName.toUpperCase().length(), " ");
@@ -1384,10 +1389,21 @@ public class BanrisulMessage {
 
 		return receipt;
 	}
-
+	
+	private boolean cardChipWithSignature(String goOnChip) {
+		
+		//Especificacao BC - Retorno GoOnChip
+		//002 - Assinatura em papel deve ser obtida (“0”-não / “1”-sim). 
+		if (goOnChip.length() > 0 && goOnChip.substring(1, 2).equals("1"))
+			return true;
+		
+		return false;
+	}
+	
 	private String getCardholderReceipt(TransactionData requestData, ISOMsg message) {
 		String receipt = new String();
 		String dataStr = new String();
+
 		try {
 
 			// Formatar comprovante
@@ -1398,8 +1414,8 @@ public class BanrisulMessage {
 			
 			receipt += "@@---------- 2^ via - cliente ----------";
 			receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
+			receipt += "@" + cf.padRight(getTypePaymentDescription(requestData), 39, " ");
 			receipt += "@"; // quebra linha
-			receipt += "@" + cf.padRight(getTypePaymentDescription(requestData.processingCode), 39, " ");
 
 			String merchant = requestData.merchantName.toUpperCase();
 			if (merchant.length() > 38)
@@ -1423,7 +1439,10 @@ public class BanrisulMessage {
 			
 			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
 			
-			dataStr = "@NSU BERGS:" + nsuAcquirer + "  NSU BANDEIRA:" + message.getString(FIELD_AUTHORIZATION_CODE);
+			dataStr = "@NSU BERGS: " + nsuAcquirer;
+			if (!requestData.productDescription.contains("BANRISUL"))
+				dataStr += " NSU BANDEIRA: " + message.getString(FIELD_AUTHORIZATION_CODE);
+			
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			
 			dataStr = "@CARTAO: ";
@@ -1445,6 +1464,12 @@ public class BanrisulMessage {
 				dataStr = "@TRANSAÇÃO DIGITADA (M.O.T.O.)";
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
+			
+			receipt += "@@";
+			
+			if (requestData.productDescription.contains("BANRISUL") && 
+				requestData.processingCode.equals(ListoData.PROC_REQ_DEBIT))
+				receipt += "DEBITO EM: " + requestData.brazilianDate;
 
 			if ((requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_VALIDATED_PIN)
 					|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
@@ -1578,16 +1603,28 @@ public class BanrisulMessage {
 		return receipt;
 	}
 	
-	private String getTypePaymentDescription(String type) {
-		switch (type) {
+	private String getTypePaymentDescription(TransactionData requestData) {
+		String ret = "VENDA DEBITO A VISTA";
+		
+		switch (requestData.processingCode) {
 		case ListoData.PROC_REQ_CREDIT:
-			return "VENDA CREDITO A VISTA";
+			ret =  "VENDA CREDITO A VISTA";
+			break;
 		case ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST:
-			return "VENDA CREDITO PARCELADO LOJISTA";
+			ret =  "VENDA CREDITO PARCELADO LOJISTA";
+			break;
 		case ListoData.PROC_REQ_CREDIT_WITH_INTEREST:
-			return "VENDA CREDITO PARCELADO EMISSOR";
+			ret = "VENDA CREDITO PARCELADO EMISSOR";
+			break;
+		case ListoData.PROC_REQ_DEBIT:
+			if (requestData.productDescription.contains("BANRISUL"))
+			{
+				ret = "PAGAMENTO A VISTA";
+			}
+			break;
 		}
-		return "VENDA DEBITO A VISTA";
+		
+		return ret;
 	}
 
 	public TransactionData requestPayment(TransactionData requestData) {
@@ -1650,10 +1687,20 @@ public class BanrisulMessage {
 		TransactionData responseData = null;
 		
 		try {
-			
-			ISOMsg request = getMessage0420(requestData);
-			ISOMsg response = requestAcquirer(request, true);	
-			responseData = getResponseData(RES_BA_UNMAKING, requestData, response);
+			//Verifica se a transacao foi negada pelo chip
+			//Caso tenha sido negada pelo chip, a transacao deve possuir NSU do Adquirente
+			if ((requestData.originalNSUAcquirer.length() > 0) &&
+				(requestData.responseCode.equals(ListoData.CODE_TRANSACTION_TIMEOUT))){
+				requestData.nsuAcquirer = requestData.originalNSUAcquirer;
+				ISOMsg request = getMessage0202(requestData);
+				requestAcquirer(request, false);	
+				//Utiliza o request para responder o desfazimento da ponta
+				responseData = getResponseData(RES_BA_UNMAKING, requestData, request);
+			} else {			
+				ISOMsg request = getMessage0420(requestData);
+				ISOMsg response = requestAcquirer(request, true);	
+				responseData = getResponseData(RES_BA_UNMAKING, requestData, response);
+			}
 			
 		} catch (Exception e) {
 			// TODO: handle exception

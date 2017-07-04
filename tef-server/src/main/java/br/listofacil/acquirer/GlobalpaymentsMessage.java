@@ -3,7 +3,6 @@
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
@@ -11,14 +10,11 @@ import org.jpos.iso.MUX;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
-import com.bravado.bsh.InfoTransaction;
-
 import br.listofacil.AcquirerSettings;
 import br.listofacil.BCDataEmvAid;
 import br.listofacil.BCDataPublicKeys;
 import br.listofacil.CommonFunctions;
 import br.listofacil.tefserver.iso.ISO87APackagerGP;
-import br.listofacil.tefserver.iso.ISO93EPackagerBanrisul;
 
 public class GlobalpaymentsMessage {
 	private final  String MERCHANT = "LISTO FACIL";

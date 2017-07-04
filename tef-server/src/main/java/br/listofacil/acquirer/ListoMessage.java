@@ -3,19 +3,15 @@ package br.listofacil.acquirer;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.packager.XMLPackager;
 
-import com.bravado.bsh.InfoTransaction;
 import com.bravado.util.RabbitMQ;
 
 import br.listofacil.CommonFunctions;
-import br.listofacil.AcquirerProcess;
 import br.listofacil.AcquirerSettings;
 
 public class ListoMessage {
@@ -34,7 +30,7 @@ public class ListoMessage {
 	private final int FIELD_PRODUCT_DESCRIPTION = 33;
 	private final int FIELD_TRACK_1 = 34;
 	private final int FIELD_TRACK_2 = 35;
-	private final int FIELD_EMV_AID = 36;
+	private final int FIELD_BC_DATA = 36;
 	private final int FIELD_AUTHORIZATION_CODE = 38;
 	private final int FIELD_RESPONSE_CODE = 39;
 	private final int FIELD_PINPAD_ACQUIRER_ID = 40;
@@ -102,6 +98,10 @@ public class ListoMessage {
 	private final String TAG_POSITION_DATA_PINPAD = "001";
 	private final String TAG_POSITION_PIN_PINPAD = "002";
 	
+	private final String TAG_BC_GOONCHIP = "001";
+	private final String TAG_BC_AID = "002";
+	
+    
 	CommonFunctions cf =  new CommonFunctions();
 	
 	public ISOMsg getResponseMessage(ISOMsg m)
@@ -774,9 +774,14 @@ public class ListoMessage {
 			data.cardTrack1 = message.getString(FIELD_TRACK_1);
 		if (message.hasField(FIELD_TRACK_2))
 			data.cardTrack2 = message.getString(FIELD_TRACK_2);
-		if (message.hasField(FIELD_EMV_AID))
-			data.emvAID = message.getString(FIELD_EMV_AID);			
-		if (message.hasField(FIELD_TERMINAL_CODE))
+		if (message.hasField(FIELD_BC_DATA)) {
+			HashMap<String, String> map = cf.tlvExtractData(message.getString(FIELD_BC_DATA));
+			if (map.containsKey(TAG_BC_GOONCHIP))
+				data.goOnChip = map.get(TAG_BC_GOONCHIP);
+			if (map.containsKey(TAG_BC_AID))
+				data.emvAID = map.get(TAG_BC_AID);
+		}
+		if (message.hasField(FIELD_TERMINAL_CODE))  
 			data.terminalCode = message.getString(FIELD_TERMINAL_CODE);
 		if (message.hasField(FIELD_MERCHANT_CODE))
 			data.merchantCode = message.getString(FIELD_MERCHANT_CODE);
@@ -907,9 +912,12 @@ public class ListoMessage {
 			data.cardPreferredName = data.emvData.substring(index + 4, data.emvData.length());
 			int size = Integer.parseInt(cf.convertHexToInt(data.cardPreferredName.substring(0, 2))) * 2;
 			data.cardPreferredName = cf.convertHexString(data.cardPreferredName.substring(2, size + 2));
-			//Remove dos dados EMV
-			//bit055 = data.emvData.substring(0, index);
-			//data.emvData = bit055 + data.emvData.substring(index + (size + 6), data.emvData.length());
+			if (cf.isASCII(data.cardPreferredName)) {
+				data.cardPreferredName = data.productDescription; 
+				//Remove dos dados EMV
+				bit055 = data.emvData.substring(0, index);
+				data.emvData = bit055 + data.emvData.substring(index + (size + 6), data.emvData.length());
+			}
 		}
 		if (data.emvData.contains("9F26")) {
 			int index = data.emvData.indexOf("9F26");
@@ -1033,4 +1041,58 @@ public class ListoMessage {
 
 		return response;
 	}
+	
+	public void SendUnmakingMessage(ISOMsg request, ISOMsg response) {
+		
+		try {
+			
+			if((response == null) || (!(response.getMTI().equals(ListoData.RES_PAYMENT))))
+				return;
+			
+			if (response.hasField(FIELD_RESPONSE_CODE) && response.getString(FIELD_RESPONSE_CODE).equals("00")) {
+				String acquirer = response.getString(FIELD_ACQUIRER_CODE);
+				
+				TransactionData dataRequest = new TransactionData();
+				
+				switch (acquirer) {
+				case ListoData.GLOBAL_PAYMENTS:
+					dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUGlobalpayments()));
+					
+					dataRequest.originalMessageCode = request.getMTI();
+					dataRequest.originalNSUAcquirer = response.getString(FIELD_NSU_ACQUIRER);
+					dataRequest.originalNSUTEF = response.getString(FIELD_NSU_TEF);
+					dataRequest.originalDateTime = response.getString(FIELD_DATE);
+					
+					GlobalpaymentsMessage globalPayments = new GlobalpaymentsMessage();
+					globalPayments.requestUnmaking(dataRequest);
+					break;
+		
+				case ListoData.BANRISUL:
+					dataRequest = getTransactionData(getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul()));
+					
+					dataRequest.originalMessageCode = request.getMTI();
+					dataRequest.originalNSUAcquirer = response.getString(FIELD_NSU_ACQUIRER);
+					dataRequest.originalNSUTEF = response.getString(FIELD_NSU_TEF);
+					dataRequest.originalDateTime = response.getString(FIELD_DATE);
+					
+					BanrisulMessage banrisul = new BanrisulMessage();
+					
+					//86 - transacao desfeita (timeout)
+					dataRequest.responseCode = ListoData.CODE_TRANSACTION_TIMEOUT;
+					
+					//Para o Banrisul enviar uma confirmacao negativa da transacao						
+					banrisul.requestConfirmation(dataRequest); 
+					break;
+					
+				default:
+					break;
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	
 }

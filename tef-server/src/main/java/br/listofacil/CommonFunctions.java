@@ -1,5 +1,6 @@
 package br.listofacil;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +16,18 @@ public class CommonFunctions {
 		currentDate.setTime(date);			
 		
 		return currentDate;
+	}
+	
+	public boolean isASCII(String input) {
+		byte[] bytes;
+		try {
+			bytes = input.getBytes("UTF-8");
+			return bytes.length != input.length();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	public String padRight(String str, int length, String padChar) {

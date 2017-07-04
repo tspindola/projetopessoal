@@ -16,6 +16,7 @@ public class TransactionData {
 	public String entryMode = new String();
 	public String panSequence = new String();
 	public String emvAID = new String();
+	public String goOnChip = new String();
 	public String cardTrack1 = new String();
 	public String cardTrack2 = new String();
 	public String terminalCode = new String();
