@@ -139,6 +139,7 @@ public class ListoMessage {
 						isomsg = getLogon(listoData, m);
 						break;
 					case ListoData.PROC_REQ_INIT:
+					case ListoData.PROC_REQ_FORCE_INIT: //Forcar inicializacao com o adquirente
 						isomsg = getInitialize(listoData, m);
 						break;
 					

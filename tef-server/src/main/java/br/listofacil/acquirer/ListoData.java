@@ -33,6 +33,7 @@ public class ListoData {
 	public final static String PROC_REQ_LOGON = "10000";
 	public final static String PROC_RES_LOGON = "11000";
 	public final static String PROC_REQ_INIT = "20000";
+	public final static String PROC_REQ_FORCE_INIT = "20020";
 	public final static String PROC_RES_INIT = "21000";
 	public final static String PROC_REQ_CREDIT = "30000";
 	public final static String PROC_REQ_CREDIT_WITHOUT_INTEREST = "30001";

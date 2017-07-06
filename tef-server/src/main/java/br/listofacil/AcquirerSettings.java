@@ -43,6 +43,8 @@ public class AcquirerSettings {
 	private static long nsuGlobalpayments = 1;
 	
 	private static String dateDataUpdate = new String();
+	private static boolean isNSUOdd = true; //impar
+	private static String nsuType = "";
 	
 	public static synchronized void writeDataFile(){
 		
@@ -54,7 +56,8 @@ public class AcquirerSettings {
 		
 		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" +
 						  "NSU_BA=\"" + nsuBanrisul + "\"\n" +
-						  "DATE_UPDATE_NSU=\"" + dateReg + "\"\n";
+						  "DATE_UPDATE_NSU=\"" + dateReg + "\"\n" +
+						  "NSU_TYPE=\"" + dateReg + "\"\n";
 		try {
 
 	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\nsuconfig.data");
@@ -83,7 +86,13 @@ public class AcquirerSettings {
 	
 	public static synchronized long getIncrementNSUGlobalpayments(){
 		//Incrementa o NSU
-		return nsuGlobalpayments++;
+		long nsu = nsuGlobalpayments++;
+
+		return nsu;
+	}
+	
+	public static synchronized boolean isNSUOdd(){
+		return isNSUOdd;
 	}
 	
 	public static synchronized void loadLastNsu(){			
@@ -124,7 +133,14 @@ public class AcquirerSettings {
     		    	}
     		    	setDateDataUpdate(nsudata[1]);
     		    	continue;
-    		    }    		    
+    		    }    	
+    		    
+    		    if (nsudata[0].contains("NSU_TYPE")){
+    		    	nsuType = nsudata[1];
+    		    	if (nsudata[1].toUpperCase().equals("PAR"));
+    		    		isNSUOdd = false;
+    		    	continue;
+    		    }
     		}
     		
     		if(flagnsu) {
