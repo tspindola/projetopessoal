@@ -6,6 +6,91 @@ import java.util.HashMap;
 public class ListoData {
 	public final static String GLOBAL_PAYMENTS = "01";
 	public final static String BANRISUL = "02";
+	
+	public final static int FIELD_PAN = 2;
+	public final static int FIELD_PROCESSING_CODE = 3;
+	public final static int FIELD_AMOUNT = 4;
+	public final static int FIELD_DATE_TIME = 7;
+	public final static int FIELD_NSU_TEF = 11;
+	public final static int FIELD_TIME = 12;
+	public final static int FIELD_DATE = 13;
+	public final static int FIELD_CARD_EXP_DATE = 14;
+	public final static int FIELD_RELEASE_DATE = 15;
+	public final static int FIELD_ENTRY_MODE = 22;
+	public final static int FIELD_PAN_SEQUENCE = 23;
+	public final static int FIELD_PRODUCT_DESCRIPTION = 33;
+	public final static int FIELD_TRACK_1 = 34;
+	public final static int FIELD_TRACK_2 = 35;
+	public final static int FIELD_BC_DATA = 36;
+	public final static int FIELD_AUTHORIZATION_CODE = 38;
+	public final static int FIELD_RESPONSE_CODE = 39;
+	public final static int FIELD_PINPAD_ACQUIRER_ID = 40;
+	public final static int FIELD_TERMINAL_CODE = 41;
+	public final static int FIELD_MERCHANT_CODE = 42;
+	public final static int FIELD_SHOP_CODE = 43;
+	public final static int FIELD_ACQUIRER_CODE = 44;
+	public final static int FIELD_EQUIPMENT_TYPE = 45;
+	public final static int FIELD_SMID = 46;
+	public final static int FIELD_TABLES_VERSION = 47;
+	public final static int FIELD_TRANSACTION_DATA = 48;
+	public final static int FIELD_CURRENCY_CODE = 49;
+	public final static int FIELD_COUNTRY_CODE = 50;
+	public final static int FIELD_TYPE_CARD_READ = 51;
+	public final static int FIELD_PIN = 52;
+	public final static int FIELD_EMV_DATA = 55;
+	public final static int FIELD_REGISTRY_INDEX = 56;
+	public final static int FIELD_REGISTRY_CODE = 57;
+	public final static int FIELD_ENCRYPTED_CARD_DATA = 60;
+	public final static int FIELD_TERMINAL_DATA = 61;
+	public final static int FIELD_GENERIC_DATA_1 = 62;
+	public final static int FIELD_GENERIC_DATA_2 = 63;
+	public final static int FIELD_MERCHANT_DATA = 64;
+	public final static int FIELD_SUGGEST_DATE = 65;
+	public final static int FIELD_INSTALLMENT_VALUE = 66;
+	public final static int FIELD_INSTALLMENTS = 67;
+	public final static int FIELD_ORIGINAL_TRANSACTION = 90;
+	public final static int FIELD_CONFIRMATION_DATA = 120;
+	public final static int FIELD_ENCRYPTION_DATA = 126;
+	public final static int FIELD_NSU_ACQUIRER = 127;	
+	
+	public final static String TAG_PAN_PART_ENCRYPTED = "005";
+	
+	public final static String TAG_PINPAD_SERIAL_NUMBER = "001";
+	public final static String TAG_PINPAD_BC_VERSION = "002";
+	public final static String TAG_PINPAD_MANUFACTURER = "003";
+	public final static String TAG_PINPAD_MODEL = "004";
+	public final static String TAG_PINPAD_FIRMWARE = "005";
+	public final static String TAG_PINPAD_TABLES_VERSION = "006";
+	public final static String TAG_PINPAD_VERSION_BASIC_APP = "007";
+	
+	public final static String TAG_MERCHANT_NAME = "001";
+	public final static String TAG_MERCHANT_ADDRESS = "002";
+	public final static String TAG_MERCHANT_CITY = "003";
+	public final static String TAG_MERCHANT_STATE = "004";
+	public final static String TAG_MERCHANT_COUNTRY = "005";
+	public final static String TAG_MERCHANT_ZIPCODE = "006";
+	public final static String TAG_MERCHANT_MCC = "007";
+	public final static String TAG_MERCHANT_CPFCNPJ = "008";
+	public final static String TAG_MERCHANT_PHONE = "009";
+	
+	public final static String TAG_ENCRYPTION_PIN = "001";
+	public final static String TAG_ENCRYPTION_KSN_PIN = "002";
+	public final static String TAG_ENCRYPTION_CARD = "003";
+	public final static String TAG_ENCRYPTION_KSN_CARD = "004";
+	public final static String TAG_ENCRYPTION_TYPE_CVD = "005";
+	public final static String TAG_ENCRYPTION_CVD = "006";
+	
+	public final static String TAG_ORIGINAL_MESSAGE_CODE = "001";
+	public final static String TAG_ORIGINAL_NSU_TEF = "002";
+	public final static String TAG_ORIGINAL_NSU_ACQUIRER = "003";
+	public final static String TAG_ORIGINAL_TRANSACTION_DATE = "004";
+	public final static String TAG_ORIGINAL_CV = "005";
+	
+	public final static String TAG_POSITION_DATA_PINPAD = "001";
+	public final static String TAG_POSITION_PIN_PINPAD = "002";
+	
+	public final static String TAG_BC_GOONCHIP = "001";
+	public final static String TAG_BC_AID = "002";
 
 	public final static String RES_CODE_AUTHORIZED = "00";
 	public final static String RES_CODE_ERROR = "05";
@@ -43,31 +128,8 @@ public class ListoData {
 	
 	public final static String CODE_TRANSACTION_TIMEOUT = "86";
 	
-	public final static int SERVER_TIMEOUT = 65; //segundos
-	/*
-	public final static int FIELD_PROCESSING_CODE = 3;
-	public final static int FIELD_AMOUNT = 4;
-	public final static int FIELD_DATE_TIME = 7;
-	public final static int FIELD_NSU_TEF = 11;
-	public final static int FIELD_DATE = 12;
-	public final static int FIELD_TIME = 13;
-	public final static int FIELD_AUTHORIZATION_CODE = 38;
-	public final static int FIELD_RESPONSE_CODE = 39;
-	public final static int FIELD_TERMINAL_CODE = 41;
-	public final static int FIELD_MERCHANT_CODE = 42;
-	public final static int FIELD_SHOP_CODE = 43;
-	public final static int FIELD_ACQUIRER_CODE = 44;
-	public final static int FIELD_EQUIPMENT_TYPE = 45;
-	public final static int FIELD_SMID = 46;
-	public final static int FIELD_TABLES_VERSION = 47;
-	public final static int FIELD_WORKING_KEY = 48;
-	public final static int FIELD_REGISTRY_INDEX = 56;
-	public final static int FIELD_REGISTRY_CODE = 57;
-	
-	public final static int FIELD_TERMINAL_DATA = 61;
-	public final static int FIELD_REGISTRY_VALUE_1 = 62;
-	public final static int FIELD_REGISTRY_VALUE_2 = 63;
-	*/
+	public final static int SERVER_TIMEOUT = 60; //segundos
+
 	public static final String REG_CODE_REQUEST = "000";
 	public static final String REG_CODE_LOGON = "001";
 	

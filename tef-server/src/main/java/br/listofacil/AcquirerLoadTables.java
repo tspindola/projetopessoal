@@ -17,7 +17,7 @@ import br.listofacil.acquirer.BanrisulMessage;
 import br.listofacil.acquirer.GlobalpaymentsMessage;
 import br.listofacil.acquirer.ListoData;
 
-public class AcquirerProcess implements Runnable {
+public class AcquirerLoadTables implements Runnable {
 	
 	private final static String GLOBAL_PAYMENTS = "01";
 	private final static String BANRISUL = "02";
@@ -26,16 +26,18 @@ public class AcquirerProcess implements Runnable {
 	private static String acquirerSetted;
 	private static String logicalNumberSetted;
 	private static String terminalNumberSetted;
+	private static boolean forceInitialization;
 	
-	public AcquirerProcess() {
+	public AcquirerLoadTables() {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void startProcess(String acquirer, String logicalNumber, String terminalNumber){
+	public void startProcess(String acquirer, String logicalNumber, String terminalNumber, boolean force){
 		acquirerSetted = acquirer;
 		logicalNumberSetted = logicalNumber;
 		terminalNumberSetted = terminalNumber;
+		forceInitialization = force;
 		
 		if (thrd_settings == null) {
 			thrd_settings = new Thread (this);
@@ -61,12 +63,12 @@ public class AcquirerProcess implements Runnable {
 			switch (acquirerSetted) {
 			case GLOBAL_PAYMENTS:
 				GlobalpaymentsMessage globalpaymentsMessage = new GlobalpaymentsMessage();
-				globalpaymentsMessage.loadTablesInitialization(logicalNumberSetted, terminalNumberSetted);
+				globalpaymentsMessage.loadTablesInitialization(logicalNumberSetted, terminalNumberSetted, forceInitialization);
 				break;
 				
 			case BANRISUL:
 				BanrisulMessage banrisulMessage = new BanrisulMessage();
-				banrisulMessage.loadTablesInitialization(logicalNumberSetted, terminalNumberSetted);
+				banrisulMessage.loadTablesInitialization(logicalNumberSetted, terminalNumberSetted, forceInitialization);
 				break;
 
 			default:

@@ -42,6 +42,8 @@ public class AcquirerSettings {
 	private static long nsuBanrisul = 1;
 	private static long nsuGlobalpayments = 1;
 	
+	private static String dateNsuLastTransaction = "0000000000000000";
+	
 	private static String dateDataUpdate = new String();
 	private static boolean isNSUOdd = true; //impar
 	private static String nsuType = "";
@@ -181,22 +183,22 @@ public class AcquirerSettings {
 		isLoadingListoDataInitBanrisul.remove(logicalNumber);
 	}
 	
-	public static boolean loadAcquirerTables(String acquirer, String logicalNumber, String terminalNumber) {
+	public static boolean loadAcquirerTables(String acquirer, String logicalNumber, String terminalNumber, boolean force) {
 		boolean status = true;
 		
 		try {
 			switch (acquirer) {
 			case GLOBAL_PAYMENTS:
-				if (!getStatusLoadingGlobalpayments(logicalNumber)){
-					AcquirerProcess process = new AcquirerProcess();
-					process.startProcess(acquirer, logicalNumber, terminalNumber);
+				if ((!getStatusLoadingGlobalpayments(logicalNumber)) || force){
+					AcquirerLoadTables process = new AcquirerLoadTables();
+					process.startProcess(acquirer, logicalNumber, terminalNumber, force);
 				}
 				break;
 				
 			case BANRISUL:
-				if (!getStatusLoadingBanrisul(logicalNumber)){
-					AcquirerProcess process = new AcquirerProcess();
-					process.startProcess(acquirer, logicalNumber, terminalNumber);
+				if ((!getStatusLoadingBanrisul(logicalNumber)) || force){
+					AcquirerLoadTables process = new AcquirerLoadTables();
+					process.startProcess(acquirer, logicalNumber, terminalNumber, force);
 				}
 				break;
 
@@ -268,13 +270,6 @@ public class AcquirerSettings {
 	}
 	*/
 	
-	public static synchronized void loadTransactions() {
-		transactions = new HashMap<String, InfoTransaction>();
-		
-		//Carregar do arquivo TXT
-		//Carregar as ultimas transacoes em memoria para que seja possivel estornar GP
-	}
-	
 	public static synchronized boolean setInitializationTables(String acquirer, 
 															   String logicalNumber, 
 															   ListoData dataInitialization) {
@@ -283,10 +278,14 @@ public class AcquirerSettings {
 		try {
 			switch (acquirer) {
 			case GLOBAL_PAYMENTS:
+				if (listoDataInitGlobalpayments.containsKey(logicalNumber))
+					listoDataInitGlobalpayments.remove(logicalNumber);
 				listoDataInitGlobalpayments.put(logicalNumber, dataInitialization);
 				break;
 				
 			case BANRISUL:
+				if (listoDataInitBanrisul.containsKey(logicalNumber))
+					listoDataInitBanrisul.remove(logicalNumber);
 				listoDataInitBanrisul.put(logicalNumber, dataInitialization);
 				break;
 
@@ -327,6 +326,14 @@ public class AcquirerSettings {
 		return tables;
 	}	
 	
+
 	
+	public static synchronized void setDateNsuLastTransactionOk(String date, String nsu){
+		dateNsuLastTransaction = date + nsu;
+	}
+	
+	public static synchronized String getDateNsuLastTransactionOk(){
+		return dateNsuLastTransaction;
+	}
 	
 }

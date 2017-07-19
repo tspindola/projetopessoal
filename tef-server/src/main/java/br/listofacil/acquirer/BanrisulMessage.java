@@ -6,9 +6,12 @@ import java.util.Map.Entry;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.MUX;
+import org.jpos.util.LogEvent;
+import org.jpos.util.Logger;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
+import br.listofacil.AcquirerLogonProcess;
 import br.listofacil.AcquirerSettings;
 import br.listofacil.CommonFunctions;
 import br.listofacil.tefserver.iso.ISO87APackagerGP;
@@ -24,7 +27,7 @@ public class BanrisulMessage {
 	private final String RCP_ACQUIRER_NAME = "VERO";
 	private final String RCP_CREDIT = "VENDA CREDITO A VISTA";
 
-	private final String BYTE_1 = "11111101";
+	private final String BYTE_1 = "11111000";
 	private final String BYTE_2 = "10000000";
 	private final String BYTE_3 = "00000000";
 
@@ -95,8 +98,9 @@ public class BanrisulMessage {
 
 	private final String PARAM_63a = "11"; // DUKPT e Master Key Banrisul
 	private final String PARAM_63b = "50"; // forma de comunicacao (50 - TCP/IP)
-	private final String PARAM_63c = "001"; // tipo do equipamento - DEVERA VIR
-											// DO CLIENT
+	private final String PARAM_63c = "002"; //Banrisul (Carlos Santos) solicitou para que o valor seja o 002 = terminal type = 22
+											//O codigo 001 significa terminal type 21 tag 9F35 no GoOnChip
+
 	private final String PARAM_63d = "00003"; // versao do buffer
 	private final String PARAM_63e = "LISTO_TEF_v_2.00aaaa"; // versao da
 																// especificacao
@@ -109,6 +113,7 @@ public class BanrisulMessage {
 																	 // pelo
 																	 // BANRISUL
 																	 // (testes)
+	
 	private final String TAGS_EMV_REQUIRED = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";	
 	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F3784";
 	private final String TAGS_EMV_OPTIONAL = "9F125F34";
@@ -129,12 +134,12 @@ public class BanrisulMessage {
 
 	private static final String idMUXBanrisul = "mux.clientsimulator-banrisul-mux";
 
-	ListoData listoData = new ListoData();
-	CommonFunctions cf = new CommonFunctions();
+	private ListoData listoData = new ListoData();
+	private CommonFunctions cf = new CommonFunctions();
 
 	boolean firstEmvReg = false;
 
-	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber)
+	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber, boolean forceInitialization)
 			throws ISOException, Exception {
 
 		ISOMsg response = null;
@@ -144,7 +149,8 @@ public class BanrisulMessage {
 		// Nao utiliza o numero do terminal
 		// PARAM_41 = terminalNumber;
 
-		AcquirerSettings.setStatusLoadingBanrisul(logicalNumber);
+		if (!forceInitialization)
+			AcquirerSettings.setStatusLoadingBanrisul(logicalNumber);
 
 		// Efetuar o logon
 		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
@@ -163,7 +169,7 @@ public class BanrisulMessage {
 
 					// Timeout
 					if (response == null) {
-						System.out.println("Banrisul - Connection Timed out!");
+						Logger.log(new LogEvent("Banrisul - Connection Timed out!"));
 						AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
 						return false;
 					}
@@ -179,15 +185,17 @@ public class BanrisulMessage {
 				AcquirerSettings.setInitializationTables(BANRISUL, logicalNumber, listoData);
 
 			} else {
-				System.out.println("Banrisul - Falha nos dados do logon!");
+				Logger.log(new LogEvent("Banrisul - Falha nos dados do logon!"));
 				ret = false;
 			}
 		} else {
-			System.out.println("Banrisul - Connection Timed out!");
+			Logger.log(new LogEvent("Banrisul - Connection Timed out!"));
 			ret = false;
 		}
 
-		AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
+		if (!forceInitialization)
+			AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
+		
 		AcquirerSettings.writeDataFile();
 
 		return ret;
@@ -496,6 +504,35 @@ public class BanrisulMessage {
 												// Abertura
 
 			response = requestAcquirer(request, true);
+
+		} catch (ISOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (response != null)
+			AcquirerLogonProcess.setDateLogon(ListoData.BANRISUL, cf.getCurrentDate());
+		
+		return response;
+	}
+	
+	public ISOMsg requestLogoff(String logicalNumber, long nsu) {
+		ISOMsg request = new ISOMsg();
+		ISOMsg response = null;
+		try {
+
+			request.setPackager(new ISO93EPackagerBanrisul());
+			request.setMTI(REQ_BA_LOGON_INIT);
+			// Obtem os bits 007, 011, 012 e 013
+			request = getCommonBitsFormatted(request, nsu);
+			request.set(42, logicalNumber);
+
+			String bit63 = getTerminalData();
+			request.set(63, bit63); // bit63
+			request.set(70, PROC_CODE_LOGON_F); // Codigo de gerenciamento = 002
+												// Fechamento
+
+			response = requestAcquirer(request, false); //Nao aguarda a  resposta
 
 		} catch (ISOException e) {
 			// TODO Auto-generated catch block
@@ -1000,8 +1037,7 @@ public class BanrisulMessage {
 	private String getTerminalData() {
 		String bit63 = PARAM_63a; // Master key Banrisul
 		bit63 += PARAM_63b; // Forma de comunicacao (50 - TCP/IP)
-		bit63 += PARAM_63c; // Tipo de equipamento (001 - POSes terminal type
-							// 21)
+		bit63 += PARAM_63c; // Tipo de equipamento (002 - POSes terminal type 22)
 		bit63 += PARAM_63d; // versao do buffer
 		bit63 += PARAM_63e; // versao da especificacao do tef
 		bit63 += PARAM_63f; // codigo da Listo no cadastro com o BANRISUL
@@ -1044,7 +1080,7 @@ public class BanrisulMessage {
 		// request.set(FIELD_TRACK_2, requestData.cardTrack2);
 
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
-		request.set(FIELD_MERCHANT_CODE, "041003500000100");
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
 
 		if (requestData.cardTrack1.length() > 0)
 			request.set(FIELD_TRACK_1,
@@ -1120,7 +1156,7 @@ public class BanrisulMessage {
 		// salvar em memoria a data e o NSU do banrisul
 		// Somente enviar valores da data e NSU banrisul da transacao
 		// realizada e confirmada com o host
-		request.set(FIELD_LAST_TRANSACTION, "0000000000000000");
+		request.set(FIELD_LAST_TRANSACTION, AcquirerSettings.getDateNsuLastTransactionOk());
 
 		return request;
 	}
@@ -1159,14 +1195,13 @@ public class BanrisulMessage {
 		
 		request.set(FIELD_RESPONSE_CODE, requestData.responseCode);
 
-		// request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
-		request.set(FIELD_FINANCIAL_INSTITUTION, "0800000000");
+		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
 
 		// if (requestData.cardTrack2.length() > 0)
 		// request.set(FIELD_TRACK_2, requestData.cardTrack2);
 
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
-		request.set(FIELD_MERCHANT_CODE, "041003500000100");
+		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
 
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
 
@@ -1237,7 +1272,9 @@ public class BanrisulMessage {
 		if (message.hasField(FIELD_CURRENCY_CODE))
 			data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
 		if (message.hasField(FIELD_EMV_DATA))
-			data.emvData = message.getString(FIELD_EMV_DATA);
+			data.emvData = message.getString(FIELD_EMV_DATA);		
+		if (message.hasField(FIELD_NSU_ACQUIRER))
+			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
 		
 		if (mti.equals(REQ_BA_PAYMENT)) {
 			if (!data.responseCode.equals("00")) {
@@ -1245,11 +1282,16 @@ public class BanrisulMessage {
 				if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
 					msg = listoData.messages.get(data.responseCode).trim();
 				data.cardholderReceipt = msg;
-			} else {
+			} else {				
+				if (data.nsuAcquirer.length() > 0) {
+					Calendar cal = cf.getCurrentDate();
+					String nsuAcq = data.nsuAcquirer.substring(3,  data.nsuAcquirer.length()); //Retira data juliana
+					AcquirerSettings.setDateNsuLastTransactionOk(cal.get(Calendar.YEAR) + data.date, nsuAcq);
+				}
 				data.merchantReceipt = getMerchantReceipt(requestData, message);
 				data.cardholderReceipt = getCardholderReceipt(requestData, message);
 			}
-		}
+		}	
 		
 		if (mti.equals(REQ_BA_CANCELLATION)) {
 			if (!data.responseCode.equals("00")) {
@@ -1262,9 +1304,6 @@ public class BanrisulMessage {
 				data.cardholderReceipt = getCardholderCancelReceipt(requestData, message);
 			}
 		}
-		
-		if (message.hasField(FIELD_NSU_ACQUIRER))
-			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
 
 		return data;
 	}
@@ -1297,7 +1336,8 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			dataStr = requestData.merchantCode + " " + PARAM_63c; 
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
@@ -1429,7 +1469,8 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			dataStr = requestData.merchantCode + " " + PARAM_63c; //Seta codigo 22 terminal type
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
@@ -1518,7 +1559,8 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			dataStr = requestData.merchantCode + " " + PARAM_63c; //Seta codigo 22 terminal type
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
@@ -1572,7 +1614,8 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
+			dataStr = requestData.merchantCode + " " + PARAM_63c; //Seta codigo 22 terminal type
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
@@ -1781,6 +1824,40 @@ public class BanrisulMessage {
 		bit090 += "00000000000000000000000000";
 		
 		return bit090;
+	}
+	
+	public void requestLogonProcess(ISOMsg message) {
+		
+		String logicalNumber = message.getString(ListoData.FIELD_MERCHANT_CODE);
+		
+		//Efetua o logoff e em seguida o logon (regra banrisul)
+		requestLogoff(message.getString(ListoData.FIELD_MERCHANT_CODE), AcquirerSettings.getIncrementNSUBanrisul());
+		
+		ISOMsg response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
+		
+		if (response != null) {
+			
+			String bit62 = response.getString(62);
+			if (bit62.trim().length() > 0) {
+				String versaoTabelasBanrisul = bit62.substring(32, bit62.length());
+				
+				//Obtem os dados de inicializacao do adquirente
+				ListoData listoData = AcquirerSettings.getInitializationTables(ListoData.BANRISUL, logicalNumber);	
+				
+				if (listoData != null) {
+					if (!versaoTabelasBanrisul.equals(listoData.versaoTabelasBanrisul)) {
+						
+						Logger.log(new LogEvent("Diferent tables version - Process of load Banrisul tables started!"));
+						
+						AcquirerSettings.loadAcquirerTables(ListoData.BANRISUL, logicalNumber, 
+															message.getString(ListoData.FIELD_TERMINAL_CODE), true);
+					}
+				}
+			}
+			
+		}
+		
+		
 	}
 	
 }

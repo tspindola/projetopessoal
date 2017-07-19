@@ -7,9 +7,12 @@ import java.util.HashMap;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.MUX;
+import org.jpos.util.LogEvent;
+import org.jpos.util.Logger;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
+import br.listofacil.AcquirerLogonProcess;
 import br.listofacil.AcquirerSettings;
 import br.listofacil.BCDataEmvAid;
 import br.listofacil.BCDataPublicKeys;
@@ -144,7 +147,7 @@ public class GlobalpaymentsMessage {
 	int initializationId = 0;
 	
 	
-	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber) throws ISOException, Exception{		
+	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber, boolean forceInitialization) throws ISOException, Exception{		
 		
 		ISOMsg response = null;
 		boolean ret = true;
@@ -152,7 +155,8 @@ public class GlobalpaymentsMessage {
 		PARAM_41 = terminalNumber;
 		tablesGlobalpayments = new ArrayList<String>();
 		
-		AcquirerSettings.setStatusLoadingGlobalpayments(logicalNumber);
+		if (!forceInitialization)
+			AcquirerSettings.setStatusLoadingGlobalpayments(logicalNumber);
 			
 		//Efetuar o logon
 		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUGlobalpayments());
@@ -166,7 +170,7 @@ public class GlobalpaymentsMessage {
 				//Timeout
 				if (response == null)
 				{
-					System.out.println("Globalpayments - Connection Timed out!");
+					Logger.log(new LogEvent("Globalpayments FAIL - Connection Timed out!"));
 					AcquirerSettings.removeStatusLoadingGlobalpayments(logicalNumber);
 					return false;
 				}
@@ -184,11 +188,13 @@ public class GlobalpaymentsMessage {
 			AcquirerSettings.setInitializationTables(GLOBAL_PAYMENTS, logicalNumber, listoData); 
 			
 		} else {
-			System.out.println("Globalpayments - Connection Timed out!");
+			Logger.log(new LogEvent("Globalpayments FAIL - Connection Timed out!"));
 			ret = false;
 		}
 		
-		AcquirerSettings.removeStatusLoadingGlobalpayments(logicalNumber);
+		if (!forceInitialization)
+			AcquirerSettings.removeStatusLoadingGlobalpayments(logicalNumber);
+		
 		AcquirerSettings.writeDataFile();
 		
 		return ret;
@@ -217,6 +223,9 @@ public class GlobalpaymentsMessage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		if (response != null)
+			AcquirerLogonProcess.setDateLogon(ListoData.BANRISUL, cf.getCurrentDate());
 		
 		return response;
 	}
@@ -1354,6 +1363,35 @@ public class GlobalpaymentsMessage {
             }
         }
         return bit126;
+	}
+	
+	public void requestLogonProcess(ISOMsg message) {
+		
+		String logicalNumber = message.getString(ListoData.FIELD_MERCHANT_CODE);
+		
+		ISOMsg response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUGlobalpayments());
+		
+		if (response != null) {
+			
+			String bit48 = response.getString(FIELD_ADDITIONAL_DATA_1);
+			if (bit48.trim().length() > 0) {
+				String versaoTabelas = bit48.substring(6, 14);
+				
+				//Obtem os dados de inicializacao do adquirente
+				ListoData listoData = AcquirerSettings.getInitializationTables(ListoData.GLOBAL_PAYMENTS, logicalNumber);	
+				
+				if (listoData != null) {
+					if (!versaoTabelas.equals(listoData.versaoTabelasGlobalpayments)) {		
+						
+						Logger.log(new LogEvent("Diferent tables version - Process of load Globalpayments tables started!"));
+						
+						AcquirerSettings.loadAcquirerTables(ListoData.GLOBAL_PAYMENTS, logicalNumber, 
+															message.getString(ListoData.FIELD_TERMINAL_CODE), true);
+					}
+				}
+			}
+			
+		}
 	}
 
 }
