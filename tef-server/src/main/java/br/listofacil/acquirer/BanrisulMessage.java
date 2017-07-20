@@ -115,7 +115,7 @@ public class BanrisulMessage {
 																	 // (testes)
 	
 	private final String TAGS_EMV_REQUIRED = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";	
-	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F3784";
+	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F37849F34";
 	private final String TAGS_EMV_OPTIONAL = "9F125F34";
 	private final String TAGS_EMV_2ND_GEN  = "030109F279F1095040109F279F1095010109F279F1095020109F279F1095";
 
@@ -1095,15 +1095,12 @@ public class BanrisulMessage {
 			request.set(FIELD_SMID, requestData.smid);
 
 		if (requestData.emvData.length() > 0) {
-			
 			String bit055 = requestData.emvData.substring(6, requestData.emvData.length());
-			/*
+			
 			if (bit055.contains("9F12")) {
-				bit055 = bit055.substring(0, bit055.indexOf("9F12"));				
-			}
-			 * request.set(FIELD_EMV_DATA,
-			 * cf.padLeft(String.valueOf(bit055.length()), 3, "0") + bit055);
-			 */
+				bit055 = extract9F12(bit055);
+			}	
+		
 			request.set(FIELD_EMV_DATA, bit055);
 		}
 
@@ -1204,15 +1201,18 @@ public class BanrisulMessage {
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
 
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
+		
+		if (requestData.smid.length() > 0)
+			request.set(FIELD_SMID, requestData.smid);
 
 		if (requestData.emvData.length() > 0) {
 			String bit055 = requestData.emvData.substring(6, requestData.emvData.length());
-			/*
-			 * request.set(FIELD_EMV_DATA,
-			 * cf.padLeft(String.valueOf(bit055.length()), 3, "0") + bit055);
-			 */
-			if (bit055.length() > 0)
-				request.set(FIELD_EMV_DATA, bit055);
+			
+			if (bit055.contains("9F12")) {
+				bit055 = extract9F12(bit055);
+			}	
+		
+			request.set(FIELD_EMV_DATA, bit055);
 		}
 
 		// BIT061 - Tipo de terminal - opcional
@@ -1230,6 +1230,7 @@ public class BanrisulMessage {
 		// 0145200258120000000616123400000000000";
 
 		request.set(FIELD_GENERIC_DATA_62, securityData);
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
 
 		// Prencher com os dados da ultima transacao valida
 		// salvar em memoria a data e o NSU do banrisul
@@ -1240,7 +1241,7 @@ public class BanrisulMessage {
 		return request;
 	}
 
-	public TransactionData getResponseData(String mti, TransactionData requestData, ISOMsg message) {
+	public TransactionData getResponseData(String mti, TransactionData requestData, ISOMsg message) throws ISOException {
 		TransactionData data = new TransactionData();
 
 		if (message.hasField(FIELD_PAN))
@@ -1283,7 +1284,7 @@ public class BanrisulMessage {
 					msg = listoData.messages.get(data.responseCode).trim();
 				data.cardholderReceipt = msg;
 			} else {				
-				if (data.nsuAcquirer.length() > 0) {
+				if ((data.nsuAcquirer.length() > 0) && (message.getMTI().equals(RES_BA_PAYMENT))) {
 					Calendar cal = cf.getCurrentDate();
 					String nsuAcq = data.nsuAcquirer.substring(3,  data.nsuAcquirer.length()); //Retira data juliana
 					AcquirerSettings.setDateNsuLastTransactionOk(cal.get(Calendar.YEAR) + data.date, nsuAcq);
@@ -1854,10 +1855,33 @@ public class BanrisulMessage {
 					}
 				}
 			}
-			
 		}
+	}
+	
+	private String extract9F12(String value)
+	{
+		String bit055 = value;
+		try {
+			//Obtem os dados da tag e do restante do bit055
+			String aux_ =  bit055.substring(bit055.indexOf("9F12") + 4, bit055.length());
+			
+			//Obtem o tamanho da tag com os 2 digitos em hexa convertendo para inteiro 
+			//multiplicando por dois (bytes) e somado com 6 (string 9F12 + 2 digitos do tamanho)
+			int len_ = (Integer.parseInt(cf.convertHexToInt(aux_.substring(0, 2))) * 2) + 6;
+			
+			//Obtem toda os dados antes da tag 9F12
+			aux_ = bit055.substring(0, bit055.indexOf("9F12"));
+			
+			//Concatena os dados iniciais com os que vem apos a tag e conteudo da 9F12
+			bit055 = aux_ + bit055.substring(bit055.indexOf("9F12") + len_, bit055.length());
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			//Em caso de erro retorna somente os dados antes da tag
+			bit055 = bit055.substring(0, bit055.indexOf("9F12"));	
+		}		
 		
-		
+		return bit055;
 	}
 	
 }
