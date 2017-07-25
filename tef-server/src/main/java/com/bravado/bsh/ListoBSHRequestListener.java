@@ -1,35 +1,20 @@
 package com.bravado.bsh;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.text.DecimalFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
 
 import org.jpos.bsh.BSHRequestListener;
 import org.jpos.core.Configuration;
 import org.jpos.core.ConfigurationException;
-import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.ISOSource;
 import org.jpos.iso.MUX;
-import org.jpos.iso.packager.ISO93APackager;
-import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
 import com.bravado.util.RabbitMQ;
-import com.sun.media.jfxmedia.track.Track.Encoding;
 
 import br.listofacil.AcquirerSettings;
-import br.listofacil.CommonFunctions;
 import br.listofacil.acquirer.ListoMessage;
-import br.listofacil.tefserver.iso.ISO87APackagerGP;
-import bsh.EvalError;
-import bsh.Interpreter;
 
 public class ListoBSHRequestListener extends BSHRequestListener {
 	

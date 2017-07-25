@@ -98,8 +98,11 @@ public class BanrisulMessage {
 
 	private final String PARAM_63a = "11"; // DUKPT e Master Key Banrisul
 	private final String PARAM_63b = "50"; // forma de comunicacao (50 - TCP/IP)
-	private final String PARAM_63c = "002"; //Banrisul (Carlos Santos) solicitou para que o valor seja o 002 = terminal type = 22
-											//O codigo 001 significa terminal type 21 tag 9F35 no GoOnChip
+	
+	private final String PARAM_63c_LOGON = "002"; //Banrisul (Carlos Santos) solicitou para que o valor seja o 002 = terminal type = 22
+												  //O codigo 001 significa terminal type 21 tag 9F35 no GoOnChip
+	
+	private final String PARAM_63c = "001"; //Banrisul - O codigo 001 significa terminal type 21 tag 9F35 no GoOnChip
 
 	private final String PARAM_63d = "00003"; // versao do buffer
 	private final String PARAM_63e = "LISTO_TEF_v_2.00aaaa"; // versao da
@@ -114,12 +117,12 @@ public class BanrisulMessage {
 																	 // BANRISUL
 																	 // (testes)
 	
-	private final String TAGS_EMV_REQUIRED = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";	
+	private final String TAGS_EMV_1ND_GEN_AC = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";
+	private final String TAGS_EMV_2ND_GEN_AC = "9F1A959C829F109F269F279F369F37849F349F24";
 	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F37849F34";
 	private final String TAGS_EMV_OPTIONAL = "9F125F34";
 	//private final String TAGS_EMV_2ND_GEN  = "030109F279F1095040109F279F1095010109F279F1095020109F279F1095"
-	private final String TAGS_EMV_2ND_GEN  = "9F1A959C829F109F269F279F369F37849F349F24";
-
+	
 	/*
 	 * 003000 – compra credito a vista 003100 – compra credito parcelado lojista
 	 * 003800 – compra credito parcelado emissor 002000 – compra debito a vista
@@ -233,7 +236,7 @@ public class BanrisulMessage {
 				bit62 += response.getValue(62).toString().substring(0, 3);
 			isomsg.set(62, bit62); // bit62
 
-			String bit63 = getTerminalData();
+			String bit63 = getTerminalData(PARAM_63c);
 			isomsg.set(63, bit63); // bit63
 
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
@@ -281,7 +284,7 @@ public class BanrisulMessage {
 			}
 			isomsg.set(62, bit62); // bit62
 
-			String bit63 = getTerminalData();
+			String bit63 = getTerminalData(PARAM_63c);
 			isomsg.set(63, bit63); // bit63
 
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
@@ -325,7 +328,7 @@ public class BanrisulMessage {
 			}
 			isomsg.set(62, bit62); // bit62
 
-			String bit63 = getTerminalData();
+			String bit63 = getTerminalData(PARAM_63c);
 			isomsg.set(63, bit63); // bit63
 
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
@@ -373,7 +376,7 @@ public class BanrisulMessage {
 			}
 			isomsg.set(62, bit62); // bit62
 
-			String bit63 = getTerminalData();
+			String bit63 = getTerminalData(PARAM_63c);
 			isomsg.set(63, bit63); // bit63
 
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
@@ -411,7 +414,7 @@ public class BanrisulMessage {
 			}
 			isomsg.set(62, bit62); // bit62
 
-			String bit63 = getTerminalData();
+			String bit63 = getTerminalData(PARAM_63c);
 			isomsg.set(63, bit63); // bit63
 
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
@@ -499,8 +502,7 @@ public class BanrisulMessage {
 			request = getCommonBitsFormatted(request, nsu);
 			request.set(42, logicalNumber);
 
-			String bit63 = getTerminalData();
-			request.set(63, bit63); // bit63
+			request.set(63, getTerminalData(PARAM_63c_LOGON)); // bit63
 			request.set(70, PROC_CODE_LOGON_A); // Codigo de gerenciamento = 001
 												// Abertura
 
@@ -528,7 +530,7 @@ public class BanrisulMessage {
 			request = getCommonBitsFormatted(request, nsu);
 			request.set(42, logicalNumber);
 
-			String bit63 = getTerminalData();
+			String bit63 = getTerminalData(PARAM_63c);
 			request.set(63, bit63); // bit63
 			request.set(70, PROC_CODE_LOGON_F); // Codigo de gerenciamento = 002
 												// Fechamento
@@ -744,8 +746,8 @@ public class BanrisulMessage {
 		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || 
 			emvAid.contains("MASTER") || emvAid.contains("MAESTRO")) {
 			
-			length = cf.padLeft(String.valueOf(TAGS_EMV_REQUIRED.length()), 3, "0");
-			return index + length + TAGS_EMV_REQUIRED;
+			length = cf.padLeft(String.valueOf(TAGS_EMV_1ND_GEN_AC.length()), 3, "0");
+			return index + length + TAGS_EMV_1ND_GEN_AC;
 		}
 
 		length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
@@ -780,8 +782,8 @@ public class BanrisulMessage {
 		// 9F1A959C829F109F269F279F369F3784
 		String index = emvAid.substring(6, 8);
 
-		String length = cf.padLeft(String.valueOf(TAGS_EMV_2ND_GEN.length()), 3, "0");
-		return index + length + TAGS_EMV_2ND_GEN;
+		String length = cf.padLeft(String.valueOf(TAGS_EMV_2ND_GEN_AC.length()), 3, "0");
+		return index + length + TAGS_EMV_2ND_GEN_AC;
 	}
 
 	private void setTablesInitialization(String tab02, String tab04, String tab09, String tab10, String tab11) {
@@ -1035,10 +1037,10 @@ public class BanrisulMessage {
 		return bit062;
 	}
 
-	private String getTerminalData() {
+	private String getTerminalData(String param_63c) {
 		String bit63 = PARAM_63a; // Master key Banrisul
 		bit63 += PARAM_63b; // Forma de comunicacao (50 - TCP/IP)
-		bit63 += PARAM_63c; // Tipo de equipamento (002 - POSes terminal type 22)
+		bit63 += param_63c; // Tipo de equipamento (002 - POSes terminal type 22)
 		bit63 += PARAM_63d; // versao do buffer
 		bit63 += PARAM_63e; // versao da especificacao do tef
 		bit63 += PARAM_63f; // codigo da Listo no cadastro com o BANRISUL
@@ -1132,7 +1134,7 @@ public class BanrisulMessage {
 
 		// TESTE
 		// terminalData = "014000100003***XXXXXXXXX TEF****0001";
-		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData(PARAM_63c));
 
 		if (requestData.installments.length() > 0)
 			request.set(FIELD_INSTALLMENTS, cf.padLeft(requestData.installments, 2, "0"));
@@ -1231,7 +1233,7 @@ public class BanrisulMessage {
 		// 0145200258120000000616123400000000000";
 
 		request.set(FIELD_GENERIC_DATA_62, securityData);
-		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData(PARAM_63c));
 
 		// Prencher com os dados da ultima transacao valida
 		// salvar em memoria a data e o NSU do banrisul
@@ -1338,8 +1340,7 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
-			dataStr = requestData.merchantCode + " " + PARAM_63c; 
+			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE); 
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
@@ -1471,8 +1472,7 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
-			dataStr = requestData.merchantCode + " " + PARAM_63c; //Seta codigo 22 terminal type
+			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE);
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
@@ -1777,7 +1777,7 @@ public class BanrisulMessage {
 		//request.set(FIELD_TERMINAL_TYPE, "00811111111");
 		
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
-		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData(PARAM_63c));
 		
 		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
 		
@@ -1805,7 +1805,7 @@ public class BanrisulMessage {
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
 		
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
-		request.set(FIELD_GENERIC_DATA_63, getTerminalData());
+		request.set(FIELD_GENERIC_DATA_63, getTerminalData(PARAM_63c));
 		
 		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
 		
