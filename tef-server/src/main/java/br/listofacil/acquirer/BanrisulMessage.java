@@ -1561,8 +1561,7 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
-			dataStr = requestData.merchantCode + " " + PARAM_63c; //Seta codigo 22 terminal type
+			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE);
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
@@ -1616,8 +1615,7 @@ public class BanrisulMessage {
 			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
 			
-			//dataStr = requestData.merchantCode + " " + requestData.equipmentType;
-			dataStr = requestData.merchantCode + " " + PARAM_63c; //Seta codigo 22 terminal type
+			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE);
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 

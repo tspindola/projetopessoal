@@ -939,7 +939,7 @@ public class ListoMessage {
 		if (dataResponse.emvData.trim().length() > 0) {
 
 			if (dataResponse.emvData.contains("9F26")) {
-				dataResponse.emvData = dataResponse.emvData.substring(6, dataResponse.emvData.length());
+				dataResponse.emvData = dataResponse.emvData.substring(0, dataResponse.emvData.length());
 			}
 			response.set(ListoData.FIELD_EMV_DATA, dataResponse.emvData);
 
