@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
+import org.jpos.util.LogEvent;
+import org.jpos.util.Logger;
+
 public class CommonFunctions {
 
 	public Calendar getCurrentDate()
@@ -24,8 +27,7 @@ public class CommonFunctions {
 			bytes = input.getBytes("UTF-8");
 			return bytes.length != input.length();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail verifying if string isAscii"));
 		}
 		return false;
 	}
@@ -72,8 +74,7 @@ public class CommonFunctions {
 				tlv = tlv.substring(length + 6, tlv.length());
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when extracting tlv data"));
 			return null;
 		}
 		return messages;

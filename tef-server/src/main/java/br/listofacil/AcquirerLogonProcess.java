@@ -51,7 +51,7 @@ public class AcquirerLogonProcess {
 			startProcess(message);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when starting logon process"));
 			stopProcess();
 		}
 	}
@@ -70,9 +70,8 @@ public class AcquirerLogonProcess {
 			try {
 				thrdLogon.join();
 				thrdLogon = null;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				Logger.log(new LogEvent("Fail when stopping logon process"));
 			}
 		}
 	}
@@ -98,8 +97,7 @@ public class AcquirerLogonProcess {
 				}			
 	    	}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when running logon process"));
 		}
 	    
 	    thrdLogon = null;

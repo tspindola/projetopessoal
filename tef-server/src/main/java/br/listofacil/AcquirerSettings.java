@@ -13,6 +13,8 @@ import org.jpos.core.Configuration;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.MUX;
+import org.jpos.util.LogEvent;
+import org.jpos.util.Logger;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
@@ -68,8 +70,7 @@ public class AcquirerSettings {
 	        bw.close();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when writing DataFile"));
 		}
 	}
 	
@@ -100,7 +101,7 @@ public class AcquirerSettings {
 	public static synchronized void loadLastNsu(){			
 		int nsuGP = 1;
 		int nsuBA = 1;
-		Boolean flagnsu = false;
+		//Boolean flagnsu = false;
 
 		Calendar nsucalendaraux = common.getCurrentDate();
 		
@@ -129,10 +130,10 @@ public class AcquirerSettings {
     		    }
     		    
     		    if (nsudata[0].contains("DATE_UPDATE_NSU")){   
-    		    	if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0,  2)) &&
-    		    	   (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer.parseInt(nsudata[1].substring(2,  4))) {
-	    		    	flagnsu = false;
-    		    	}
+    		    	//if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0,  2)) &&
+    		    	//   (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer.parseInt(nsudata[1].substring(2,  4))) {
+	    		    //	flagnsu = false;
+    		    	//}
     		    	setDateDataUpdate(nsudata[1]);
     		    	continue;
     		    }    	
@@ -145,15 +146,15 @@ public class AcquirerSettings {
     		    }
     		}
     		
-    		if(flagnsu) {
-    			nsuGlobalpayments = nsuGP;
-	    		nsuBanrisul = nsuBA;
-    		}
+    		//if(flagnsu) {
+    		//	nsuGlobalpayments = nsuGP;
+	    	//	nsuBanrisul = nsuBA;
+    		//}
     		
     		txtFile.closeTextFile();	 
     		
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when loading last NSU"));
 		}				
 	}	
 	
@@ -208,7 +209,7 @@ public class AcquirerSettings {
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when loading acquires tables"));
 			return false;
 		}
 		return status;
@@ -294,8 +295,7 @@ public class AcquirerSettings {
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
+			Logger.log(new LogEvent("Fail when setting initialization tables"));
 		}
 		return status;
 	}		
@@ -319,7 +319,7 @@ public class AcquirerSettings {
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when getting initialization tables"));
 			return null;
 		}
 		

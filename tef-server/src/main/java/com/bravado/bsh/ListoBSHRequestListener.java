@@ -9,6 +9,8 @@ import org.jpos.core.ConfigurationException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.ISOSource;
 import org.jpos.iso.MUX;
+import org.jpos.util.LogEvent;
+import org.jpos.util.Logger;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
 import com.bravado.util.RabbitMQ;
@@ -52,10 +54,10 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 			RabbitMQ.Connect();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(new LogEvent("IOException on function setConfiguration"));
 		} catch (TimeoutException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(new LogEvent("TimeoutException on function setConfiguration"));
 		}
 		
 		// try {

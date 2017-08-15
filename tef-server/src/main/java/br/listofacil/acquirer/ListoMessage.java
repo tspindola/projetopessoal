@@ -8,6 +8,8 @@ import java.util.concurrent.TimeoutException;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.packager.XMLPackager;
+import org.jpos.util.LogEvent;
+import org.jpos.util.Logger;
 
 import com.bravado.util.RabbitMQ;
 
@@ -282,7 +284,7 @@ public class ListoMessage {
 			RabbitMQ.Send(new String(messageData));
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getLogon"));
 			isomsg = getErrorMessage(m);
 		}
 
@@ -504,7 +506,7 @@ public class ListoMessage {
 			RabbitMQ.Send(new String(messageData));
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getInitialize"));
 			isomsg = getErrorMessage(m);
 		}
 
@@ -542,7 +544,7 @@ public class ListoMessage {
 			response = getResponseFormatted(ListoData.RES_PAYMENT, request, dataRequest, dataResponse);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getPayment"));
 			response = getErrorMessage(request);
 		}
 
@@ -580,7 +582,7 @@ public class ListoMessage {
 			response = getResponseFormatted(ListoData.RES_CONFIRMATION, request, dataRequest, dataResponse);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getConfirmation"));
 			response = getErrorMessage(request);
 		}
 
@@ -618,7 +620,7 @@ public class ListoMessage {
 			response = getResponseFormatted(ListoData.RES_ADVICE, request, dataRequest, dataResponse);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getAdvice"));
 			response = getErrorMessage(request);
 		}
 
@@ -656,7 +658,7 @@ public class ListoMessage {
 			response = getResponseFormatted(ListoData.RES_CANCELLATION, request, dataRequest, dataResponse);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getCancellation"));
 			response = getErrorMessage(request);
 		}
 
@@ -694,7 +696,7 @@ public class ListoMessage {
 			response = getResponseFormatted(ListoData.RES_UNMAKING, request, dataRequest, dataResponse);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getUnmaking"));
 			response = getErrorMessage(request);
 		}
 
@@ -1036,7 +1038,7 @@ public class ListoMessage {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function SendUnmakingMessage"));
 		}
 	}
 
