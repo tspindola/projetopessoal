@@ -1037,7 +1037,8 @@ public class GlobalpaymentsMessage {
 		
 		request.set(FIELD_ENTRY_MODE, entryMode);
 		
-		if (requestData.panSequence.length() > 0)
+		if ((requestData.panSequence.length() > 0) &&
+			(Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 	
 		if (requestData.cardTrack2.length() > 0) {
@@ -1112,7 +1113,8 @@ public class GlobalpaymentsMessage {
 		
 		request.set(FIELD_ENTRY_MODE, "010"); //Advice
 		
-		if (requestData.panSequence.length() > 0)
+		if ((requestData.panSequence.length() > 0) &&
+			(Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 		
 		//Se a transacao foi aprovada, enviar o codigo
@@ -1163,7 +1165,8 @@ public class GlobalpaymentsMessage {
 			entryMode = "051";
 		request.set(FIELD_ENTRY_MODE, entryMode);
 		
-		if (requestData.panSequence.length() > 0)
+		if ((requestData.panSequence.length() > 0) &&
+			(Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 	
 		if (requestData.cardTrack2.length() > 0) {
@@ -1208,7 +1211,8 @@ public class GlobalpaymentsMessage {
 			entryMode = "051";
 		request.set(FIELD_ENTRY_MODE, entryMode);
 		
-		if (requestData.panSequence.length() > 0)
+		if ((requestData.panSequence.length() > 0) &&
+			(Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 		
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);

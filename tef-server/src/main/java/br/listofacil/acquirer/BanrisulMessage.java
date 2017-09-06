@@ -110,6 +110,8 @@ public class BanrisulMessage {
 																// do tef
 	private final String PARAM_63f = "0010"; // codigo da Listo no cadastro com
 												// o BANRISUL
+	
+	private final String SOFT_DESCRIPTOR = "LISTO *";
 
 	private final String FINANCIAL_INSTITUTION_CODE = "00410035000"; // Codigo
 																	 // fornecido
@@ -992,6 +994,7 @@ public class BanrisulMessage {
 
 	private String getMerchantData(TransactionData data) {
 		
+		data.merchantName = SOFT_DESCRIPTOR + data.merchantName;
 		if (data.merchantName.length() > 22)
 			data.merchantName = data.merchantName.substring(0, 22);
 		
@@ -1074,7 +1077,8 @@ public class BanrisulMessage {
 
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 
-		if (requestData.panSequence.length() > 0)
+		if ((requestData.panSequence.length() > 0) &&
+			(Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 
 		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
@@ -1187,7 +1191,8 @@ public class BanrisulMessage {
 
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 
-		if (requestData.panSequence.length() > 0)
+		if ((requestData.panSequence.length() > 0) &&
+			(Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 		
 		if (requestData.authorizationCode.length() > 0)
@@ -1734,6 +1739,12 @@ public class BanrisulMessage {
 			//Caso tenha sido negada pelo chip, a transacao deve possuir NSU do Adquirente
 			if ((requestData.originalNSUAcquirer.length() > 0) &&
 				(requestData.responseCode.equals(ListoData.CODE_TRANSACTION_TIMEOUT))){
+				
+				//Caso o cartao seja banrisul e a transacao negada pelo cartao, 
+				//enviar o codigo V1 no BIT39 da nao confirmacao
+				if (requestData.productDescription.toUpperCase().contains("BANRISUL"))
+					requestData.responseCode = "V1";
+								
 				requestData.nsuAcquirer = requestData.originalNSUAcquirer;
 				ISOMsg request = getMessage0202(requestData);
 				requestAcquirer(request, false);	
