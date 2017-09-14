@@ -8,6 +8,8 @@ import java.util.concurrent.TimeoutException;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.MUX;
+import org.jpos.util.LogEvent;
+import org.jpos.util.Logger;
 import org.jpos.util.NameRegistrar;
 import org.jpos.util.NameRegistrar.NotFoundException;
 
@@ -22,11 +24,11 @@ public class AcquirerLoadTables implements Runnable {
 	private final static String GLOBAL_PAYMENTS = "01";
 	private final static String BANRISUL = "02";
 	
-	private static Thread thrd_settings;
-	private static String acquirerSetted;
-	private static String logicalNumberSetted;
-	private static String terminalNumberSetted;
-	private static boolean forceInitialization;
+	private Thread thrd_settings;
+	private String acquirerSetted;
+	private String logicalNumberSetted;
+	private String terminalNumberSetted;
+	private boolean forceInitialization;
 	
 	public AcquirerLoadTables() {
 		// TODO Auto-generated method stub
@@ -50,9 +52,8 @@ public class AcquirerLoadTables implements Runnable {
 			try {
 				thrd_settings.join();
 				thrd_settings = null;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				Logger.log(new LogEvent("Fail when stopping AcquirerLoadTables process"));
 			}
 		}
 	}
@@ -79,7 +80,7 @@ public class AcquirerLoadTables implements Runnable {
 			e.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail to run AdquirerLoadTables"));
 		}
 	    
 	    thrd_settings = null;

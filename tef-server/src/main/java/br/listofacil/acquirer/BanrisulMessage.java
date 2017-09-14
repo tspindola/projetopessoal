@@ -146,7 +146,7 @@ public class BanrisulMessage {
 	boolean firstEmvReg = false;
 
 	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber, boolean forceInitialization)
-			throws ISOException, Exception {
+			throws ISOException {
 
 		ISOMsg response = null;
 		String timestampTables;
@@ -548,13 +548,6 @@ public class BanrisulMessage {
 	}
 
 	public ListoData getResDataInitialization() {
-		try {
-			// listoData.estabelecimento =
-
-		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
-		}
 		return listoData;
 	}
 
@@ -569,8 +562,7 @@ public class BanrisulMessage {
 				listoData.versaoTabelasBanrisul = bit62.substring(32, bit62.length());
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when setting ResDataLogon"));
 			return false;
 		}
 		return true;
@@ -593,8 +585,7 @@ public class BanrisulMessage {
 			listoData.L001_estabelecimento.put(listoData.L001_estabelecimento.size(), merchant);
 
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when setting MerchantData"));
 		}
 	}
 
@@ -729,8 +720,7 @@ public class BanrisulMessage {
 			setTablesInitialization(tab02, tab04, tab09, tab10, tab11);
 
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Fail when setting DataInitialization"));
 			return false;
 		}
 
@@ -1687,8 +1677,7 @@ public class BanrisulMessage {
 			responseData = getResponseData(REQ_BA_PAYMENT, requestData, response);
 
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestPayment"));
 		}
 
 		return responseData;
@@ -1707,8 +1696,7 @@ public class BanrisulMessage {
 			requestAcquirer(request, false);
 
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestConfirmation"));
 		}
 
 		return requestData;
@@ -1724,8 +1712,7 @@ public class BanrisulMessage {
 			responseData = getResponseData(REQ_BA_CANCELLATION, requestData, response);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestCancellation"));
 		}
 		
 		return responseData;
@@ -1757,8 +1744,7 @@ public class BanrisulMessage {
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestUnmaking"));
 		}
 		
 		return responseData;

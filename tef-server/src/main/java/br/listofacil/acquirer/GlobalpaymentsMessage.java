@@ -147,7 +147,7 @@ public class GlobalpaymentsMessage {
 	int initializationId = 0;
 	
 	
-	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber, boolean forceInitialization) throws ISOException, Exception{		
+	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber, boolean forceInitialization) throws ISOException{		
 		
 		ISOMsg response = null;
 		boolean ret = true;
@@ -267,8 +267,7 @@ public class GlobalpaymentsMessage {
 				return info.get("001");
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function getAcquirerTimestampTables"));
 		}
 		
 		return "";
@@ -417,8 +416,7 @@ public class GlobalpaymentsMessage {
 									tab16, tab17);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function setResDataInitialization"));
 		}
 	}
 	
@@ -931,8 +929,7 @@ public class GlobalpaymentsMessage {
 			responseData = getResponseData(response);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestPayment"));
 		}
 		
 		return responseData;
@@ -948,8 +945,7 @@ public class GlobalpaymentsMessage {
 			responseData = getResponseData(response);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestConfirmation"));
 		}
 		
 		return responseData;
@@ -965,8 +961,7 @@ public class GlobalpaymentsMessage {
 			responseData = getResponseData(response);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestAdvice"));
 		}
 		
 		return responseData;
@@ -982,8 +977,7 @@ public class GlobalpaymentsMessage {
 			responseData = getResponseData(response);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestCancellation"));
 		}
 		
 		return responseData;
@@ -999,8 +993,7 @@ public class GlobalpaymentsMessage {
 			responseData = getResponseData(response);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Logger.log(new LogEvent("Exception on function requestUnmaking"));
 		}
 		
 		return responseData;
