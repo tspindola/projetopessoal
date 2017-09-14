@@ -5,10 +5,13 @@
 	<channel class="br.listofacil.tefserver.iso.SimpleRawChannel"
 		logger="Q2" packager="br.listofacil.tefserver.iso.ISO93EPackagerBanrisul">
 		<property name="host" value="52.67.150.185" />
-		<property name="port" value="5788" /> 
+		<property name="port" value="5789" />
+		
+		<property name="alternate-host" value="52.67.150.185" />
+        <property name="alternate-port" value="5786" />
 	</channel>
 	<in>clientsimulatorba-send</in>
 	<out>clientsimulatorba-receive</out>
-	<reconnect-delay>20008</reconnect-delay>
+	<reconnect-delay>5000</reconnect-delay>
 </channel-adaptor>
 

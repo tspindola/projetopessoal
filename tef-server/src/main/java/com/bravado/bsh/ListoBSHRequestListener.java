@@ -53,11 +53,13 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 		try {
 			RabbitMQ.Connect();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Logger.log(new LogEvent("IOException on function setConfiguration"));
+			Logger.log(new LogEvent(
+					"Error: br.bravado.bsh.ListoBSHRequestListener.setConfiguration \n " + e.getMessage()));
+			e.printStackTrace();
 		} catch (TimeoutException e) {
-			// TODO Auto-generated catch block
-			Logger.log(new LogEvent("TimeoutException on function setConfiguration"));
+			Logger.log(new LogEvent(
+					"Error: br.bravado.bsh.ListoBSHRequestListener.setConfiguration \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 		
 		// try {
@@ -130,6 +132,8 @@ public class ListoBSHRequestListener extends BSHRequestListener {
 
 		} catch (Exception e) {
 			listoMessage.SendUnmakingMessage(m, response);
+			Logger.log(new LogEvent(
+					"Error: br.bravado.bsh.ListoBSHRequestListener.process return false \n " + e.getMessage()));
 			return false;
 		}
 		return true;

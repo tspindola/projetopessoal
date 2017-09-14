@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
@@ -51,7 +50,9 @@ public class AcquirerLogonProcess {
 			startProcess(message);
 			
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when starting logon process"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.AcquirerLogonProcess.setValidationConnection -> stopProcess() \n " + e.getMessage()));
+			e.printStackTrace();
 			stopProcess();
 		}
 	}
@@ -70,13 +71,16 @@ public class AcquirerLogonProcess {
 			try {
 				thrdLogon.join();
 				thrdLogon = null;
-			} catch (Exception e) {
-				Logger.log(new LogEvent("Fail when stopping logon process"));
+			} catch (InterruptedException e) {
+				Logger.log(new LogEvent(
+						"Error: br.listofacil.acquirer.AcquirerLogonProcess.stopProcess \n " + e.getMessage()));
+				e.printStackTrace();
 			}
 		}
 	}
 	
-    private static void run() {
+    @SuppressWarnings("unused")
+	private static void run() {
 	    
 	    try {
 	    	if (messageLogon.hasField(ListoData.FIELD_ACQUIRER_CODE))
@@ -97,7 +101,9 @@ public class AcquirerLogonProcess {
 				}			
 	    	}
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when running logon process"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.AcquirerLogonProcess.run \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 	    
 	    thrdLogon = null;

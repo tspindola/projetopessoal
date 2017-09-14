@@ -9,22 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jpos.core.Configuration;
-import org.jpos.iso.ISOException;
-import org.jpos.iso.ISOMsg;
-import org.jpos.iso.MUX;
 import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
-import org.jpos.util.NameRegistrar;
-import org.jpos.util.NameRegistrar.NotFoundException;
 
 import com.bravado.bsh.InfoTransaction;
 import com.bravado.bsh.TextFile;
 
-import br.listofacil.acquirer.BanrisulMessage;
 import br.listofacil.acquirer.ListoData;
-import br.listofacil.acquirer.ListoMessage;
-import br.listofacil.tefserver.iso.ISO93EPackagerBanrisul;
 
 public class AcquirerSettings {
 	
@@ -70,7 +61,9 @@ public class AcquirerSettings {
 	        bw.close();
 			
 		} catch (IOException e) {
-			Logger.log(new LogEvent("Fail when writing DataFile"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.AcquirerSettings.writeDataFile \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 	}
 	
@@ -101,7 +94,7 @@ public class AcquirerSettings {
 	public static synchronized void loadLastNsu(){			
 		int nsuGP = 1;
 		int nsuBA = 1;
-		//Boolean flagnsu = false;
+		Boolean flagnsu = false;
 
 		Calendar nsucalendaraux = common.getCurrentDate();
 		
@@ -130,31 +123,33 @@ public class AcquirerSettings {
     		    }
     		    
     		    if (nsudata[0].contains("DATE_UPDATE_NSU")){   
-    		    	//if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0,  2)) &&
-    		    	//   (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer.parseInt(nsudata[1].substring(2,  4))) {
-	    		    //	flagnsu = false;
-    		    	//}
+    		    	if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0,  2)) &&
+    		    	   (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer.parseInt(nsudata[1].substring(2,  4))) {
+	    		    	flagnsu = false;
+    		    	}
     		    	setDateDataUpdate(nsudata[1]);
     		    	continue;
     		    }    	
     		    
     		    if (nsudata[0].contains("NSU_TYPE")){
-    		    	nsuType = nsudata[1];
+    		    	setNsuType(nsudata[1]);
     		    	if (nsudata[1].toUpperCase().equals("PAR"));
     		    		isNSUOdd = false;
     		    	continue;
     		    }
     		}
     		
-    		//if(flagnsu) {
-    		//	nsuGlobalpayments = nsuGP;
-	    	//	nsuBanrisul = nsuBA;
-    		//}
+    		if(flagnsu) {
+    			nsuGlobalpayments = nsuGP;
+	    		nsuBanrisul = nsuBA;
+    		}
     		
     		txtFile.closeTextFile();	 
     		
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when loading last NSU"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.AcquirerSettings.loadLastNsu \n " + e.getMessage()));
+			e.printStackTrace();
 		}				
 	}	
 	
@@ -209,7 +204,9 @@ public class AcquirerSettings {
 			}
 			
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when loading acquires tables"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.AcquirerSettings.loadAcquirerTables return false \n " + e.getMessage()));
+			e.printStackTrace();
 			return false;
 		}
 		return status;
@@ -295,7 +292,10 @@ public class AcquirerSettings {
 			}
 			
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when setting initialization tables"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.AcquirerSettings.setInitializationTables return false \n " + e.getMessage()));
+			e.printStackTrace();
+			return false;
 		}
 		return status;
 	}		
@@ -319,7 +319,9 @@ public class AcquirerSettings {
 			}
 			
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when getting initialization tables"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.AcquirerSettings.getInitializationTables return null \n " + e.getMessage()));
+			e.printStackTrace();
 			return null;
 		}
 		
@@ -334,6 +336,22 @@ public class AcquirerSettings {
 	
 	public static synchronized String getDateNsuLastTransactionOk(){
 		return dateNsuLastTransaction;
+	}
+
+	public static String getNsuType() {
+		return nsuType;
+	}
+
+	public static void setNsuType(String nsuType) {
+		AcquirerSettings.nsuType = nsuType;
+	}
+
+	public static HashMap<String, InfoTransaction> getTransactions() {
+		return transactions;
+	}
+
+	public static void setTransactions(HashMap<String, InfoTransaction> transactions) {
+		AcquirerSettings.transactions = transactions;
 	}
 	
 }

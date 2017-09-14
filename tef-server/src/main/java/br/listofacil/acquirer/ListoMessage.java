@@ -706,283 +706,309 @@ public class ListoMessage {
 	private TransactionData getTransactionData(ISOMsg message) throws IOException, TimeoutException, ISOException {
 		TransactionData data = new TransactionData();
 
-		if (message.hasField(ListoData.FIELD_PAN)) {
-			data.pan = message.getString(ListoData.FIELD_PAN);
-			// Formato do PAN para globalpayments (ultimos 4 digitos com zero)
-			if (message.getValue(ListoData.FIELD_ACQUIRER_CODE).equals(ListoData.GLOBAL_PAYMENTS)) {
-				data.pan = data.pan.substring(0, data.pan.length() - 4);
-				data.pan += "0000";
+		try {
+
+			if (message.hasField(ListoData.FIELD_PAN)) {
+				data.pan = message.getString(ListoData.FIELD_PAN);
+				// Formato do PAN para globalpayments (ultimos 4 digitos com
+				// zero)
+				if (message.getValue(ListoData.FIELD_ACQUIRER_CODE).equals(ListoData.GLOBAL_PAYMENTS)) {
+					data.pan = data.pan.substring(0, data.pan.length() - 4);
+					data.pan += "0000";
+				}
 			}
-		}
-		if (message.hasField(ListoData.FIELD_PROCESSING_CODE))
-			data.processingCode = message.getString(ListoData.FIELD_PROCESSING_CODE);
-		if (message.hasField(ListoData.FIELD_AMOUNT))
-			data.amount = message.getString(ListoData.FIELD_AMOUNT);
-		if (message.hasField(ListoData.FIELD_DATE_TIME))
-			data.dateTime = message.getString(ListoData.FIELD_DATE_TIME);
-		if (message.hasField(ListoData.FIELD_NSU_TEF))
-			data.nsuTef = message.getString(ListoData.FIELD_NSU_TEF);
-		if (message.hasField(ListoData.FIELD_TIME))
-			data.time = message.getString(ListoData.FIELD_TIME);
-		if (message.hasField(ListoData.FIELD_DATE))
-			data.date = message.getString(ListoData.FIELD_DATE);
-		if (message.hasField(ListoData.FIELD_CARD_EXP_DATE))
-			data.expirationDateCard = message.getString(ListoData.FIELD_CARD_EXP_DATE);
-		if (message.hasField(ListoData.FIELD_RELEASE_DATE))
-			data.releaseDate = message.getString(ListoData.FIELD_RELEASE_DATE);
-		if (message.hasField(ListoData.FIELD_ENTRY_MODE))
-			data.entryMode = message.getString(ListoData.FIELD_ENTRY_MODE);
-		if (message.hasField(ListoData.FIELD_PAN_SEQUENCE))
-			data.panSequence = message.getString(ListoData.FIELD_PAN_SEQUENCE);
-		if (message.hasField(ListoData.FIELD_PRODUCT_DESCRIPTION))
-			data.productDescription = message.getString(ListoData.FIELD_PRODUCT_DESCRIPTION);
-		if (message.hasField(ListoData.FIELD_TRACK_1))
-			data.cardTrack1 = message.getString(ListoData.FIELD_TRACK_1);
-		if (message.hasField(ListoData.FIELD_TRACK_2))
-			data.cardTrack2 = message.getString(ListoData.FIELD_TRACK_2);
-		if (message.hasField(ListoData.FIELD_BC_DATA)) {
-			HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_BC_DATA));
-			if (map.containsKey(ListoData.TAG_BC_GOONCHIP))
-				data.goOnChip = map.get(ListoData.TAG_BC_GOONCHIP);
-			if (map.containsKey(ListoData.TAG_BC_AID))
-				data.emvAID = map.get(ListoData.TAG_BC_AID);
-		}
-		if (message.hasField(ListoData.FIELD_TERMINAL_CODE))
-			data.terminalCode = message.getString(ListoData.FIELD_TERMINAL_CODE);
-		if (message.hasField(ListoData.FIELD_MERCHANT_CODE))
-			data.merchantCode = message.getString(ListoData.FIELD_MERCHANT_CODE);
-		if (message.hasField(ListoData.FIELD_SHOP_CODE))
-			data.shopCode = message.getString(ListoData.FIELD_SHOP_CODE);
-		if (message.hasField(ListoData.FIELD_ACQUIRER_CODE))
-			data.acquirerCode = message.getString(ListoData.FIELD_ACQUIRER_CODE);
-		if (message.hasField(ListoData.FIELD_EQUIPMENT_TYPE))
-			data.equipmentType = message.getString(ListoData.FIELD_EQUIPMENT_TYPE);
-		if (message.hasField(ListoData.FIELD_SMID))
-			data.smid = message.getString(ListoData.FIELD_SMID);
-		if (message.hasField(ListoData.FIELD_CURRENCY_CODE))
-			data.currencyCode = message.getString(ListoData.FIELD_CURRENCY_CODE);
-		if (message.hasField(ListoData.FIELD_COUNTRY_CODE))
-			data.countryCode = message.getString(ListoData.FIELD_COUNTRY_CODE);
-		if (message.hasField(ListoData.FIELD_AUTHORIZATION_CODE))
-			data.authorizationCode = message.getString(ListoData.FIELD_AUTHORIZATION_CODE);
-		if (message.hasField(ListoData.FIELD_RESPONSE_CODE))
-			data.responseCode = message.getString(ListoData.FIELD_RESPONSE_CODE);
-		if (message.hasField(ListoData.FIELD_PIN))
-			data.pin = message.getString(ListoData.FIELD_PIN);
-		if (message.hasField(ListoData.FIELD_EMV_DATA)) {
-			data.emvData = message.getString(ListoData.FIELD_EMV_DATA);
-			data = setDataTAGs(data);
-		}
-		if (message.hasField(ListoData.FIELD_TYPE_CARD_READ))
-			data.typeCardRead = message.getString(ListoData.FIELD_TYPE_CARD_READ);
-		if (message.hasField(ListoData.FIELD_TRANSACTION_DATA)) {
-			HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_TRANSACTION_DATA));
-			if (map.containsKey(ListoData.TAG_PAN_PART_ENCRYPTED))
-				data.panPartEncrypted = map.get(ListoData.TAG_PAN_PART_ENCRYPTED);
-		}
-		if (message.hasField(ListoData.FIELD_ENCRYPTED_CARD_DATA))
-			data.encryptedCardData = message.getString(ListoData.FIELD_ENCRYPTED_CARD_DATA);
-		if (message.hasField(ListoData.FIELD_TERMINAL_DATA)) {
-			HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_TERMINAL_DATA));
-			if (map.containsKey(ListoData.TAG_PINPAD_SERIAL_NUMBER))
-				data.pinpadSerialNumber = map.get(ListoData.TAG_PINPAD_SERIAL_NUMBER);
-			if (map.containsKey(ListoData.TAG_PINPAD_BC_VERSION))
-				data.pinpadBCVersion = map.get(ListoData.TAG_PINPAD_BC_VERSION);
-			if (map.containsKey(ListoData.TAG_PINPAD_MANUFACTURER))
-				data.pinpadManufacturer = map.get(ListoData.TAG_PINPAD_MANUFACTURER);
-			if (map.containsKey(ListoData.TAG_PINPAD_MODEL))
-				data.pinpadModel = map.get(ListoData.TAG_PINPAD_MODEL);
-			if (map.containsKey(ListoData.TAG_PINPAD_FIRMWARE))
-				data.pinpadFirmware = map.get(ListoData.TAG_PINPAD_FIRMWARE);
-			if (map.containsKey(ListoData.TAG_PINPAD_TABLES_VERSION))
-				data.tablesVersion = map.get(ListoData.TAG_PINPAD_TABLES_VERSION);
-			if (map.containsKey(ListoData.TAG_PINPAD_VERSION_BASIC_APP))
-				data.pinpadVersionBasicApp = map.get(ListoData.TAG_PINPAD_VERSION_BASIC_APP);
-		}
-		if (message.hasField(ListoData.FIELD_MERCHANT_DATA)) {
-			HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_MERCHANT_DATA));
-			if (map.containsKey(ListoData.TAG_MERCHANT_NAME))
-				data.merchantName = map.get(ListoData.TAG_MERCHANT_NAME);
-			if (map.containsKey(ListoData.TAG_MERCHANT_ADDRESS))
-				data.address = map.get(ListoData.TAG_MERCHANT_ADDRESS);
-			if (map.containsKey(ListoData.TAG_MERCHANT_CITY))
-				data.city = map.get(ListoData.TAG_MERCHANT_CITY);
-			if (map.containsKey(ListoData.TAG_MERCHANT_STATE))
-				data.state = map.get(ListoData.TAG_MERCHANT_STATE);
-			if (map.containsKey(ListoData.TAG_MERCHANT_COUNTRY))
-				data.country = map.get(ListoData.TAG_MERCHANT_COUNTRY);
-			if (map.containsKey(ListoData.TAG_MERCHANT_ZIPCODE))
-				data.zipCode = map.get(ListoData.TAG_MERCHANT_ZIPCODE);
-			if (map.containsKey(ListoData.TAG_MERCHANT_MCC))
-				data.mcc = map.get(ListoData.TAG_MERCHANT_MCC);
-			if (map.containsKey(ListoData.TAG_MERCHANT_CPFCNPJ))
-				data.cnpjcpf = map.get(ListoData.TAG_MERCHANT_CPFCNPJ);
-			if (map.containsKey(ListoData.TAG_MERCHANT_PHONE))
-				data.phone = map.get(ListoData.TAG_MERCHANT_PHONE);
-		}
-		if (message.hasField(ListoData.FIELD_SUGGEST_DATE))
-			data.suggestedDate = message.getString(ListoData.FIELD_SUGGEST_DATE);
-		if (message.hasField(ListoData.FIELD_INSTALLMENT_VALUE))
-			data.installmentValue = message.getString(ListoData.FIELD_INSTALLMENT_VALUE);
-		if (message.hasField(ListoData.FIELD_INSTALLMENTS))
-			data.installments = message.getString(ListoData.FIELD_INSTALLMENTS);
-		if (message.hasField(ListoData.FIELD_ORIGINAL_TRANSACTION)) {
-			HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_ORIGINAL_TRANSACTION));
-			if (map.containsKey(ListoData.TAG_ORIGINAL_MESSAGE_CODE))
-				data.originalMessageCode = map.get(ListoData.TAG_ORIGINAL_MESSAGE_CODE);
-			if (map.containsKey(ListoData.TAG_ORIGINAL_NSU_TEF))
-				data.originalNSUTEF = map.get(ListoData.TAG_ORIGINAL_NSU_TEF);
-			if (map.containsKey(ListoData.TAG_ORIGINAL_NSU_ACQUIRER))
-				data.originalNSUAcquirer = map.get(ListoData.TAG_ORIGINAL_NSU_ACQUIRER);
-			if (map.containsKey(ListoData.TAG_ORIGINAL_TRANSACTION_DATE))
-				data.originalDateTime = map.get(ListoData.TAG_ORIGINAL_TRANSACTION_DATE);
-			if (map.containsKey(ListoData.TAG_ORIGINAL_CV))
-				data.originalCV = map.get(ListoData.TAG_ORIGINAL_CV);
-		}
-		if (message.hasField(ListoData.FIELD_CONFIRMATION_DATA))
-			data.confirmationData = message.getString(ListoData.FIELD_CONFIRMATION_DATA);
-		if (message.hasField(ListoData.FIELD_ENCRYPTION_DATA)) {
-			HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_ENCRYPTION_DATA));
-			if (map.containsKey(ListoData.TAG_ENCRYPTION_PIN))
-				data.encryptionPinType = map.get(ListoData.TAG_ENCRYPTION_PIN);
-			if (map.containsKey(ListoData.TAG_ENCRYPTION_KSN_PIN))
-				data.ksnPin = map.get(ListoData.TAG_ENCRYPTION_KSN_PIN);
-			if (map.containsKey(ListoData.TAG_ENCRYPTION_CARD))
-				data.encryptionCardType = map.get(ListoData.TAG_ENCRYPTION_CARD);
-			if (map.containsKey(ListoData.TAG_ENCRYPTION_KSN_CARD))
-				data.ksnCard = map.get(ListoData.TAG_ENCRYPTION_KSN_CARD);
-			if (map.containsKey(ListoData.TAG_ENCRYPTION_TYPE_CVD))
-				data.typeCardVerificationData = map.get(ListoData.TAG_ENCRYPTION_TYPE_CVD);
-			if (map.containsKey(ListoData.TAG_ENCRYPTION_CVD))
-				data.cardVerificationData = map.get(ListoData.TAG_ENCRYPTION_CVD);
-		}
-		if (message.hasField(ListoData.FIELD_NSU_ACQUIRER))
-			data.nsuAcquirer = message.getString(ListoData.FIELD_NSU_ACQUIRER);
+			if (message.hasField(ListoData.FIELD_PROCESSING_CODE))
+				data.processingCode = message.getString(ListoData.FIELD_PROCESSING_CODE);
+			if (message.hasField(ListoData.FIELD_AMOUNT))
+				data.amount = message.getString(ListoData.FIELD_AMOUNT);
+			if (message.hasField(ListoData.FIELD_DATE_TIME))
+				data.dateTime = message.getString(ListoData.FIELD_DATE_TIME);
+			if (message.hasField(ListoData.FIELD_NSU_TEF))
+				data.nsuTef = message.getString(ListoData.FIELD_NSU_TEF);
+			if (message.hasField(ListoData.FIELD_TIME))
+				data.time = message.getString(ListoData.FIELD_TIME);
+			if (message.hasField(ListoData.FIELD_DATE))
+				data.date = message.getString(ListoData.FIELD_DATE);
+			if (message.hasField(ListoData.FIELD_CARD_EXP_DATE))
+				data.expirationDateCard = message.getString(ListoData.FIELD_CARD_EXP_DATE);
+			if (message.hasField(ListoData.FIELD_RELEASE_DATE))
+				data.releaseDate = message.getString(ListoData.FIELD_RELEASE_DATE);
+			if (message.hasField(ListoData.FIELD_ENTRY_MODE))
+				data.entryMode = message.getString(ListoData.FIELD_ENTRY_MODE);
+			if (message.hasField(ListoData.FIELD_PAN_SEQUENCE))
+				data.panSequence = message.getString(ListoData.FIELD_PAN_SEQUENCE);
+			if (message.hasField(ListoData.FIELD_PRODUCT_DESCRIPTION))
+				data.productDescription = message.getString(ListoData.FIELD_PRODUCT_DESCRIPTION);
+			if (message.hasField(ListoData.FIELD_TRACK_1))
+				data.cardTrack1 = message.getString(ListoData.FIELD_TRACK_1);
+			if (message.hasField(ListoData.FIELD_TRACK_2))
+				data.cardTrack2 = message.getString(ListoData.FIELD_TRACK_2);
+			if (message.hasField(ListoData.FIELD_BC_DATA)) {
+				HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_BC_DATA));
+				if (map.containsKey(ListoData.TAG_BC_GOONCHIP))
+					data.goOnChip = map.get(ListoData.TAG_BC_GOONCHIP);
+				if (map.containsKey(ListoData.TAG_BC_AID))
+					data.emvAID = map.get(ListoData.TAG_BC_AID);
+			}
+			if (message.hasField(ListoData.FIELD_TERMINAL_CODE))
+				data.terminalCode = message.getString(ListoData.FIELD_TERMINAL_CODE);
+			if (message.hasField(ListoData.FIELD_MERCHANT_CODE))
+				data.merchantCode = message.getString(ListoData.FIELD_MERCHANT_CODE);
+			if (message.hasField(ListoData.FIELD_SHOP_CODE))
+				data.shopCode = message.getString(ListoData.FIELD_SHOP_CODE);
+			if (message.hasField(ListoData.FIELD_ACQUIRER_CODE))
+				data.acquirerCode = message.getString(ListoData.FIELD_ACQUIRER_CODE);
+			if (message.hasField(ListoData.FIELD_EQUIPMENT_TYPE))
+				data.equipmentType = message.getString(ListoData.FIELD_EQUIPMENT_TYPE);
+			if (message.hasField(ListoData.FIELD_SMID))
+				data.smid = message.getString(ListoData.FIELD_SMID);
+			if (message.hasField(ListoData.FIELD_CURRENCY_CODE))
+				data.currencyCode = message.getString(ListoData.FIELD_CURRENCY_CODE);
+			if (message.hasField(ListoData.FIELD_COUNTRY_CODE))
+				data.countryCode = message.getString(ListoData.FIELD_COUNTRY_CODE);
+			if (message.hasField(ListoData.FIELD_AUTHORIZATION_CODE))
+				data.authorizationCode = message.getString(ListoData.FIELD_AUTHORIZATION_CODE);
+			if (message.hasField(ListoData.FIELD_RESPONSE_CODE))
+				data.responseCode = message.getString(ListoData.FIELD_RESPONSE_CODE);
+			if (message.hasField(ListoData.FIELD_PIN))
+				data.pin = message.getString(ListoData.FIELD_PIN);
+			if (message.hasField(ListoData.FIELD_EMV_DATA)) {
+				data.emvData = message.getString(ListoData.FIELD_EMV_DATA);
+				data = setDataTAGs(data);
+			}
+			if (message.hasField(ListoData.FIELD_TYPE_CARD_READ))
+				data.typeCardRead = message.getString(ListoData.FIELD_TYPE_CARD_READ);
+			if (message.hasField(ListoData.FIELD_TRANSACTION_DATA)) {
+				HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_TRANSACTION_DATA));
+				if (map.containsKey(ListoData.TAG_PAN_PART_ENCRYPTED))
+					data.panPartEncrypted = map.get(ListoData.TAG_PAN_PART_ENCRYPTED);
+			}
+			if (message.hasField(ListoData.FIELD_ENCRYPTED_CARD_DATA))
+				data.encryptedCardData = message.getString(ListoData.FIELD_ENCRYPTED_CARD_DATA);
+			if (message.hasField(ListoData.FIELD_TERMINAL_DATA)) {
+				HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_TERMINAL_DATA));
+				if (map.containsKey(ListoData.TAG_PINPAD_SERIAL_NUMBER))
+					data.pinpadSerialNumber = map.get(ListoData.TAG_PINPAD_SERIAL_NUMBER);
+				if (map.containsKey(ListoData.TAG_PINPAD_BC_VERSION))
+					data.pinpadBCVersion = map.get(ListoData.TAG_PINPAD_BC_VERSION);
+				if (map.containsKey(ListoData.TAG_PINPAD_MANUFACTURER))
+					data.pinpadManufacturer = map.get(ListoData.TAG_PINPAD_MANUFACTURER);
+				if (map.containsKey(ListoData.TAG_PINPAD_MODEL))
+					data.pinpadModel = map.get(ListoData.TAG_PINPAD_MODEL);
+				if (map.containsKey(ListoData.TAG_PINPAD_FIRMWARE))
+					data.pinpadFirmware = map.get(ListoData.TAG_PINPAD_FIRMWARE);
+				if (map.containsKey(ListoData.TAG_PINPAD_TABLES_VERSION))
+					data.tablesVersion = map.get(ListoData.TAG_PINPAD_TABLES_VERSION);
+				if (map.containsKey(ListoData.TAG_PINPAD_VERSION_BASIC_APP))
+					data.pinpadVersionBasicApp = map.get(ListoData.TAG_PINPAD_VERSION_BASIC_APP);
+			}
+			if (message.hasField(ListoData.FIELD_MERCHANT_DATA)) {
+				HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_MERCHANT_DATA));
+				if (map.containsKey(ListoData.TAG_MERCHANT_NAME))
+					data.merchantName = map.get(ListoData.TAG_MERCHANT_NAME);
+				if (map.containsKey(ListoData.TAG_MERCHANT_ADDRESS))
+					data.address = map.get(ListoData.TAG_MERCHANT_ADDRESS);
+				if (map.containsKey(ListoData.TAG_MERCHANT_CITY))
+					data.city = map.get(ListoData.TAG_MERCHANT_CITY);
+				if (map.containsKey(ListoData.TAG_MERCHANT_STATE))
+					data.state = map.get(ListoData.TAG_MERCHANT_STATE);
+				if (map.containsKey(ListoData.TAG_MERCHANT_COUNTRY))
+					data.country = map.get(ListoData.TAG_MERCHANT_COUNTRY);
+				if (map.containsKey(ListoData.TAG_MERCHANT_ZIPCODE))
+					data.zipCode = map.get(ListoData.TAG_MERCHANT_ZIPCODE);
+				if (map.containsKey(ListoData.TAG_MERCHANT_MCC))
+					data.mcc = map.get(ListoData.TAG_MERCHANT_MCC);
+				if (map.containsKey(ListoData.TAG_MERCHANT_CPFCNPJ))
+					data.cnpjcpf = map.get(ListoData.TAG_MERCHANT_CPFCNPJ);
+				if (map.containsKey(ListoData.TAG_MERCHANT_PHONE))
+					data.phone = map.get(ListoData.TAG_MERCHANT_PHONE);
+			}
+			if (message.hasField(ListoData.FIELD_SUGGEST_DATE))
+				data.suggestedDate = message.getString(ListoData.FIELD_SUGGEST_DATE);
+			if (message.hasField(ListoData.FIELD_INSTALLMENT_VALUE))
+				data.installmentValue = message.getString(ListoData.FIELD_INSTALLMENT_VALUE);
+			if (message.hasField(ListoData.FIELD_INSTALLMENTS))
+				data.installments = message.getString(ListoData.FIELD_INSTALLMENTS);
+			if (message.hasField(ListoData.FIELD_ORIGINAL_TRANSACTION)) {
+				HashMap<String, String> map = cf
+						.tlvExtractData(message.getString(ListoData.FIELD_ORIGINAL_TRANSACTION));
+				if (map.containsKey(ListoData.TAG_ORIGINAL_MESSAGE_CODE))
+					data.originalMessageCode = map.get(ListoData.TAG_ORIGINAL_MESSAGE_CODE);
+				if (map.containsKey(ListoData.TAG_ORIGINAL_NSU_TEF))
+					data.originalNSUTEF = map.get(ListoData.TAG_ORIGINAL_NSU_TEF);
+				if (map.containsKey(ListoData.TAG_ORIGINAL_NSU_ACQUIRER))
+					data.originalNSUAcquirer = map.get(ListoData.TAG_ORIGINAL_NSU_ACQUIRER);
+				if (map.containsKey(ListoData.TAG_ORIGINAL_TRANSACTION_DATE))
+					data.originalDateTime = map.get(ListoData.TAG_ORIGINAL_TRANSACTION_DATE);
+				if (map.containsKey(ListoData.TAG_ORIGINAL_CV))
+					data.originalCV = map.get(ListoData.TAG_ORIGINAL_CV);
+			}
+			if (message.hasField(ListoData.FIELD_CONFIRMATION_DATA))
+				data.confirmationData = message.getString(ListoData.FIELD_CONFIRMATION_DATA);
+			if (message.hasField(ListoData.FIELD_ENCRYPTION_DATA)) {
+				HashMap<String, String> map = cf.tlvExtractData(message.getString(ListoData.FIELD_ENCRYPTION_DATA));
+				if (map.containsKey(ListoData.TAG_ENCRYPTION_PIN))
+					data.encryptionPinType = map.get(ListoData.TAG_ENCRYPTION_PIN);
+				if (map.containsKey(ListoData.TAG_ENCRYPTION_KSN_PIN))
+					data.ksnPin = map.get(ListoData.TAG_ENCRYPTION_KSN_PIN);
+				if (map.containsKey(ListoData.TAG_ENCRYPTION_CARD))
+					data.encryptionCardType = map.get(ListoData.TAG_ENCRYPTION_CARD);
+				if (map.containsKey(ListoData.TAG_ENCRYPTION_KSN_CARD))
+					data.ksnCard = map.get(ListoData.TAG_ENCRYPTION_KSN_CARD);
+				if (map.containsKey(ListoData.TAG_ENCRYPTION_TYPE_CVD))
+					data.typeCardVerificationData = map.get(ListoData.TAG_ENCRYPTION_TYPE_CVD);
+				if (map.containsKey(ListoData.TAG_ENCRYPTION_CVD))
+					data.cardVerificationData = map.get(ListoData.TAG_ENCRYPTION_CVD);
+			}
+			if (message.hasField(ListoData.FIELD_NSU_ACQUIRER))
+				data.nsuAcquirer = message.getString(ListoData.FIELD_NSU_ACQUIRER);
 
-		Calendar trsdate = cf.getCurrentDate();
-		data.brazilianDate = cf.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0") + "/"
-				+ cf.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") + "/"
-				+ trsdate.get(Calendar.YEAR);
+			Calendar trsdate = cf.getCurrentDate();
+			data.brazilianDate = cf.padLeft(String.valueOf(trsdate.get(Calendar.DAY_OF_MONTH)), 2, "0") + "/"
+					+ cf.padLeft(String.valueOf(trsdate.get(Calendar.MONTH) + 1), 2, "0") + "/"
+					+ trsdate.get(Calendar.YEAR);
 
-		// Envia para o sistema que grava no banco de dados
-		byte[] messageData = message.pack();
-		RabbitMQ.Send(new String(messageData));
+			// Envia para o sistema que grava no banco de dados
+			byte[] messageData = message.pack();
+			RabbitMQ.Send(new String(messageData));
+
+		} catch (Exception e) {
+			Logger.log(
+					new LogEvent("Error: br.listofacil.acquirer.ListoMessage.getTransactionData \n " + e.getMessage()));
+			throw e;
+		}
 
 		return data;
 	}
 
 	private TransactionData setDataTAGs(TransactionData data) {
-		String bit055 = new String();
-		if (data.emvData.contains("9F12")) {
-			int index = data.emvData.indexOf("9F12");
-			data.cardPreferredName = data.emvData.substring(index + 4, data.emvData.length());
-			int size = Integer.parseInt(cf.convertHexToInt(data.cardPreferredName.substring(0, 2))) * 2;
-			data.cardPreferredName = cf.convertHexString(data.cardPreferredName.substring(2, size + 2));
-			if (cf.isASCII(data.cardPreferredName)) {
-				data.cardPreferredName = data.productDescription;
-				// Remove dos dados EMV
-				bit055 = data.emvData.substring(0, index);
-				data.emvData = bit055 + data.emvData.substring(index + (size + 6), data.emvData.length());
+
+		try {
+
+			String bit055 = new String();
+			if (data.emvData.contains("9F12")) {
+				int index = data.emvData.indexOf("9F12");
+				data.cardPreferredName = data.emvData.substring(index + 4, data.emvData.length());
+				int size = Integer.parseInt(cf.convertHexToInt(data.cardPreferredName.substring(0, 2))) * 2;
+				data.cardPreferredName = cf.convertHexString(data.cardPreferredName.substring(2, size + 2));
+				if (cf.isASCII(data.cardPreferredName)) {
+					data.cardPreferredName = data.productDescription;
+					// Remove dos dados EMV
+					bit055 = data.emvData.substring(0, index);
+					data.emvData = bit055 + data.emvData.substring(index + (size + 6), data.emvData.length());
+				}
 			}
-		}
-		if (data.emvData.contains("9F26")) {
-			int index = data.emvData.indexOf("9F26");
-			data.cardApplicationCryptogram = data.emvData.substring(index + 4, data.emvData.length());
-			int size = Integer.parseInt(cf.convertHexToInt(data.cardApplicationCryptogram.substring(0, 2))) * 2;
-			data.cardApplicationCryptogram = data.cardApplicationCryptogram.substring(2, size + 2);
-		}
-		if (data.emvData.contains("9F36")) {
-			int index = data.emvData.indexOf("9F36");
-			data.cardApplicationTransactionCounter = data.emvData.substring(index + 4, data.emvData.length());
-			int size = Integer.parseInt(cf.convertHexToInt(data.cardApplicationTransactionCounter.substring(0, 2))) * 2;
-			data.cardApplicationTransactionCounter = data.cardApplicationTransactionCounter.substring(2, size + 2);
+			if (data.emvData.contains("9F26")) {
+				int index = data.emvData.indexOf("9F26");
+				data.cardApplicationCryptogram = data.emvData.substring(index + 4, data.emvData.length());
+				int size = Integer.parseInt(cf.convertHexToInt(data.cardApplicationCryptogram.substring(0, 2))) * 2;
+				data.cardApplicationCryptogram = data.cardApplicationCryptogram.substring(2, size + 2);
+			}
+			if (data.emvData.contains("9F36")) {
+				int index = data.emvData.indexOf("9F36");
+				data.cardApplicationTransactionCounter = data.emvData.substring(index + 4, data.emvData.length());
+				int size = Integer.parseInt(cf.convertHexToInt(data.cardApplicationTransactionCounter.substring(0, 2)))
+						* 2;
+				data.cardApplicationTransactionCounter = data.cardApplicationTransactionCounter.substring(2, size + 2);
+			}
+		} catch (Exception e) {
+			Logger.log(new LogEvent("Error: br.listofacil.acquirer.ListoMessage.setDataTAGs \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 		return data;
 	}
 
 	private ISOMsg getResponseFormatted(String mti, ISOMsg request, TransactionData dataRequest,
 			TransactionData dataResponse) throws ISOException, IOException, TimeoutException {
+
 		ISOMsg response = new ISOMsg();
 
-		if ((dataResponse == null) || (dataRequest == null))
-			return null;
+		try {
 
-		if (dataResponse.dateTime.trim().equals(""))
-			dataResponse.dateTime = dataRequest.dateTime;
+			if ((dataResponse == null) || (dataRequest == null))
+				return null;
 
-		if (dataResponse.time.trim().equals(""))
-			dataResponse.time = dataRequest.time;
+			if (dataResponse.dateTime.trim().equals(""))
+				dataResponse.dateTime = dataRequest.dateTime;
 
-		if (dataResponse.date.trim().equals(""))
-			dataResponse.date = dataRequest.date;
+			if (dataResponse.time.trim().equals(""))
+				dataResponse.time = dataRequest.time;
 
-		response.setPackager(new XMLPackager());
+			if (dataResponse.date.trim().equals(""))
+				dataResponse.date = dataRequest.date;
 
-		response.setMTI(mti);
-		response.set(ListoData.FIELD_PROCESSING_CODE, dataRequest.processingCode);
-		response.set(ListoData.FIELD_AMOUNT, dataRequest.amount);
-		response.set(ListoData.FIELD_DATE_TIME, dataResponse.dateTime);
-		response.set(ListoData.FIELD_NSU_TEF, dataResponse.nsuTef);
-		response.set(ListoData.FIELD_TIME, dataResponse.time);
-		response.set(ListoData.FIELD_DATE, dataResponse.date);
+			response.setPackager(new XMLPackager());
 
-		if (dataResponse.authorizationCode.trim().length() > 0)
-			response.set(ListoData.FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
+			response.setMTI(mti);
+			response.set(ListoData.FIELD_PROCESSING_CODE, dataRequest.processingCode);
+			response.set(ListoData.FIELD_AMOUNT, dataRequest.amount);
+			response.set(ListoData.FIELD_DATE_TIME, dataResponse.dateTime);
+			response.set(ListoData.FIELD_NSU_TEF, dataResponse.nsuTef);
+			response.set(ListoData.FIELD_TIME, dataResponse.time);
+			response.set(ListoData.FIELD_DATE, dataResponse.date);
 
-		if (dataResponse.responseCode.trim().length() > 0)
-			response.set(ListoData.FIELD_RESPONSE_CODE, dataResponse.responseCode);
+			if (dataResponse.authorizationCode.trim().length() > 0)
+				response.set(ListoData.FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
 
-		response.set(ListoData.FIELD_TERMINAL_CODE, dataRequest.terminalCode);
-		response.set(ListoData.FIELD_MERCHANT_CODE, dataRequest.merchantCode);
-		response.set(ListoData.FIELD_SHOP_CODE, dataRequest.shopCode);
-		response.set(ListoData.FIELD_ACQUIRER_CODE, dataRequest.acquirerCode);
-		response.set(ListoData.FIELD_EQUIPMENT_TYPE, dataRequest.equipmentType);
+			if (dataResponse.responseCode.trim().length() > 0)
+				response.set(ListoData.FIELD_RESPONSE_CODE, dataResponse.responseCode);
 
-		if (dataResponse.emvData.trim().length() > 0) {
+			response.set(ListoData.FIELD_TERMINAL_CODE, dataRequest.terminalCode);
+			response.set(ListoData.FIELD_MERCHANT_CODE, dataRequest.merchantCode);
+			response.set(ListoData.FIELD_SHOP_CODE, dataRequest.shopCode);
+			response.set(ListoData.FIELD_ACQUIRER_CODE, dataRequest.acquirerCode);
+			response.set(ListoData.FIELD_EQUIPMENT_TYPE, dataRequest.equipmentType);
 
-			if (dataResponse.emvData.contains("9F26")) {
-				dataResponse.emvData = dataResponse.emvData.substring(0, dataResponse.emvData.length());
+			if (dataResponse.emvData.trim().length() > 0) {
+
+				if (dataResponse.emvData.contains("9F26")) {
+					dataResponse.emvData = dataResponse.emvData.substring(0, dataResponse.emvData.length());
+				}
+				response.set(ListoData.FIELD_EMV_DATA, dataResponse.emvData);
+
 			}
-			response.set(ListoData.FIELD_EMV_DATA, dataResponse.emvData);
 
-		}
+			if (dataResponse.merchantReceipt.trim().length() > 0) {
+				if (!dataResponse.responseCode.equals("00")) {
+					dataResponse.merchantReceipt = dataResponse.merchantReceipt.trim();
 
-		if (dataResponse.merchantReceipt.trim().length() > 0) {
-			if (!dataResponse.responseCode.equals("00")) {
-				dataResponse.merchantReceipt = dataResponse.merchantReceipt.trim();
+					if (dataRequest.acquirerCode.equals(ListoData.GLOBAL_PAYMENTS))
+						dataResponse.merchantReceipt = dataResponse.merchantReceipt.substring(1,
+								dataResponse.merchantReceipt.length());
 
-				if (dataRequest.acquirerCode.equals(ListoData.GLOBAL_PAYMENTS))
-					dataResponse.merchantReceipt = dataResponse.merchantReceipt.substring(1,
-							dataResponse.merchantReceipt.length());
-
-				dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("'", "");
-				dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("#", "");
+					dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("'", "");
+					dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("#", "");
+				}
+				response.set(ListoData.FIELD_GENERIC_DATA_1, dataResponse.merchantReceipt);
 			}
-			response.set(ListoData.FIELD_GENERIC_DATA_1, dataResponse.merchantReceipt);
+
+			if (dataResponse.cardholderReceipt.trim().length() > 0)
+				response.set(ListoData.FIELD_GENERIC_DATA_2, dataResponse.cardholderReceipt);
+
+			if (request.hasField(ListoData.FIELD_MERCHANT_DATA))
+				response.set(ListoData.FIELD_MERCHANT_DATA, request.getString(ListoData.FIELD_MERCHANT_DATA));
+
+			if (dataResponse.nsuAcquirer.trim().length() > 0) {
+				response.set(ListoData.FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
+				/*
+				 * if (dataRequest.acquirerCode.equals(ListoData.BANRISUL)) {
+				 * String nsuAcquirer = dataResponse.nsuAcquirer.substring(3,
+				 * dataResponse.nsuAcquirer.length());
+				 * response.set(ListoData.FIELD_NSU_ACQUIRER, nsuAcquirer); }
+				 * else { response.set(ListoData.FIELD_NSU_ACQUIRER,
+				 * dataResponse.nsuAcquirer); }
+				 */
+			}
+
+			// Envia para o sistema que grava no banco de dados
+			byte[] messageData = response.pack();
+			RabbitMQ.Send(new String(messageData));
+
+		} catch (Exception e) {
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.ListoMessage.getResponseFormatted \n " + e.getMessage()));
+			throw e;
 		}
-
-		if (dataResponse.cardholderReceipt.trim().length() > 0)
-			response.set(ListoData.FIELD_GENERIC_DATA_2, dataResponse.cardholderReceipt);
-
-		if (request.hasField(ListoData.FIELD_MERCHANT_DATA))
-			response.set(ListoData.FIELD_MERCHANT_DATA, request.getString(ListoData.FIELD_MERCHANT_DATA));
-
-		if (dataResponse.nsuAcquirer.trim().length() > 0) {
-			response.set(ListoData.FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
-			/*
-			 * if (dataRequest.acquirerCode.equals(ListoData.BANRISUL)) { String
-			 * nsuAcquirer = dataResponse.nsuAcquirer.substring(3,
-			 * dataResponse.nsuAcquirer.length());
-			 * response.set(ListoData.FIELD_NSU_ACQUIRER, nsuAcquirer); } else {
-			 * response.set(ListoData.FIELD_NSU_ACQUIRER,
-			 * dataResponse.nsuAcquirer); }
-			 */
-		}
-
-		// Envia para o sistema que grava no banco de dados
-		byte[] messageData = response.pack();
-		RabbitMQ.Send(new String(messageData));
-
 		return response;
 	}
 
@@ -1038,7 +1064,9 @@ public class ListoMessage {
 			}
 
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Exception on function SendUnmakingMessage"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.ListoMessage.SendUnmakingMessage \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 	}
 

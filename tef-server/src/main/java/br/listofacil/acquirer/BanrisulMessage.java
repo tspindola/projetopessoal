@@ -19,13 +19,13 @@ import br.listofacil.tefserver.iso.ISO93EPackagerBanrisul;
 
 public class BanrisulMessage {
 
-	private final String MERCHANT = "LISTO FACIL";
+	//private final String MERCHANT = "LISTO FACIL";
 	private final String BANRISUL = "02";
 	private final String CURRENCY_SYMBOL = "R$  ";
 
 	// Comprovante
 	private final String RCP_ACQUIRER_NAME = "VERO";
-	private final String RCP_CREDIT = "VENDA CREDITO A VISTA";
+	//private final String RCP_CREDIT = "VENDA CREDITO A VISTA";
 
 	private final String BYTE_1 = "11111000";
 	private final String BYTE_2 = "10000000";
@@ -38,15 +38,15 @@ public class BanrisulMessage {
 	private final String PROC_CODE_PARAMS = "063";
 	private final String PROC_CODE_MESSAGES = "064";
 	private final String PROC_CODE_FLAGS = "065";
-	private final String PROC_CODE_END = "999";
+	//private final String PROC_CODE_END = "999";
 
 	private final String REQ_BA_LOGON_INIT = "0800";
-	private final String RES_BA_LOGON_INIT = "0810";
+	//private final String RES_BA_LOGON_INIT = "0810";
 	private final String REQ_BA_PAYMENT = "0200";
 	private final String RES_BA_PAYMENT = "0210";
 	private final String REQ_BA_CONFIRMATION = "0202";
 	private final String REQ_BA_CANCELLATION = "0400";
-	private final String RES_BA_CANCELLATION = "0410";
+	//private final String RES_BA_CANCELLATION = "0410";
 	private final String REQ_BA_UNMAKING = "0420";
 	private final String RES_BA_UNMAKING = "0430";
 
@@ -57,11 +57,11 @@ public class BanrisulMessage {
 	private final int FIELD_NSU_TEF = 11;
 	private final int FIELD_TIME = 12;
 	private final int FIELD_DATE = 13;
-	private final int FIELD_CARD_EXPIRATION_DATE = 14;
+	//private final int FIELD_CARD_EXPIRATION_DATE = 14;
 	private final int FIELD_ENTRY_MODE = 22;
 	private final int FIELD_PAN_SEQUENCE = 23;
 	private final int FIELD_FINANCIAL_INSTITUTION = 32;
-	private final int FIELD_TRACK_2 = 35;
+	//private final int FIELD_TRACK_2 = 35;
 	private final int FIELD_AUTHORIZATION_CODE = 38;
 	private final int FIELD_RESPONSE_CODE = 39;
 	private final int FIELD_TERMINAL_CODE = 41;
@@ -72,18 +72,18 @@ public class BanrisulMessage {
 	private final int FIELD_PIN = 52;
 	private final int FIELD_SMID = 53;
 	private final int FIELD_EMV_DATA = 55;
-	private final int FIELD_TERMINAL_TYPE = 61;
+	//private final int FIELD_TERMINAL_TYPE = 61;
 	private final int FIELD_GENERIC_DATA_62 = 62;
 	private final int FIELD_GENERIC_DATA_63 = 63;
 	private final int FIELD_INSTALLMENTS = 67;
 	private final int FIELD_ORIGINAL_DATA = 90;
-	private final int FIELD_SECURITY_CODE = 122;
+	//private final int FIELD_SECURITY_CODE = 122;
 	private final int FIELD_LAST_TRANSACTION = 125;
 	private final int FIELD_NSU_ACQUIRER = 127;
-	
+
 	private String DATA_POSITION_BA_PINPAD = "04";
-	private String PIN_POSITION_BA_PINPAD = "314"; //DUKPT 3DES = 3-3DES 14-POSICAO
-	
+	private String PIN_POSITION_BA_PINPAD = "314"; // DUKPT 3DES = 3-3DES
+													// 14-POSICAO
 
 	private String BANRISUL_PINPAD_DATA = "14"; // Posicao da chave de
 												// criptografia de dados
@@ -98,11 +98,18 @@ public class BanrisulMessage {
 
 	private final String PARAM_63a = "11"; // DUKPT e Master Key Banrisul
 	private final String PARAM_63b = "50"; // forma de comunicacao (50 - TCP/IP)
-	
-	private final String PARAM_63c_LOGON = "002"; //Banrisul (Carlos Santos) solicitou para que o valor seja o 002 = terminal type = 22
-												  //O codigo 001 significa terminal type 21 tag 9F35 no GoOnChip
-	
-	private final String PARAM_63c = "001"; //Banrisul - O codigo 001 significa terminal type 21 tag 9F35 no GoOnChip
+
+	private final String PARAM_63c_LOGON = "002"; // Banrisul (Carlos Santos)
+													// solicitou para que o
+													// valor seja o 002 =
+													// terminal type = 22
+													// O codigo 001 significa
+													// terminal type 21 tag 9F35
+													// no GoOnChip
+
+	private final String PARAM_63c = "001"; // Banrisul - O codigo 001 significa
+											// terminal type 21 tag 9F35 no
+											// GoOnChip
 
 	private final String PARAM_63d = "00003"; // versao do buffer
 	private final String PARAM_63e = "LISTO_TEF_v_2.00aaaa"; // versao da
@@ -110,21 +117,22 @@ public class BanrisulMessage {
 																// do tef
 	private final String PARAM_63f = "0010"; // codigo da Listo no cadastro com
 												// o BANRISUL
-	
+
 	private final String SOFT_DESCRIPTOR = "LISTO *";
 
 	private final String FINANCIAL_INSTITUTION_CODE = "00410035000"; // Codigo
-																	 // fornecido
-																	 // pelo
-																	 // BANRISUL
-																	 // (testes)
-	
+																		// fornecido
+																		// pelo
+																		// BANRISUL
+																		// (testes)
+
 	private final String TAGS_EMV_1ND_GEN_AC = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";
 	private final String TAGS_EMV_2ND_GEN_AC = "9F1A959C829F109F269F279F369F37849F349F24";
 	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F37849F34";
 	private final String TAGS_EMV_OPTIONAL = "9F125F34";
-	//private final String TAGS_EMV_2ND_GEN  = "030109F279F1095040109F279F1095010109F279F1095020109F279F1095"
-	
+	// private final String TAGS_EMV_2ND_GEN =
+	// "030109F279F1095040109F279F1095010109F279F1095020109F279F1095"
+
 	/*
 	 * 003000 – compra credito a vista 003100 – compra credito parcelado lojista
 	 * 003800 – compra credito parcelado emissor 002000 – compra debito a vista
@@ -132,10 +140,12 @@ public class BanrisulMessage {
 	private final String PROC_CODE_CREDIT = "003000";
 	private final String PROC_CODE_CREDIT_BANRISUL = "002900";
 	private final String PROC_CODE_CREDIT_BANRISUL_WITH_INSTALLMENT = "002800";
-	private final String PROC_CODE_CREDIT_BANRISUL_1MINUTO = "002899";
-	
-	private final String PROC_CODE_CREDIT_WITHOUT_INTEREST = "003100"; // Parcelado lojista																		
-	private final String PROC_CODE_CREDIT_WITH_INTEREST = "003800"; // Parcelado emissor																	
+	//private final String PROC_CODE_CREDIT_BANRISUL_1MINUTO = "002899";
+
+	private final String PROC_CODE_CREDIT_WITHOUT_INTEREST = "003100"; // Parcelado
+																		// lojista
+	private final String PROC_CODE_CREDIT_WITH_INTEREST = "003800"; // Parcelado
+																	// emissor
 	private final String PROC_CODE_DEBIT = "002000";
 
 	private static final String idMUXBanrisul = "mux.clientsimulator-banrisul-mux";
@@ -146,64 +156,70 @@ public class BanrisulMessage {
 	boolean firstEmvReg = false;
 
 	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber, boolean forceInitialization)
-			throws ISOException {
+			throws ISOException, Exception {
 
 		ISOMsg response = null;
-		String timestampTables;
+		//String timestampTables;
 		boolean ret = true;
 
 		// Nao utiliza o numero do terminal
 		// PARAM_41 = terminalNumber;
 
-		if (!forceInitialization)
-			AcquirerSettings.setStatusLoadingBanrisul(logicalNumber);
+		try {
 
-		// Efetuar o logon
-		response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
+			if (!forceInitialization)
+				AcquirerSettings.setStatusLoadingBanrisul(logicalNumber);
 
-		if (response != null) {
+			// Efetuar o logon
+			response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
 
-			if (setResDataLogon(response)) {
+			if (response != null) {
 
-				// Configura algumas tabelas que nao existem na
-				// inicializacao do Banrisul
-				setMerchantData(response);
+				if (setResDataLogon(response)) {
 
-				while (true) {
+					// Configura algumas tabelas que nao existem na
+					// inicializacao do Banrisul
+					setMerchantData(response);
 
-					response = requestTable(response, AcquirerSettings.getIncrementNSUBanrisul());
+					while (true) {
 
-					// Timeout
-					if (response == null) {
-						Logger.log(new LogEvent("Banrisul - Connection Timed out!"));
-						AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
-						return false;
+						response = requestTable(response, AcquirerSettings.getIncrementNSUBanrisul());
+
+						// Timeout
+						if (response == null) {
+							Logger.log(new LogEvent("Banrisul - Connection Timed out!"));
+							AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
+							return false;
+						}
+
+						if (!setResDataInitialization(response))
+							break;
 					}
 
-					if (!setResDataInitialization(response))
-						break;
+					// Seta os dados de criptografia
+					setEspecificData();
+
+					// Seta inicializacao na estrutura padrao Listo
+					AcquirerSettings.setInitializationTables(BANRISUL, logicalNumber, listoData);
+
+				} else {
+					Logger.log(new LogEvent("Banrisul - Falha nos dados do logon!"));
+					ret = false;
 				}
-
-				// Seta os dados de criptografia
-				setEspecificData();
-
-				// Seta inicializacao na estrutura padrao Listo
-				AcquirerSettings.setInitializationTables(BANRISUL, logicalNumber, listoData);
-
 			} else {
-				Logger.log(new LogEvent("Banrisul - Falha nos dados do logon!"));
+				Logger.log(new LogEvent("Banrisul - Connection Timed out!"));
 				ret = false;
 			}
-		} else {
-			Logger.log(new LogEvent("Banrisul - Connection Timed out!"));
-			ret = false;
+
+			if (!forceInitialization)
+				AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
+
+			AcquirerSettings.writeDataFile();
+
+		} catch (Exception e) {
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.loadTablesInitialization \n " + e.getMessage()));
 		}
-
-		if (!forceInitialization)
-			AcquirerSettings.removeStatusLoadingBanrisul(logicalNumber);
-		
-		AcquirerSettings.writeDataFile();
-
 		return ret;
 	}
 
@@ -244,7 +260,8 @@ public class BanrisulMessage {
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestEMV \n " + request + "\n" + e.getMessage()));
 			e.printStackTrace();
 			return request;
 		}
@@ -292,7 +309,8 @@ public class BanrisulMessage {
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestBINS \n " + request + "\n" + e.getMessage()));
 			e.printStackTrace();
 			return request;
 		}
@@ -336,7 +354,8 @@ public class BanrisulMessage {
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent("Error: br.listofacil.acquirer.BanrisulMessage.requestParameters \n " + request
+					+ "\n" + e.getMessage()));
 			e.printStackTrace();
 			return request;
 		}
@@ -384,7 +403,8 @@ public class BanrisulMessage {
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent("Error: br.listofacil.acquirer.BanrisulMessage.requestMessages \n " + request + "\n"
+					+ e.getMessage()));
 			e.printStackTrace();
 			return request;
 		}
@@ -422,7 +442,8 @@ public class BanrisulMessage {
 			isomsg.set(70, tableCode); // Codigo de gerenciamento = 001 Abertura
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestFlags \n " + request + "\n" + e.getMessage()));
 			e.printStackTrace();
 			return request;
 		}
@@ -473,7 +494,8 @@ public class BanrisulMessage {
 			response = requestAcquirer(request, true);
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestTable \n " + request + "\n" + e.getMessage()));
 			e.printStackTrace();
 			return request;
 		}
@@ -511,16 +533,17 @@ public class BanrisulMessage {
 			response = requestAcquirer(request, true);
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestLogon \n " + e.getMessage()));
 			e.printStackTrace();
 		}
 
 		if (response != null)
 			AcquirerLogonProcess.setDateLogon(ListoData.BANRISUL, cf.getCurrentDate());
-		
+
 		return response;
 	}
-	
+
 	public ISOMsg requestLogoff(String logicalNumber, long nsu) {
 		ISOMsg request = new ISOMsg();
 		ISOMsg response = null;
@@ -537,10 +560,12 @@ public class BanrisulMessage {
 			request.set(70, PROC_CODE_LOGON_F); // Codigo de gerenciamento = 002
 												// Fechamento
 
-			response = requestAcquirer(request, false); //Nao aguarda a  resposta
+			response = requestAcquirer(request, false); // Nao aguarda a
+														// resposta
 
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestLogoff \n " + e.getMessage()));
 			e.printStackTrace();
 		}
 
@@ -562,7 +587,9 @@ public class BanrisulMessage {
 				listoData.versaoTabelasBanrisul = bit62.substring(32, bit62.length());
 			}
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when setting ResDataLogon"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.setResDataLogon return false \n " + e.getMessage()));
+			e.printStackTrace();
 			return false;
 		}
 		return true;
@@ -585,7 +612,9 @@ public class BanrisulMessage {
 			listoData.L001_estabelecimento.put(listoData.L001_estabelecimento.size(), merchant);
 
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when setting MerchantData"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.setMerchantData \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 	}
 
@@ -611,7 +640,7 @@ public class BanrisulMessage {
 			if (!listoData.tableSequence.contains(ListoData.REG_CODE_OPT_TAGS_1ND_GEN))
 				listoData.tableSequence.add(ListoData.REG_CODE_OPT_TAGS_1ND_GEN);
 		}
-		
+
 		// Seta as tags emv obrigatorias referentes ao aid
 		String tab14 = new String();
 		for (Entry<Integer, String> entry : listoData.L009_emv.entrySet())
@@ -640,10 +669,10 @@ public class BanrisulMessage {
 	}
 
 	public boolean setResDataInitialization(ISOMsg response) {
-		int ini = 0;
-		int end = 42;
-		String messages;
-		String flags;
+		//int ini = 0;
+		//int end = 42;
+		//String messages;
+		//String flags;
 
 		String tab02 = new String();
 		String tab04 = new String();
@@ -653,7 +682,7 @@ public class BanrisulMessage {
 
 		try {
 
-			CommonFunctions common = new CommonFunctions();
+			//CommonFunctions common = new CommonFunctions();
 
 			listoData.codigoAdquirente = ListoData.BANRISUL;
 			listoData.posicaoChaveDadosPinpad = DATA_POSITION_BA_PINPAD;
@@ -720,7 +749,9 @@ public class BanrisulMessage {
 			setTablesInitialization(tab02, tab04, tab09, tab10, tab11);
 
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when setting DataInitialization"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.setResDataInitialization return false \n " + e.getMessage()));
+			e.printStackTrace();
 			return false;
 		}
 
@@ -735,9 +766,9 @@ public class BanrisulMessage {
 		String index = emvAid.substring(6, 8);
 		String length = "0";
 
-		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || 
-			emvAid.contains("MASTER") || emvAid.contains("MAESTRO")) {
-			
+		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
+				|| emvAid.contains("MAESTRO")) {
+
 			length = cf.padLeft(String.valueOf(TAGS_EMV_1ND_GEN_AC.length()), 3, "0");
 			return index + length + TAGS_EMV_1ND_GEN_AC;
 		}
@@ -746,7 +777,7 @@ public class BanrisulMessage {
 		return index + length + TAGS_EMV_BANRISUL;
 		// return index + length + TAGS_EMV_BANRISUL;
 	}
-	
+
 	private String getTagsEmvOptional(String emvAid) {
 		// Mastercard e visa
 		// 9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884
@@ -755,9 +786,9 @@ public class BanrisulMessage {
 		String index = emvAid.substring(6, 8);
 		String length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
 
-		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || 
-			emvAid.contains("MASTER") || emvAid.contains("MAESTRO")) {
-			
+		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
+				|| emvAid.contains("MAESTRO")) {
+
 			length = cf.padLeft(String.valueOf(TAGS_EMV_OPTIONAL.length()), 3, "0");
 			return index + length + TAGS_EMV_OPTIONAL;
 		}
@@ -766,7 +797,7 @@ public class BanrisulMessage {
 		return index + length + TAGS_EMV_OPTIONAL;
 		// return index + length + TAGS_EMV_BANRISUL;
 	}
-	
+
 	private String getTagsEmv2ndGenAC(String emvAid) {
 		// Mastercard e visa
 		// 9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884
@@ -865,10 +896,10 @@ public class BanrisulMessage {
 	}
 
 	private String getProductDataParams(String value) {
-		String params = "";// value.substring(11, value.length());
+		//String params = "";// value.substring(11, value.length());
 		String registry = "";
-		String code = "";
-		int count = 0;
+		//String code = "";
+		//int count = 0;
 		/*
 		 * ADICIONAR NA TABELA DE PRODUTOS E NA DE PARAMETROS POR PRODUTOS
 		 * while(params.length() > 0) { code = params.substring(0, 3); count =
@@ -902,8 +933,8 @@ public class BanrisulMessage {
 		long timeout = ListoData.SERVER_TIMEOUT * 1000;
 
 		try {
-			
-			//Desabilita o timeout
+
+			// Desabilita o timeout
 			if (!enableTimeout)
 				timeout = 0;
 
@@ -917,7 +948,8 @@ public class BanrisulMessage {
 			response = mux.request(request, timeout);
 
 		} catch (NotFoundException | ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestAcquirer \n " + e.getMessage()));
 			e.printStackTrace();
 		}
 
@@ -983,13 +1015,13 @@ public class BanrisulMessage {
 	}
 
 	private String getMerchantData(TransactionData data) {
-		
+
 		data.merchantName = SOFT_DESCRIPTOR + data.merchantName;
 		if (data.merchantName.length() > 22)
 			data.merchantName = data.merchantName.substring(0, 22);
-		
+
 		String bit062 = cf.padRight(data.merchantName, 22, " ");
-		
+
 		if (data.address.length() > 40)
 			data.address = data.address.substring(0, 40);
 		bit062 += cf.padRight(data.address, 40, " ");
@@ -1018,7 +1050,7 @@ public class BanrisulMessage {
 		data.cnpjcpf = data.cnpjcpf.replace("/", "");
 		data.cnpjcpf = data.cnpjcpf.replace("-", "");
 		data.cnpjcpf = data.cnpjcpf.replace(",", "");
-		
+
 		if (data.cnpjcpf.length() > 14)
 			data.cnpjcpf = data.cnpjcpf.substring(0, 14);
 		bit062 += cf.padLeft(data.cnpjcpf, 14, "0");
@@ -1033,7 +1065,8 @@ public class BanrisulMessage {
 	private String getTerminalData(String param_63c) {
 		String bit63 = PARAM_63a; // Master key Banrisul
 		bit63 += PARAM_63b; // Forma de comunicacao (50 - TCP/IP)
-		bit63 += param_63c; // Tipo de equipamento (002 - POSes terminal type 22)
+		bit63 += param_63c; // Tipo de equipamento (002 - POSes terminal type
+							// 22)
 		bit63 += PARAM_63d; // versao do buffer
 		bit63 += PARAM_63e; // versao da especificacao do tef
 		bit63 += PARAM_63f; // codigo da Listo no cadastro com o BANRISUL
@@ -1067,8 +1100,7 @@ public class BanrisulMessage {
 
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 
-		if ((requestData.panSequence.length() > 0) &&
-			(Integer.parseInt(requestData.panSequence) > 0))
+		if ((requestData.panSequence.length() > 0) && (Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
 
 		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
@@ -1093,11 +1125,11 @@ public class BanrisulMessage {
 
 		if (requestData.emvData.length() > 0) {
 			String bit055 = requestData.emvData.substring(6, requestData.emvData.length());
-			
+
 			if (bit055.contains("9F12")) {
 				bit055 = extract9F12(bit055);
-			}	
-		
+			}
+
 			request.set(FIELD_EMV_DATA, bit055);
 		}
 
@@ -1112,7 +1144,7 @@ public class BanrisulMessage {
 		String merchantData = getMerchantData(requestData);
 		if (!requestData.productDescription.contains("BANRISUL"))
 			merchantData = "0" + merchantData;
-			
+
 		String securityData = requestData.ksnPin;
 		securityData += "00000000000000000000"; // ksn dados
 		// securityData += requestData.ksnCard;
@@ -1121,8 +1153,8 @@ public class BanrisulMessage {
 		// TESTE
 		// merchantData = "0XXXXXXXXXXXX*JOJOAOZIN SAOPAULO
 		// 0145200258120000000616123400000000000";
-		
-		//request.set(FIELD_TERMINAL_TYPE, requestData.equipmentType);
+
+		// request.set(FIELD_TERMINAL_TYPE, requestData.equipmentType);
 
 		request.set(FIELD_GENERIC_DATA_62, merchantData + securityData);
 
@@ -1133,18 +1165,17 @@ public class BanrisulMessage {
 		if (requestData.installments.length() > 0)
 			request.set(FIELD_INSTALLMENTS, cf.padLeft(requestData.installments, 2, "0"));
 
-		//Nao envia o BIT122
+		// Nao envia o BIT122
 		/*
-		if (requestData.typeCardRead.equals(ListoData.MAGNETIC)) {
-			securityData = "0";
-			if (!requestData.typeCardVerificationData.equals(ListoData.SECURITY_CODE_INFORMED)) {
-				if (requestData.typeCardVerificationData.equals(ListoData.SECURITY_CODE_UNREADABLE))
-					securityData = "1";
-			} else
-				securityData = requestData.cardVerificationData;
-			request.set(FIELD_SECURITY_CODE, securityData);
-		}
-		*/
+		 * if (requestData.typeCardRead.equals(ListoData.MAGNETIC)) {
+		 * securityData = "0"; if
+		 * (!requestData.typeCardVerificationData.equals(ListoData.
+		 * SECURITY_CODE_INFORMED)) { if
+		 * (requestData.typeCardVerificationData.equals(ListoData.
+		 * SECURITY_CODE_UNREADABLE)) securityData = "1"; } else securityData =
+		 * requestData.cardVerificationData; request.set(FIELD_SECURITY_CODE,
+		 * securityData); }
+		 */
 
 		// Prencher com os dados da ultima transacao valida
 		// salvar em memoria a data e o NSU do banrisul
@@ -1154,7 +1185,7 @@ public class BanrisulMessage {
 
 		return request;
 	}
-	
+
 	private ISOMsg getMessage0202(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 
@@ -1181,13 +1212,12 @@ public class BanrisulMessage {
 
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 
-		if ((requestData.panSequence.length() > 0) &&
-			(Integer.parseInt(requestData.panSequence) > 0))
+		if ((requestData.panSequence.length() > 0) && (Integer.parseInt(requestData.panSequence) > 0))
 			request.set(FIELD_PAN_SEQUENCE, requestData.panSequence);
-		
+
 		if (requestData.authorizationCode.length() > 0)
 			request.set(FIELD_AUTHORIZATION_CODE, requestData.authorizationCode);
-		
+
 		request.set(FIELD_RESPONSE_CODE, requestData.responseCode);
 
 		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
@@ -1199,17 +1229,17 @@ public class BanrisulMessage {
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
 
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
-		
+
 		if (requestData.smid.length() > 0)
 			request.set(FIELD_SMID, requestData.smid);
 
 		if (requestData.emvData.length() > 0) {
 			String bit055 = requestData.emvData.substring(6, requestData.emvData.length());
-			
+
 			if (bit055.contains("9F12")) {
 				bit055 = extract9F12(bit055);
-			}	
-		
+			}
+
 			request.set(FIELD_EMV_DATA, bit055);
 		}
 
@@ -1239,7 +1269,8 @@ public class BanrisulMessage {
 		return request;
 	}
 
-	public TransactionData getResponseData(String mti, TransactionData requestData, ISOMsg message) throws ISOException {
+	public TransactionData getResponseData(String mti, TransactionData requestData, ISOMsg message)
+			throws ISOException {
 		TransactionData data = new TransactionData();
 
 		if (message.hasField(FIELD_PAN))
@@ -1271,27 +1302,29 @@ public class BanrisulMessage {
 		if (message.hasField(FIELD_CURRENCY_CODE))
 			data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
 		if (message.hasField(FIELD_EMV_DATA))
-			data.emvData = message.getString(FIELD_EMV_DATA);		
+			data.emvData = message.getString(FIELD_EMV_DATA);
 		if (message.hasField(FIELD_NSU_ACQUIRER))
 			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
-		
+
 		if (mti.equals(REQ_BA_PAYMENT)) {
 			if (!data.responseCode.equals("00")) {
 				String msg = "TRANSACAO NEGADA";
 				if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
 					msg = listoData.messages.get(data.responseCode).trim();
 				data.cardholderReceipt = msg;
-			} else {				
+			} else {
 				if ((data.nsuAcquirer.length() > 0) && (message.getMTI().equals(RES_BA_PAYMENT))) {
 					Calendar cal = cf.getCurrentDate();
-					String nsuAcq = data.nsuAcquirer.substring(3,  data.nsuAcquirer.length()); //Retira data juliana
+					String nsuAcq = data.nsuAcquirer.substring(3, data.nsuAcquirer.length()); // Retira
+																								// data
+																								// juliana
 					AcquirerSettings.setDateNsuLastTransactionOk(cal.get(Calendar.YEAR) + data.date, nsuAcq);
 				}
 				data.merchantReceipt = getMerchantReceipt(requestData, message);
 				data.cardholderReceipt = getCardholderReceipt(requestData, message);
 			}
-		}	
-		
+		}
+
 		if (mti.equals(REQ_BA_CANCELLATION)) {
 			if (!data.responseCode.equals("00")) {
 				String msg = "TRANSACAO NEGADA";
@@ -1306,17 +1339,16 @@ public class BanrisulMessage {
 
 		return data;
 	}
-	
+
 	private String getMerchantReceipt(TransactionData requestData, ISOMsg message) {
 		String receipt = new String();
 		String dataStr = new String();
-		
+
 		try {
 			// Formatar comprovante
-			
+
 			String flag = requestData.productDescription.trim();
-			if (message.hasField(FIELD_GENERIC_DATA_62) && 
-				message.getString(FIELD_GENERIC_DATA_62).trim().length() > 0)
+			if (message.hasField(FIELD_GENERIC_DATA_62) && message.getString(FIELD_GENERIC_DATA_62).trim().length() > 0)
 				flag = message.getString(FIELD_GENERIC_DATA_62).trim();
 			receipt += "@@------------ 1^ via - loja -----------";
 			receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
@@ -1328,29 +1360,31 @@ public class BanrisulMessage {
 				merchant = merchant.substring(0, 38);
 
 			receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
-			
+
 			dataStr = "@CNPJ: " + requestData.cnpjcpf;
 			receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
-			
-			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
+
+			receipt += "@"
+					+ cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
-			
-			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE); 
+
+			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE);
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
-			dataStr = "@DATA: " + requestData.brazilianDate + "         HORA: " + requestData.time.substring(0, 2)
-					+ ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
+			dataStr = "@DATA: " + requestData.brazilianDate + "         HORA: " + requestData.time.substring(0, 2) + ":"
+					+ requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
-			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
-			
+
+			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3,
+					message.getString(FIELD_NSU_ACQUIRER).length());
+
 			dataStr = "@NSU BERGS: " + nsuAcquirer;
 			if (!requestData.productDescription.contains("BANRISUL"))
 				dataStr += " NSU BANDEIRA: " + message.getString(FIELD_AUTHORIZATION_CODE);
-			
+
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@CARTAO: ";
 			if (requestData.pan.length() > 0)
 				dataStr += requestData.pan.substring(requestData.pan.length() - 4, requestData.pan.length());
@@ -1359,20 +1393,20 @@ public class BanrisulMessage {
 									// ultimos digitos
 			dataStr += "   VALOR: " + String.format("%.2f", (Double.parseDouble(requestData.amount) / 100));
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
-			if (requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITH_INTEREST) ||
-				requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST)) {
+
+			if (requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITH_INTEREST)
+					|| requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST)) {
 				dataStr = "@NUMERO DE PARCELAS: " + requestData.installments;
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
-			
+
 			if (requestData.processingCode.equals(ListoData.TRANSACTION_ENTERED)) {
 				dataStr = "@TRANSAÇÃO DIGITADA (M.O.T.O.)";
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
 
-			if (requestData.entryMode.equals(ListoData.ENTRY_MODE_MAGNETIC_WITHOUT_PIN) 
-				|| cardChipWithSignature(requestData.goOnChip)) {
+			if (requestData.entryMode.equals(ListoData.ENTRY_MODE_MAGNETIC_WITHOUT_PIN)
+					|| cardChipWithSignature(requestData.goOnChip)) {
 
 				String cardholder = "ASSINATURA DO CLIENTE";
 				if (message.hasField(FIELD_TRACK_1)) {
@@ -1385,59 +1419,61 @@ public class BanrisulMessage {
 				}
 
 				receipt += "@@      RECONHECO E PAGAREI A DIVIDA     ";
-				receipt +=  "@           AQUI REPRESENTADA           ";
+				receipt += "@           AQUI REPRESENTADA           ";
 				receipt += "@@   ---------------------------------   ";
-				
+
 				int len = 39 - cardholder.length();
-				if (len % 2 != 0) len--;
-				
+				if (len % 2 != 0)
+					len--;
+
 				dataStr = cf.padLeft(cardholder, (len / 2) + cardholder.length(), " ");
 				receipt += "@" + cf.padRight(dataStr, (len / 2) + dataStr.length(), " ");
 				receipt += "@         CONFIRA A ASSINATURA          ";
 				receipt += "@@";
 			}
-			
+
 			receipt += "@@";
-			
-			if (requestData.productDescription.contains("BANRISUL") && 
-				requestData.processingCode.equals(ListoData.PROC_REQ_DEBIT))
+
+			if (requestData.productDescription.contains("BANRISUL")
+					&& requestData.processingCode.equals(ListoData.PROC_REQ_DEBIT))
 				receipt += "DEBITO EM: " + requestData.brazilianDate;
-			
+
 			if ((requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_VALIDATED_PIN)
-				|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
-				&& requestData.emvData.length() > 0) {
-				
-				receipt += "@" + cf.padRight(requestData.cardPreferredName.toUpperCase(), 
-											 39 - requestData.cardPreferredName.toUpperCase().length(), " ");
-				
-				dataStr = "@" + requestData.panSequence + "-" + 
-								requestData.cardApplicationTransactionCounter + "-" + 
-								requestData.cardApplicationCryptogram;
+					|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
+					&& requestData.emvData.length() > 0) {
+
+				receipt += "@" + cf.padRight(requestData.cardPreferredName.toUpperCase(),
+						39 - requestData.cardPreferredName.toUpperCase().length(), " ");
+
+				dataStr = "@" + requestData.panSequence + "-" + requestData.cardApplicationTransactionCounter + "-"
+						+ requestData.cardApplicationCryptogram;
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-				
-				dataStr = "@" + requestData.emvAID.substring(0,  14);
+
+				dataStr = "@" + requestData.emvAID.substring(0, 14);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
-			
+
 			receipt += "@@";
-			
+
 		} catch (Exception e) {
-			// TODO: handle exception
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.getMerchantReceipt \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 
 		return receipt;
 	}
-	
+
 	private boolean cardChipWithSignature(String goOnChip) {
-		
-		//Especificacao BC - Retorno GoOnChip
-		//002 - Assinatura em papel deve ser obtida (“0”-não / “1”-sim). 
+
+		// Especificacao BC - Retorno GoOnChip
+		// 002 - Assinatura em papel deve ser obtida (“0”-não / “1”-sim).
 		if (goOnChip.length() > 0 && goOnChip.substring(1, 2).equals("1"))
 			return true;
-		
+
 		return false;
 	}
-	
+
 	private String getCardholderReceipt(TransactionData requestData, ISOMsg message) {
 		String receipt = new String();
 		String dataStr = new String();
@@ -1446,10 +1482,9 @@ public class BanrisulMessage {
 
 			// Formatar comprovante
 			String flag = requestData.productDescription.trim();
-			if (message.hasField(FIELD_GENERIC_DATA_62) && 
-				message.getString(FIELD_GENERIC_DATA_62).trim().length() > 0)
+			if (message.hasField(FIELD_GENERIC_DATA_62) && message.getString(FIELD_GENERIC_DATA_62).trim().length() > 0)
 				flag = message.getString(FIELD_GENERIC_DATA_62).trim();
-			
+
 			receipt += "@@---------- 2^ via - cliente ----------";
 			receipt += "@" + cf.padRight(RCP_ACQUIRER_NAME + " - " + flag, 39, " ");
 			receipt += "@" + cf.padRight(getTypePaymentDescription(requestData), 39, " ");
@@ -1460,29 +1495,31 @@ public class BanrisulMessage {
 				merchant = merchant.substring(0, 38);
 
 			receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
-			
+
 			dataStr = "@CNPJ: " + requestData.cnpjcpf;
 			receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
-			
-			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
+
+			receipt += "@"
+					+ cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
-			
+
 			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE);
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
-			dataStr = "@DATA: " + requestData.brazilianDate + "         HORA: " + requestData.time.substring(0, 2)
-					+ ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
+			dataStr = "@DATA: " + requestData.brazilianDate + "         HORA: " + requestData.time.substring(0, 2) + ":"
+					+ requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
-			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
-			
+
+			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3,
+					message.getString(FIELD_NSU_ACQUIRER).length());
+
 			dataStr = "@NSU BERGS: " + nsuAcquirer;
 			if (!requestData.productDescription.contains("BANRISUL"))
 				dataStr += " NSU BANDEIRA: " + message.getString(FIELD_AUTHORIZATION_CODE);
-			
+
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@CARTAO: ";
 			if (requestData.pan.length() > 0)
 				dataStr += requestData.pan.substring(requestData.pan.length() - 4, requestData.pan.length());
@@ -1491,43 +1528,44 @@ public class BanrisulMessage {
 									// ultimos digitos
 			dataStr += "   VALOR: " + String.format("%.2f", (Double.parseDouble(requestData.amount) / 100));
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
-			if (requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITH_INTEREST) ||
-				requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST)) {
+
+			if (requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITH_INTEREST)
+					|| requestData.processingCode.equals(ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST)) {
 				dataStr = "@NUMERO DE PARCELAS: " + requestData.installments;
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
-			
+
 			if (requestData.processingCode.equals(ListoData.TRANSACTION_ENTERED)) {
 				dataStr = "@TRANSAÇÃO DIGITADA (M.O.T.O.)";
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
-			
+
 			receipt += "@@";
-			
-			if (requestData.productDescription.contains("BANRISUL") && 
-				requestData.processingCode.equals(ListoData.PROC_REQ_DEBIT))
+
+			if (requestData.productDescription.contains("BANRISUL")
+					&& requestData.processingCode.equals(ListoData.PROC_REQ_DEBIT))
 				receipt += "DEBITO EM: " + requestData.brazilianDate;
 
 			if ((requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_VALIDATED_PIN)
 					|| requestData.entryMode.equals(ListoData.ENTRY_MODE_CHIP_WITH_PIN))
 					&& requestData.emvData.length() > 0) {
-				
-				receipt += "@" + cf.padRight(requestData.cardPreferredName.toUpperCase(), 
-											 39 - requestData.cardPreferredName.toUpperCase().length(), " ");
-				
-				dataStr = "@" + requestData.panSequence + "-" + 
-								requestData.cardApplicationTransactionCounter + "-" + 
-								requestData.cardApplicationCryptogram;
+
+				receipt += "@" + cf.padRight(requestData.cardPreferredName.toUpperCase(),
+						39 - requestData.cardPreferredName.toUpperCase().length(), " ");
+
+				dataStr = "@" + requestData.panSequence + "-" + requestData.cardApplicationTransactionCounter + "-"
+						+ requestData.cardApplicationCryptogram;
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-				
-				dataStr = "@" + requestData.emvAID.substring(0,  14);
+
+				dataStr = "@" + requestData.emvAID.substring(0, 14);
 				receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			}
 
 			receipt += "@@";
 		} catch (Exception e) {
-			// TODO: handle exception
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.getCardholderReceipt \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 
 		return receipt;
@@ -1536,7 +1574,7 @@ public class BanrisulMessage {
 	private String getMerchantCancelReceipt(TransactionData requestData, ISOMsg message) {
 		String receipt = new String();
 		String dataStr = new String();
-		
+
 		try {
 			// Formatar comprovante
 			receipt += "@@------------ 1^ via - loja -----------";
@@ -1549,39 +1587,43 @@ public class BanrisulMessage {
 				merchant = merchant.substring(0, 38);
 
 			receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
-			
+
 			dataStr = "@CNPJ: " + requestData.cnpjcpf;
 			receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
-			
-			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
+
+			receipt += "@"
+					+ cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
-			
+
 			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE);
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
 			dataStr = "@DATA DO CANCELAMENTO: " + requestData.brazilianDate + "      ";
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
-			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
-			
-			dataStr = "@NSU BERGS: " + nsuAcquirer + "         HORA: "  + requestData.time.substring(0, 2)
-															  + ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
+
+			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3,
+					message.getString(FIELD_NSU_ACQUIRER).length());
+
+			dataStr = "@NSU BERGS: " + nsuAcquirer + "         HORA: " + requestData.time.substring(0, 2) + ":"
+					+ requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@VALOR: " + String.format("%.2f", (Double.parseDouble(requestData.amount) / 100));
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@DATA OPERACAO CANCELADA: " + requestData.brazilianDate;
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@NSU OPERACAO CANCELADA: " + requestData.nsuAcquirer;
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-		
+
 			receipt += "@@";
-			
+
 		} catch (Exception e) {
-			// TODO: handle exception
+			Logger.log(new LogEvent(
+					"Erro: br.listofacil.acquirer.BanrisulMessage.getMerchantCancelReceipt \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 
 		return receipt;
@@ -1603,65 +1645,68 @@ public class BanrisulMessage {
 				merchant = merchant.substring(0, 38);
 
 			receipt += "@" + cf.padRight(merchant, 39 - merchant.length(), " ");
-			
+
 			dataStr = "@CNPJ: " + requestData.cnpjcpf;
 			receipt += cf.padRight(dataStr, 39 - (dataStr.length() + 6), " ");
-			
-			receipt += "@" + cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
+
+			receipt += "@"
+					+ cf.padRight(requestData.city.toUpperCase(), 39 - requestData.city.toUpperCase().length(), " ");
 			receipt += "@"; // quebra linha
-			
+
 			dataStr = message.getString(FIELD_MERCHANT_CODE) + " " + message.getString(FIELD_TERMINAL_CODE);
 			receipt += "@" + cf.padRight(dataStr, 39 - dataStr.length(), " ");
 			receipt += "@";
 
 			dataStr = "@DATA DO CANCELAMENTO: " + requestData.brazilianDate + "      ";
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
-			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3, message.getString(FIELD_NSU_ACQUIRER).length());
-			
-			dataStr = "@NSU BERGS: " + nsuAcquirer + "         HORA: "  + requestData.time.substring(0, 2)
-															  + ":" + requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
+
+			String nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER).substring(3,
+					message.getString(FIELD_NSU_ACQUIRER).length());
+
+			dataStr = "@NSU BERGS: " + nsuAcquirer + "         HORA: " + requestData.time.substring(0, 2) + ":"
+					+ requestData.time.substring(2, 4) + ":" + requestData.time.substring(4, 6);
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@VALOR: " + String.format("%.2f", (Double.parseDouble(requestData.amount) / 100));
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@DATA OPERACAO CANCELADA: " + requestData.brazilianDate;
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			dataStr = "@NSU OPERACAO CANCELADA: " + requestData.nsuAcquirer;
 			receipt += cf.padRight(dataStr, 39 - dataStr.length(), " ");
-			
+
 			receipt += "@@";
-			
+
 		} catch (Exception e) {
-			// TODO: handle exception
+			Logger.log(new LogEvent(
+					"Erro: br.listofacil.acquirer.BanrisulMessage.getCardholderCancelReceipt \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 
 		return receipt;
 	}
-	
+
 	private String getTypePaymentDescription(TransactionData requestData) {
 		String ret = "VENDA DEBITO A VISTA";
-		
+
 		switch (requestData.processingCode) {
 		case ListoData.PROC_REQ_CREDIT:
-			ret =  "VENDA CREDITO A VISTA";
+			ret = "VENDA CREDITO A VISTA";
 			break;
 		case ListoData.PROC_REQ_CREDIT_WITHOUT_INTEREST:
-			ret =  "VENDA CREDITO PARCELADO LOJISTA";
+			ret = "VENDA CREDITO PARCELADO LOJISTA";
 			break;
 		case ListoData.PROC_REQ_CREDIT_WITH_INTEREST:
 			ret = "VENDA CREDITO PARCELADO EMISSOR";
 			break;
 		case ListoData.PROC_REQ_DEBIT:
-			if (requestData.productDescription.contains("BANRISUL"))
-			{
+			if (requestData.productDescription.contains("BANRISUL")) {
 				ret = "PAGAMENTO A VISTA";
 			}
 			break;
 		}
-		
+
 		return ret;
 	}
 
@@ -1677,86 +1722,94 @@ public class BanrisulMessage {
 			responseData = getResponseData(REQ_BA_PAYMENT, requestData, response);
 
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Exception on function requestPayment"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestPayment \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 
 		return responseData;
 	}
-	
+
 	public TransactionData requestConfirmation(TransactionData requestData) {
-		TransactionData responseData = null;
+		//TransactionData responseData = null;
 
 		try {
 			// Seta os dados de inicializacao do adquirente
 			listoData = AcquirerSettings.getInitializationTables(BANRISUL, requestData.merchantCode);
 
 			ISOMsg request = getMessage0202(requestData);
-			//No Banrisul nao ha resposta da transacao de confirmacao
-			//Os dados enviados no request sao utilizados para resposta
+			// No Banrisul nao ha resposta da transacao de confirmacao
+			// Os dados enviados no request sao utilizados para resposta
 			requestAcquirer(request, false);
 
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Exception on function requestConfirmation"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestConfirmation \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 
 		return requestData;
 	}
-	
+
 	public TransactionData requestCancellation(TransactionData requestData) {
 		TransactionData responseData = null;
-		
+
 		try {
-			
+
 			ISOMsg request = getMessage0400(requestData);
-			ISOMsg response = requestAcquirer(request, true);	
+			ISOMsg response = requestAcquirer(request, true);
 			responseData = getResponseData(REQ_BA_CANCELLATION, requestData, response);
-			
+
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Exception on function requestCancellation"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestCancellation \n " + e.getMessage()));
+			e.printStackTrace();
 		}
-		
+
 		return responseData;
 	}
-	
+
 	public TransactionData requestUnmaking(TransactionData requestData) {
 		TransactionData responseData = null;
-		
+
 		try {
-			//Verifica se a transacao foi negada pelo chip
-			//Caso tenha sido negada pelo chip, a transacao deve possuir NSU do Adquirente
-			if ((requestData.originalNSUAcquirer.length() > 0) &&
-				(requestData.responseCode.equals(ListoData.CODE_TRANSACTION_TIMEOUT))){
-				
-				//Caso o cartao seja banrisul e a transacao negada pelo cartao, 
-				//enviar o codigo V1 no BIT39 da nao confirmacao
+			// Verifica se a transacao foi negada pelo chip
+			// Caso tenha sido negada pelo chip, a transacao deve possuir NSU do
+			// Adquirente
+			if ((requestData.originalNSUAcquirer.length() > 0)
+					&& (requestData.responseCode.equals(ListoData.CODE_TRANSACTION_TIMEOUT))) {
+
+				// Caso o cartao seja banrisul e a transacao negada pelo cartao,
+				// enviar o codigo V1 no BIT39 da nao confirmacao
 				if (requestData.productDescription.toUpperCase().contains("BANRISUL"))
 					requestData.responseCode = "V1";
-								
+
 				requestData.nsuAcquirer = requestData.originalNSUAcquirer;
 				ISOMsg request = getMessage0202(requestData);
-				requestAcquirer(request, false);	
-				//Utiliza o request para responder o desfazimento da ponta
+				requestAcquirer(request, false);
+				// Utiliza o request para responder o desfazimento da ponta
 				responseData = getResponseData(RES_BA_UNMAKING, requestData, request);
-			} else {			
+			} else {
 				ISOMsg request = getMessage0420(requestData);
-				ISOMsg response = requestAcquirer(request, true);	
+				ISOMsg response = requestAcquirer(request, true);
 				responseData = getResponseData(RES_BA_UNMAKING, requestData, response);
 			}
-			
+
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Exception on function requestUnmaking"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestUnmaking \n " + e.getMessage()));
+			e.printStackTrace();
 		}
-		
+
 		return responseData;
 	}
-	
-	
-	private ISOMsg getMessage0400(TransactionData requestData) throws ISOException {	
+
+	private ISOMsg getMessage0400(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
-		
+
 		request.setPackager(new ISO87APackagerGP());
 		request.setMTI(REQ_BA_CANCELLATION);
-		
+
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.productDescription, requestData.processingCode));
 		request.set(FIELD_AMOUNT, requestData.amount);
 		request.set(FIELD_DATE_TIME, requestData.dateTime);
@@ -1765,27 +1818,26 @@ public class BanrisulMessage {
 		request.set(FIELD_DATE, requestData.date);
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
-		request.set(FIELD_RESPONSE_CODE, "00"); //Transacao aprovada
-	
+		request.set(FIELD_RESPONSE_CODE, "00"); // Transacao aprovada
+
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
-		//request.set(FIELD_TERMINAL_TYPE, "00811111111");
-		
+		// request.set(FIELD_TERMINAL_TYPE, "00811111111");
+
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
 		request.set(FIELD_GENERIC_DATA_63, getTerminalData(PARAM_63c));
-		
+
 		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
-		
+
 		return request;
 	}
-	
-	
-	private ISOMsg getMessage0420(TransactionData requestData) throws ISOException {	
+
+	private ISOMsg getMessage0420(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
-		
+
 		request.setPackager(new ISO87APackagerGP());
 		request.setMTI(REQ_BA_UNMAKING);
-		
+
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.productDescription, requestData.processingCode));
 		request.set(FIELD_AMOUNT, requestData.amount);
 		request.set(FIELD_DATE_TIME, requestData.dateTime);
@@ -1794,90 +1846,95 @@ public class BanrisulMessage {
 		request.set(FIELD_DATE, requestData.date);
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
-		request.set(FIELD_RESPONSE_CODE, "00"); //Transacao aprovada
-	
+		request.set(FIELD_RESPONSE_CODE, "00"); // Transacao aprovada
+
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
-		
+
 		request.set(FIELD_CURRENCY_CODE, requestData.currencyCode);
 		request.set(FIELD_GENERIC_DATA_63, getTerminalData(PARAM_63c));
-		
+
 		request.set(FIELD_ORIGINAL_DATA, getOriginalTransaction(requestData));
-		
+
 		return request;
 	}
-	
-	
+
 	private String getOriginalTransaction(TransactionData requestData) {
 		String bit090 = new String();
-		
+
 		String originalNsuAcquirer = requestData.originalNSUAcquirer;
 		if (requestData.originalNSUAcquirer.length() > 3)
-			originalNsuAcquirer = requestData.originalNSUAcquirer.substring(3, requestData.originalNSUAcquirer.length());
+			originalNsuAcquirer = requestData.originalNSUAcquirer.substring(3,
+					requestData.originalNSUAcquirer.length());
 
 		bit090 += requestData.originalMessageCode;
 		bit090 += originalNsuAcquirer;
-		bit090 += requestData.originalDateTime.substring(0,  4);
+		bit090 += requestData.originalDateTime.substring(0, 4);
 		bit090 += "00000000000000000000000000";
-		
+
 		return bit090;
 	}
-	
+
 	public void requestLogonProcess(ISOMsg message) {
-		
+
 		String logicalNumber = message.getString(ListoData.FIELD_MERCHANT_CODE);
-		
-		//Efetua o logoff e em seguida o logon (regra banrisul)
+
+		// Efetua o logoff e em seguida o logon (regra banrisul)
 		requestLogoff(message.getString(ListoData.FIELD_MERCHANT_CODE), AcquirerSettings.getIncrementNSUBanrisul());
-		
+
 		ISOMsg response = requestLogon(logicalNumber, AcquirerSettings.getIncrementNSUBanrisul());
-		
+
 		if (response != null) {
-			
+
 			String bit62 = response.getString(62);
 			if (bit62.trim().length() > 0) {
 				String versaoTabelasBanrisul = bit62.substring(32, bit62.length());
-				
-				//Obtem os dados de inicializacao do adquirente
-				ListoData listoData = AcquirerSettings.getInitializationTables(ListoData.BANRISUL, logicalNumber);	
-				
+
+				// Obtem os dados de inicializacao do adquirente
+				ListoData listoData = AcquirerSettings.getInitializationTables(ListoData.BANRISUL, logicalNumber);
+
 				if (listoData != null) {
 					if (!versaoTabelasBanrisul.equals(listoData.versaoTabelasBanrisul)) {
-						
+
 						Logger.log(new LogEvent("Diferent tables version - Process of load Banrisul tables started!"));
-						
-						AcquirerSettings.loadAcquirerTables(ListoData.BANRISUL, logicalNumber, 
-															message.getString(ListoData.FIELD_TERMINAL_CODE), true);
+
+						AcquirerSettings.loadAcquirerTables(ListoData.BANRISUL, logicalNumber,
+								message.getString(ListoData.FIELD_TERMINAL_CODE), true);
 					}
 				}
 			}
 		}
 	}
-	
-	private String extract9F12(String value)
-	{
+
+	private String extract9F12(String value) {
 		String bit055 = value;
 		try {
-			//Obtem os dados da tag e do restante do bit055
-			String aux_ =  bit055.substring(bit055.indexOf("9F12") + 4, bit055.length());
-			
-			//Obtem o tamanho da tag com os 2 digitos em hexa convertendo para inteiro 
-			//multiplicando por dois (bytes) e somado com 6 (string 9F12 + 2 digitos do tamanho)
+			// Obtem os dados da tag e do restante do bit055
+			String aux_ = bit055.substring(bit055.indexOf("9F12") + 4, bit055.length());
+
+			// Obtem o tamanho da tag com os 2 digitos em hexa convertendo para
+			// inteiro
+			// multiplicando por dois (bytes) e somado com 6 (string 9F12 + 2
+			// digitos do tamanho)
 			int len_ = (Integer.parseInt(cf.convertHexToInt(aux_.substring(0, 2))) * 2) + 6;
-			
-			//Obtem toda os dados antes da tag 9F12
+
+			// Obtem toda os dados antes da tag 9F12
 			aux_ = bit055.substring(0, bit055.indexOf("9F12"));
-			
-			//Concatena os dados iniciais com os que vem apos a tag e conteudo da 9F12
+
+			// Concatena os dados iniciais com os que vem apos a tag e conteudo
+			// da 9F12
 			bit055 = aux_ + bit055.substring(bit055.indexOf("9F12") + len_, bit055.length());
-			
+
 		} catch (Exception e) {
-			// TODO: handle exception
-			//Em caso de erro retorna somente os dados antes da tag
-			bit055 = bit055.substring(0, bit055.indexOf("9F12"));	
-		}		
-		
+			// Em caso de erro retorna somente os dados antes da tag
+			bit055 = bit055.substring(0, bit055.indexOf("9F12"));
+			
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.requestUnmaking \n " + bit055 + "\n" + e.getMessage()));
+			e.printStackTrace();
+		}
+
 		return bit055;
 	}
-	
+
 }
