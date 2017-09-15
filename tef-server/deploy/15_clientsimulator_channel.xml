@@ -9,6 +9,6 @@
 	</channel>
 	<in>clientsimulatorgp-send</in>
 	<out>clientsimulatorgp-receive</out>
-	<reconnect-delay>20008</reconnect-delay>
+	<reconnect-delay>5000</reconnect-delay>
 </channel-adaptor>
 

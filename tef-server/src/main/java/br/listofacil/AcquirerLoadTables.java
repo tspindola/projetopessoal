@@ -1,34 +1,22 @@
 package br.listofacil;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
-
 import org.jpos.iso.ISOException;
-import org.jpos.iso.ISOMsg;
-import org.jpos.iso.MUX;
 import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
-import org.jpos.util.NameRegistrar;
-import org.jpos.util.NameRegistrar.NotFoundException;
-
-import com.bravado.util.RabbitMQ;
 
 import br.listofacil.acquirer.BanrisulMessage;
 import br.listofacil.acquirer.GlobalpaymentsMessage;
-import br.listofacil.acquirer.ListoData;
 
 public class AcquirerLoadTables implements Runnable {
 	
 	private final static String GLOBAL_PAYMENTS = "01";
 	private final static String BANRISUL = "02";
 	
-	private Thread thrd_settings;
-	private String acquirerSetted;
-	private String logicalNumberSetted;
-	private String terminalNumberSetted;
-	private boolean forceInitialization;
+	private static Thread thrd_settings;
+	private static String acquirerSetted;
+	private static String logicalNumberSetted;
+	private static String terminalNumberSetted;
+	private static boolean forceInitialization;
 	
 	public AcquirerLoadTables() {
 		// TODO Auto-generated method stub
@@ -52,8 +40,10 @@ public class AcquirerLoadTables implements Runnable {
 			try {
 				thrd_settings.join();
 				thrd_settings = null;
-			} catch (Exception e) {
-				Logger.log(new LogEvent("Fail when stopping AcquirerLoadTables process"));
+			} catch (InterruptedException e) {
+				Logger.log(new LogEvent(
+						"Error: br.listofacil.acquirer.AcquirerLoadTables.stopProcess \n " + e.getMessage()));
+				e.printStackTrace();
 			}
 		}
 	}
@@ -76,11 +66,13 @@ public class AcquirerLoadTables implements Runnable {
 				break;
 			}			
 		} catch (ISOException e) {
-			// TODO Auto-generated catch block
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.AcquirerLoadTables.run \n " + e.getMessage()));
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			Logger.log(new LogEvent("Fail to run AdquirerLoadTables"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.AcquirerLoadTables.run \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 	    
 	    thrd_settings = null;

@@ -45,10 +45,10 @@ import org.jpos.space.SpaceFactory;
 import org.jpos.space.SpaceListener;
 import org.jpos.space.SpaceUtil;
 import org.jpos.space.TSpace;
+import org.jpos.util.LogEvent;
 import org.jpos.util.Loggeable;
+import org.jpos.util.Logger;
 import org.jpos.util.NameRegistrar;
-
-import com.bravado.util.ISOMsgUtil;
 
 /**
  * @author Alejandro Revilla
@@ -172,6 +172,10 @@ public class QMUXCustom extends QBeanSupport implements SpaceListener, MUX, QMUX
 						this.txExpired++;
 				}
 			}
+		} catch (Exception e) {
+			Logger.log(new LogEvent(
+					"Erro: br.listofacil.acquirer.QMUXCustom.request \n " + e.getMessage()));
+			throw e;
 		} finally {
 			synchronized (this) {
 				this.rxPending--;
@@ -197,7 +201,10 @@ public class QMUXCustom extends QBeanSupport implements SpaceListener, MUX, QMUX
 					return;
 				}
 			} catch (ISOException e) {
+				Logger.log(new LogEvent(
+						"Erro: br.listofacil.acquirer.QMUXCustom.notify \n " + e.getMessage()));
 				getLog().warn("notify", e);
+				e.printStackTrace();
 			}
 			processUnhandled(m);
 		}
@@ -300,7 +307,6 @@ public class QMUXCustom extends QBeanSupport implements SpaceListener, MUX, QMUX
 		this.sp.out(this.out, m, timeout);
 	}
 
-	@SuppressWarnings("unused")
 	public String[] getReadyIndicatorNames() {
 		return this.ready;
 	}

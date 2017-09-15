@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
 
-import org.jpos.iso.BaseChannel;
 import org.jpos.iso.ISOException;
+import org.jpos.iso.ISOFilter;
 import org.jpos.iso.ISOFilter.VetoException;
 import org.jpos.iso.ISOMsg;
 import org.jpos.iso.ISOPackager;

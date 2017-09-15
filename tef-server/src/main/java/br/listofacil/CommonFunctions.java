@@ -27,7 +27,9 @@ public class CommonFunctions {
 			bytes = input.getBytes("UTF-8");
 			return bytes.length != input.length();
 		} catch (UnsupportedEncodingException e) {
-			Logger.log(new LogEvent("Fail verifying if string isAscii"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.CommonFunctions.isASCII \n " + e.getMessage()));
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -74,7 +76,9 @@ public class CommonFunctions {
 				tlv = tlv.substring(length + 6, tlv.length());
 			}
 		} catch (Exception e) {
-			Logger.log(new LogEvent("Fail when extracting tlv data"));
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.CommonFunctions.tlvExtractData \n " + e.getMessage()));
+			e.printStackTrace();
 			return null;
 		}
 		return messages;
