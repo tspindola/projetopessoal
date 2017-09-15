@@ -132,7 +132,7 @@ public class AcquirerSettings {
     		    }    	
     		    
     		    if (nsudata[0].contains("NSU_TYPE")){
-    		    	setNsuType(nsudata[1]);
+    		    	nsuType = nsudata[1];
     		    	if (nsudata[1].toUpperCase().equals("PAR"));
     		    		isNSUOdd = false;
     		    	continue;
