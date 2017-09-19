@@ -1268,70 +1268,83 @@ public class BanrisulMessage {
 
 	public TransactionData getResponseData(String mti, TransactionData requestData, ISOMsg message) throws ISOException {
 		TransactionData data = new TransactionData();
-
-		if (message.hasField(FIELD_PAN))
-			data.pan = message.getString(FIELD_PAN);
-		if (message.hasField(FIELD_PROC_CODE))
-			data.processingCode = message.getString(FIELD_PROC_CODE);
-		if (message.hasField(FIELD_AMOUNT))
-			data.amount = message.getString(FIELD_AMOUNT);
-		if (message.hasField(FIELD_DATE_TIME))
-			data.dateTime = message.getString(FIELD_DATE_TIME);
-		if (message.hasField(FIELD_NSU_TEF))
-			data.nsuTef = message.getString(FIELD_NSU_TEF);
-		if (message.hasField(FIELD_DATE))
-			data.date = message.getString(FIELD_DATE);
-		if (message.hasField(FIELD_TIME))
-			data.time = message.getString(FIELD_TIME);
-		if (message.hasField(FIELD_ENTRY_MODE))
-			data.entryMode = message.getString(FIELD_ENTRY_MODE);
-		if (message.hasField(FIELD_PAN_SEQUENCE))
-			data.panSequence = message.getString(FIELD_PAN_SEQUENCE);
-		if (message.hasField(FIELD_RESPONSE_CODE))
-			data.responseCode = message.getString(FIELD_RESPONSE_CODE);
-		if (message.hasField(FIELD_AUTHORIZATION_CODE))
-			data.authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE);
-		if (message.hasField(FIELD_TERMINAL_CODE))
-			data.terminalCode = message.getString(FIELD_TERMINAL_CODE);
-		if (message.hasField(FIELD_MERCHANT_CODE))
-			data.merchantCode = message.getString(FIELD_MERCHANT_CODE);
-		if (message.hasField(FIELD_CURRENCY_CODE))
-			data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
-		if (message.hasField(FIELD_EMV_DATA))
-			data.emvData = message.getString(FIELD_EMV_DATA);		
-		if (message.hasField(FIELD_NSU_ACQUIRER))
-			data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
 		
-		if (mti.equals(REQ_BA_PAYMENT)) {
-			if (!data.responseCode.equals("00")) {
-				String msg = "TRANSACAO NEGADA";
-				if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
-					msg = listoData.messages.get(data.responseCode).trim();
-				data.cardholderReceipt = msg;
-			} else {				
-				if ((data.nsuAcquirer.length() > 0) && (message.getMTI().equals(RES_BA_PAYMENT))) {
-					Calendar cal = cf.getCurrentDate();
-					String nsuAcq = data.nsuAcquirer.substring(3,  data.nsuAcquirer.length()); //Retira data juliana
-					AcquirerSettings.setDateNsuLastTransactionOk(cal.get(Calendar.YEAR) + data.date, nsuAcq);
+		try {
+			
+			if (message.hasField(FIELD_PAN))
+				data.pan = message.getString(FIELD_PAN);
+			if (message.hasField(FIELD_PROC_CODE))
+				data.processingCode = message.getString(FIELD_PROC_CODE);
+			if (message.hasField(FIELD_AMOUNT))
+				data.amount = message.getString(FIELD_AMOUNT);
+			if (message.hasField(FIELD_DATE_TIME))
+				data.dateTime = message.getString(FIELD_DATE_TIME);
+			if (message.hasField(FIELD_NSU_TEF))
+				data.nsuTef = message.getString(FIELD_NSU_TEF);
+			if (message.hasField(FIELD_DATE))
+				data.date = message.getString(FIELD_DATE);
+			if (message.hasField(FIELD_TIME))
+				data.time = message.getString(FIELD_TIME);
+			if (message.hasField(FIELD_ENTRY_MODE))
+				data.entryMode = message.getString(FIELD_ENTRY_MODE);
+			if (message.hasField(FIELD_PAN_SEQUENCE))
+				data.panSequence = message.getString(FIELD_PAN_SEQUENCE);
+			if (message.hasField(FIELD_RESPONSE_CODE))
+				data.responseCode = message.getString(FIELD_RESPONSE_CODE);
+			if (message.hasField(FIELD_AUTHORIZATION_CODE))
+				data.authorizationCode = message.getString(FIELD_AUTHORIZATION_CODE);
+			if (message.hasField(FIELD_TERMINAL_CODE))
+				data.terminalCode = message.getString(FIELD_TERMINAL_CODE);
+			if (message.hasField(FIELD_MERCHANT_CODE))
+				data.merchantCode = message.getString(FIELD_MERCHANT_CODE);
+			if (message.hasField(FIELD_CURRENCY_CODE))
+				data.currencyCode = message.getString(FIELD_CURRENCY_CODE);
+			if (message.hasField(FIELD_EMV_DATA))
+				data.emvData = message.getString(FIELD_EMV_DATA);		
+			if (message.hasField(FIELD_NSU_ACQUIRER))
+				data.nsuAcquirer = message.getString(FIELD_NSU_ACQUIRER);
+			
+			if (mti.equals(REQ_BA_PAYMENT)) {
+				if (!data.responseCode.equals("00")) {
+					String msg = "TRANSACAO NEGADA";
+					if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
+						msg = listoData.messages.get(data.responseCode).trim();
+					data.cardholderReceipt = msg;
+				} else {				
+					if ((data.nsuAcquirer.length() > 0) && (message.getMTI().equals(RES_BA_PAYMENT))) {
+						Calendar cal = cf.getCurrentDate();
+						String nsuAcq = data.nsuAcquirer.substring(3,  data.nsuAcquirer.length()); //Retira data juliana
+						AcquirerSettings.setDateNsuLastTransactionOk(cal.get(Calendar.YEAR) + data.date, nsuAcq);
+					}
+					data.merchantReceipt = getMerchantReceipt(requestData, message);
+					data.cardholderReceipt = getCardholderReceipt(requestData, message);
 				}
-				data.merchantReceipt = getMerchantReceipt(requestData, message);
-				data.cardholderReceipt = getCardholderReceipt(requestData, message);
+			}	
+			
+			if (mti.equals(REQ_BA_CANCELLATION)) {
+				if (!data.responseCode.equals("00")) {
+					String msg = "TRANSACAO NEGADA";
+					if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
+						msg = listoData.messages.get(data.responseCode).trim();
+					data.cardholderReceipt = msg;
+				} else {
+					data.merchantReceipt = getMerchantCancelReceipt(requestData, message);
+					data.cardholderReceipt = getCardholderCancelReceipt(requestData, message);
+				}
 			}
-		}	
-		
-		if (mti.equals(REQ_BA_CANCELLATION)) {
-			if (!data.responseCode.equals("00")) {
-				String msg = "TRANSACAO NEGADA";
-				if ((listoData.messages != null) && (listoData.messages.containsKey(data.responseCode)))
-					msg = listoData.messages.get(data.responseCode).trim();
-				data.cardholderReceipt = msg;
-			} else {
-				data.merchantReceipt = getMerchantCancelReceipt(requestData, message);
-				data.cardholderReceipt = getCardholderCancelReceipt(requestData, message);
-			}
+			
+			return data;
+			
+		} catch (Exception e) {
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.acquirer.BanrisulMessage.getResponseData \n " + e.getMessage()));
+			e.printStackTrace();
+			return null;
 		}
 
-		return data;
+		
+
+		
 	}
 	
 	private String getMerchantReceipt(TransactionData requestData, ISOMsg message) {

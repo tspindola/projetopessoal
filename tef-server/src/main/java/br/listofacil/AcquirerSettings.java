@@ -39,7 +39,7 @@ public class AcquirerSettings {
 	
 	private static String dateDataUpdate = new String();
 	private static boolean isNSUOdd;
-	private static String nsuType = "";
+	private static String nsuOdd = "";
 	private static String byte_1;
 	private static String byte_2;
 	private static String byte_3;
@@ -55,7 +55,7 @@ public class AcquirerSettings {
 		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" +
 						  "NSU_BA=\"" + nsuBanrisul + "\"\n" +
 						  "DATE_UPDATE_NSU=\"" + dateReg + "\"\n" +
-						  "NSU_TYPE=\"" + nsuType + "\"\n" +
+						  "NSU_ODD=\"" + nsuOdd + "\"\n" +
 						  "CONFIG_BYTE_1=\"" + byte_1 + "\"\n" +
 						  "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" +
 						  "CONFIG_BYTE_3=\"" + byte_3 + "\"\n"; 
@@ -159,7 +159,7 @@ public class AcquirerSettings {
     		    }    	
     		    
     		    if (nsudata[0].contains("NSU_TYPE")){
-    		    	nsuType = nsudata[1];
+    		    	nsuOdd = nsudata[1];
     		    	if (nsudata[1].equals("0")){
     		    		isNSUOdd = false;
     		    	} else {
@@ -381,11 +381,11 @@ public class AcquirerSettings {
 	}
 
 	public static String getNsuType() {
-		return nsuType;
+		return nsuOdd;
 	}
 
 	public static void setNsuType(String nsuType) {
-		AcquirerSettings.nsuType = nsuType;
+		AcquirerSettings.nsuOdd = nsuType;
 	}
 
 	public static HashMap<String, InfoTransaction> getTransactions() {
