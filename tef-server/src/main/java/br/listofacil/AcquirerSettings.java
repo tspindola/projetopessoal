@@ -38,8 +38,11 @@ public class AcquirerSettings {
 	private static String dateNsuLastTransaction = "0000000000000000";
 	
 	private static String dateDataUpdate = new String();
-	private static boolean isNSUOdd = true; //impar
+	private static boolean isNSUOdd;
 	private static String nsuType = "";
+	private static String byte_1;
+	private static String byte_2;
+	private static String byte_3;
 	
 	public static synchronized void writeDataFile(){
 		
@@ -52,7 +55,10 @@ public class AcquirerSettings {
 		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" +
 						  "NSU_BA=\"" + nsuBanrisul + "\"\n" +
 						  "DATE_UPDATE_NSU=\"" + dateReg + "\"\n" +
-						  "NSU_TYPE=\"" + dateReg + "\"\n";
+						  "NSU_TYPE=\"" + nsuType + "\"\n" +
+						  "CONFIG_BYTE_1=\"" + byte_1 + "\"\n" +
+						  "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" +
+						  "CONFIG_BYTE_3=\"" + byte_3 + "\"\n"; 
 		try {
 
 	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\nsuconfig.data");
@@ -77,14 +83,35 @@ public class AcquirerSettings {
 	
 	public static synchronized long getIncrementNSUBanrisul(){
 		//Incrementa o NSU
-		return nsuBanrisul++;
+		
+		nsuBanrisul++;
+		
+		if(isNSUOdd){
+			if (nsuBanrisul % 2 == 0){
+				nsuBanrisul++;
+			}
+		} else {
+			if (nsuBanrisul % 2 != 0){
+				nsuBanrisul++;
+			}
+		}
+		return nsuBanrisul;
 	}
 	
 	public static synchronized long getIncrementNSUGlobalpayments(){
 		//Incrementa o NSU
-		long nsu = nsuGlobalpayments++;
+		nsuGlobalpayments++;
 
-		return nsu;
+		if(isNSUOdd){
+			if (nsuGlobalpayments % 2 == 0){
+				nsuGlobalpayments++;
+			}
+		} else {
+			if (nsuGlobalpayments % 2 != 0){
+				nsuGlobalpayments++;
+			}
+		}
+		return nsuGlobalpayments;
 	}
 	
 	public static synchronized boolean isNSUOdd(){
@@ -133,8 +160,23 @@ public class AcquirerSettings {
     		    
     		    if (nsudata[0].contains("NSU_TYPE")){
     		    	nsuType = nsudata[1];
-    		    	if (nsudata[1].toUpperCase().equals("PAR"));
+    		    	if (nsudata[1].equals("0")){
     		    		isNSUOdd = false;
+    		    	} else {
+    		    		isNSUOdd = true;
+    		    	}
+    		    	continue;
+    		    }
+    		    if (nsudata[0].contains("CONFIG_BYTE_1")){
+    		    	byte_1 = nsudata[1];
+    		    	continue;
+    		    }
+    		    if (nsudata[0].contains("CONFIG_BYTE_2")){
+    		    	byte_2 = nsudata[1];
+    		    	continue;
+    		    }
+    		    if (nsudata[0].contains("CONFIG_BYTE_3")){
+    		    	byte_3 = nsudata[1];
     		    	continue;
     		    }
     		}
@@ -352,6 +394,30 @@ public class AcquirerSettings {
 
 	public static void setTransactions(HashMap<String, InfoTransaction> transactions) {
 		AcquirerSettings.transactions = transactions;
+	}
+
+	public static String getByte_1() {
+		return byte_1;
+	}
+
+	public static void setByte_1(String byte_1) {
+		AcquirerSettings.byte_1 = byte_1;
+	}
+
+	public static String getByte_2() {
+		return byte_2;
+	}
+
+	public static void setByte_2(String byte_2) {
+		AcquirerSettings.byte_2 = byte_2;
+	}
+
+	public static String getByte_3() {
+		return byte_3;
+	}
+
+	public static void setByte_3(String byte_3) {
+		AcquirerSettings.byte_3 = byte_3;
 	}
 	
 }

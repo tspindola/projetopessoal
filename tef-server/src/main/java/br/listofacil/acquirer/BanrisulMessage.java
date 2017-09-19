@@ -27,9 +27,9 @@ public class BanrisulMessage {
 	private final String RCP_ACQUIRER_NAME = "VERO";
 	private final String RCP_CREDIT = "VENDA CREDITO A VISTA";
 
-	private final String BYTE_1 = "11111100";
-	private final String BYTE_2 = "10000000";
-	private final String BYTE_3 = "00000000";
+	private String BYTE_1 = "";// AcquirerSettings.getByte_1();
+	private String BYTE_2 = "";// AcquirerSettings.getByte_2();
+	private String BYTE_3 = "";// AcquirerSettings.getByte_3();
 
 	private final String PROC_CODE_LOGON_A = "001";
 	private final String PROC_CODE_LOGON_F = "002";
@@ -144,6 +144,12 @@ public class BanrisulMessage {
 	private CommonFunctions cf = new CommonFunctions();
 
 	boolean firstEmvReg = false;
+	
+	public BanrisulMessage() {
+		BYTE_1 = AcquirerSettings.getByte_1();
+		BYTE_2 = AcquirerSettings.getByte_2();
+		BYTE_3 = AcquirerSettings.getByte_3();
+	}
 
 	public boolean loadTablesInitialization(String logicalNumber, String terminalNumber, boolean forceInitialization)
 			throws ISOException, Exception {
