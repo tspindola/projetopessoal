@@ -39,7 +39,7 @@ public class AcquirerSettings {
 	
 	private static String dateDataUpdate = new String();
 	private static boolean isNSUOdd;
-	private static String nsuOdd = "";
+	private static String nsuOdd;
 	private static String byte_1;
 	private static String byte_2;
 	private static String byte_3;
@@ -58,10 +58,11 @@ public class AcquirerSettings {
 						  "NSU_ODD=\"" + nsuOdd + "\"\n" +
 						  "CONFIG_BYTE_1=\"" + byte_1 + "\"\n" +
 						  "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" +
-						  "CONFIG_BYTE_3=\"" + byte_3 + "\"\n"; 
+						  "CONFIG_BYTE_3=\"" + byte_3 + "\"\n";
+		
 		try {
 
-	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "\\nsuconfig.data");
+	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "/nsuconfig.data");
 	        BufferedWriter bw = new BufferedWriter(fw);
 	        bw.write(register);
 	        bw.close();
@@ -130,8 +131,8 @@ public class AcquirerSettings {
 		
 		try {		
 			
-			TextFile txtFile = new TextFile(System.getProperty("user.dir") + "\\nsuconfig.data");
-
+			TextFile txtFile = new TextFile(System.getProperty("user.dir") + "/nsuconfig.data");
+			
 			txtFile.openTextFile();
     		
     		while (txtFile.next()) 
@@ -159,8 +160,8 @@ public class AcquirerSettings {
     		    }    	
     		    
     		    if (nsudata[0].contains("NSU_TYPE")){
-    		    	nsuOdd = nsudata[1];
-    		    	if (nsudata[1].equals("0")){
+    		    	setNsuOdd(nsudata[1]);
+    		    	if (getNsuOdd().equals("0")){
     		    		isNSUOdd = false;
     		    	} else {
     		    		isNSUOdd = true;
@@ -168,15 +169,15 @@ public class AcquirerSettings {
     		    	continue;
     		    }
     		    if (nsudata[0].contains("CONFIG_BYTE_1")){
-    		    	byte_1 = nsudata[1];
+    		    	setByte_1(nsudata[1]);
     		    	continue;
     		    }
     		    if (nsudata[0].contains("CONFIG_BYTE_2")){
-    		    	byte_2 = nsudata[1];
+    		    	setByte_2(nsudata[1]);
     		    	continue;
     		    }
     		    if (nsudata[0].contains("CONFIG_BYTE_3")){
-    		    	byte_3 = nsudata[1];
+    		    	setByte_3(nsudata[1]);
     		    	continue;
     		    }
     		}
@@ -380,11 +381,11 @@ public class AcquirerSettings {
 		return dateNsuLastTransaction;
 	}
 
-	public static String getNsuType() {
+	public static synchronized String getNsuType() {
 		return nsuOdd;
 	}
 
-	public static void setNsuType(String nsuType) {
+	public static synchronized void setNsuType(String nsuType) {
 		AcquirerSettings.nsuOdd = nsuType;
 	}
 
@@ -396,28 +397,36 @@ public class AcquirerSettings {
 		AcquirerSettings.transactions = transactions;
 	}
 
-	public static String getByte_1() {
+	public static synchronized String getByte_1() {
 		return byte_1;
 	}
 
-	public static void setByte_1(String byte_1) {
+	public static synchronized void setByte_1(String byte_1) {
 		AcquirerSettings.byte_1 = byte_1;
 	}
 
-	public static String getByte_2() {
+	public static synchronized String getByte_2() {
 		return byte_2;
 	}
 
-	public static void setByte_2(String byte_2) {
+	public static synchronized void setByte_2(String byte_2) {
 		AcquirerSettings.byte_2 = byte_2;
 	}
 
-	public static String getByte_3() {
+	public static synchronized String getByte_3() {
 		return byte_3;
 	}
 
-	public static void setByte_3(String byte_3) {
+	public static synchronized void setByte_3(String byte_3) {
 		AcquirerSettings.byte_3 = byte_3;
+	}
+
+	public static synchronized String getNsuOdd() {
+		return nsuOdd;
+	}
+
+	public static synchronized void setNsuOdd(String nsuOdd) {
+		AcquirerSettings.nsuOdd = nsuOdd;
 	}
 	
 }

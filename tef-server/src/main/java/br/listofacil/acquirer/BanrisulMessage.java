@@ -27,9 +27,9 @@ public class BanrisulMessage {
 	private final String RCP_ACQUIRER_NAME = "VERO";
 	private final String RCP_CREDIT = "VENDA CREDITO A VISTA";
 
-	private String BYTE_1 = "";// AcquirerSettings.getByte_1();
-	private String BYTE_2 = "";// AcquirerSettings.getByte_2();
-	private String BYTE_3 = "";// AcquirerSettings.getByte_3();
+	private String BYTE_1 = "11111110";// AcquirerSettings.getByte_1();
+	private String BYTE_2 = "10000000";// AcquirerSettings.getByte_2();
+	private String BYTE_3 = "00000000";// AcquirerSettings.getByte_3();
 
 	private final String PROC_CODE_LOGON_A = "001";
 	private final String PROC_CODE_LOGON_F = "002";
