@@ -6,9 +6,15 @@
 		logger="Q2" packager="br.listofacil.tefserver.iso.ISO87APackagerGP">
 		<property name="host" value="200.204.163.104" />
 		<property name="port" value="35019" />
+		
+		<!--
+		<property name="alternate-host" value="200.204.163.104" />
+        <property name="alternate-port" value="35018" />
+        -->
+        
 	</channel>
 	<in>clientsimulatorgp-send</in>
 	<out>clientsimulatorgp-receive</out>
-	<reconnect-delay>20008</reconnect-delay>
+	<reconnect-delay>5000</reconnect-delay>
 </channel-adaptor>
 

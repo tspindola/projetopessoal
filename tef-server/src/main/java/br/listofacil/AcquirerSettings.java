@@ -159,7 +159,7 @@ public class AcquirerSettings {
     		    	continue;
     		    }    	
     		    
-    		    if (nsudata[0].contains("NSU_TYPE")){
+    		    if (nsudata[0].contains("NSU_ODD")){
     		    	setNsuOdd(nsudata[1]);
     		    	if (getNsuOdd().equals("0")){
     		    		isNSUOdd = false;
