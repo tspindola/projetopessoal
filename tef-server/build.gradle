@@ -6,7 +6,7 @@ mainClassName = "org.jpos.q2.Q2"
 
 sourceCompatibility = 1.7
 sourceCompatibility = 1.7
-version = '2.0.0.0'
+version = '2.0.1.0'
 
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
