@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
@@ -27,8 +28,14 @@ public class AcquirerSettings {
 
 	private static Map<String, ListoData> listoDataInitBanrisul = new HashMap<String, ListoData>();
 	private static List<String> isLoadingListoDataInitBanrisul = new ArrayList<String>();
+
+	private static Map<String, List<BinData>> banrisulBinsTable = new HashMap<String, List<BinData>>();
+	private static Map<String, List<BinData>> globalpaymentsBinsTable = new HashMap<String, List<BinData>>();
 	
-	//NSU Acquirer and NSU TEF original
+	private static Map<String, Map<String, String>> banrisulFlagsTable = new HashMap<String, Map<String, String>>();
+	private static Map<String, Map<String, String>> globalpaymentsFlagsTable = new HashMap<String, Map<String, String>>();
+
+	// NSU Acquirer and NSU TEF original
 	private static HashMap<String, InfoTransaction> transactions = null;
 	private static CommonFunctions common = new CommonFunctions();
 	
@@ -47,19 +54,15 @@ public class AcquirerSettings {
 	public static synchronized void writeDataFile(){
 		
 		Calendar cal = common.getCurrentDate();
-		
-		String dateReg = common.padLeft(String.valueOf(cal.get(Calendar.DAY_OF_MONTH)), 2, "0") + 
-						 common.padLeft(String.valueOf(cal.get(Calendar.MONTH) + 1), 2, "0") +
-						 String.valueOf(cal.get(Calendar.YEAR));	
-		
-		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" +
-						  "NSU_BA=\"" + nsuBanrisul + "\"\n" +
-						  "DATE_UPDATE_NSU=\"" + dateReg + "\"\n" +
-						  "NSU_ODD=\"" + nsuOdd + "\"\n" +
-						  "CONFIG_BYTE_1=\"" + byte_1 + "\"\n" +
-						  "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" +
-						  "CONFIG_BYTE_3=\"" + byte_3 + "\"\n";
-		
+
+		String dateReg = common.padLeft(String.valueOf(cal.get(Calendar.DAY_OF_MONTH)), 2, "0")
+				+ common.padLeft(String.valueOf(cal.get(Calendar.MONTH) + 1), 2, "0")
+				+ String.valueOf(cal.get(Calendar.YEAR));
+
+		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" + "NSU_BA=\"" + nsuBanrisul + "\"\n"
+				+ "DATE_UPDATE_NSU=\"" + dateReg + "\"\n" + "NSU_ODD=\"" + nsuOdd + "\"\n" + "CONFIG_BYTE_1=\"" + byte_1
+				+ "\"\n" + "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" + "CONFIG_BYTE_3=\"" + byte_3 + "\"\n";
+
 		try {
 
 	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "/nsuconfig.data");
@@ -428,5 +431,99 @@ public class AcquirerSettings {
 	public static synchronized void setNsuOdd(String nsuOdd) {
 		AcquirerSettings.nsuOdd = nsuOdd;
 	}
-	
+
+	public static synchronized BinData getBanrisulBinsTable(String logicalNumber, String bin) {
+
+		try {
+			if (AcquirerSettings.banrisulBinsTable.containsKey(logicalNumber)) {
+				List<BinData> bins = AcquirerSettings.banrisulBinsTable.get(logicalNumber);
+				
+				for (BinData binData : bins) {
+					
+					long lngBin = Long.parseLong(bin);
+
+					if (lngBin >= binData.getInitial() && lngBin <= binData.getEnd())
+						return binData;
+				}
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.AcquirerSettings.getBanrisulBinsTable return null \n " + e.getMessage()));
+		}
+
+		return null;
+	}
+
+	public static synchronized void setBanrisulBinsTable(String logicalNumber, BinData binData) {
+
+		try {
+			List<BinData> bins = new ArrayList<BinData>();
+
+			if (AcquirerSettings.banrisulBinsTable.containsKey(logicalNumber)) {
+
+				bins = AcquirerSettings.banrisulBinsTable.get(logicalNumber);
+
+				if (!bins.contains(binData)) {
+					bins.add(binData);
+					AcquirerSettings.banrisulBinsTable.put(logicalNumber, bins);
+				}				
+
+			} else {
+
+				bins.add(binData);
+
+				AcquirerSettings.banrisulBinsTable.put(logicalNumber, bins);
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			Logger.log(new LogEvent(
+					"Error: br.listofacil.AcquirerSettings.setBanrisulBinsTable \n " + e.getMessage()));
+		}
+
+	}
+
+	public static synchronized Map<String, List<BinData>> getGlobalpaymentsBinsTable() {
+		return globalpaymentsBinsTable;
+	}
+
+	public static synchronized void setGlobalpaymentsBinsTable(
+			Map<String,List<BinData>> globalpaymentsBinsTable) {
+		AcquirerSettings.globalpaymentsBinsTable = globalpaymentsBinsTable;
+	}
+
+	public static String getBanrisulFlagName(String logicalNumber, String flagCode) {
+		String flag = "";
+		
+		if (banrisulFlagsTable.containsKey(logicalNumber)) {
+			Map<String, String> tables = banrisulFlagsTable.get(logicalNumber);
+			if (tables.containsKey(flagCode))
+				flag = tables.get(flagCode);
+		}
+					
+		return flag;		
+	}
+
+	public static void setBanrisulFlagsTable(String logicalNumber, String flagCode, String flag) {
+		Map<String, String> table = new HashMap<String, String>();		
+		
+		if (banrisulFlagsTable.containsKey(logicalNumber)) {
+			table = banrisulFlagsTable.get(logicalNumber);
+			table.put(flagCode, flag);
+		} else { 
+			table.put(flagCode, flag);
+		}
+			
+		banrisulFlagsTable.put(logicalNumber, table);						
+	}
+
+	public static Map<String, Map<String, String>> getGlobalpaymentsFlagName() {
+		return globalpaymentsFlagsTable;
+	}
+
+	public static void setGlobalpaymentsFlagsTable(Map<String, Map<String, String>> globalpaymentsFlagsTable) {
+		AcquirerSettings.globalpaymentsFlagsTable = globalpaymentsFlagsTable;
+	}
+
 }
