@@ -19,10 +19,10 @@ import com.bravado.bsh.TextFile;
 import br.listofacil.acquirer.ListoData;
 
 public class AcquirerSettings {
-	
+
 	private final static String GLOBAL_PAYMENTS = "01";
 	private final static String BANRISUL = "02";
-	
+
 	private static Map<String, ListoData> listoDataInitGlobalpayments = new HashMap<String, ListoData>();
 	private static List<String> isLoadingListoDataInitGlobalpayments = new ArrayList<String>();
 
@@ -31,214 +31,258 @@ public class AcquirerSettings {
 
 	private static Map<String, List<BinData>> banrisulBinsTable = new HashMap<String, List<BinData>>();
 	private static Map<String, List<BinData>> globalpaymentsBinsTable = new HashMap<String, List<BinData>>();
-	
+
 	private static Map<String, Map<String, String>> banrisulFlagsTable = new HashMap<String, Map<String, String>>();
 	private static Map<String, Map<String, String>> globalpaymentsFlagsTable = new HashMap<String, Map<String, String>>();
 
 	// NSU Acquirer and NSU TEF original
 	private static HashMap<String, InfoTransaction> transactions = null;
 	private static CommonFunctions common = new CommonFunctions();
-	
+
 	private static long nsuBanrisul = 1;
 	private static long nsuGlobalpayments = 1;
-	
+
+	private static String nsuBergs;
+
 	private static String dateNsuLastTransaction = "0000000000000000";
-	
+
 	private static String dateDataUpdate = new String();
+	private static String dateDataUpdateGP = new String();
 	private static boolean isNSUOdd;
 	private static String nsuOdd;
 	private static String byte_1;
 	private static String byte_2;
 	private static String byte_3;
-	
-	public static synchronized void writeDataFile(){
-		
-		Calendar cal = common.getCurrentDate();
+	private static String port;
+	private static String ip;
+	private static String fila;
 
-		String dateReg = common.padLeft(String.valueOf(cal.get(Calendar.DAY_OF_MONTH)), 2, "0")
-				+ common.padLeft(String.valueOf(cal.get(Calendar.MONTH) + 1), 2, "0")
-				+ String.valueOf(cal.get(Calendar.YEAR));
+	public static synchronized void writeDataFile() {
+
+		String dateReg = currentDate();
 
 		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" + "NSU_BA=\"" + nsuBanrisul + "\"\n"
 				+ "DATE_UPDATE_NSU=\"" + dateReg + "\"\n" + "NSU_ODD=\"" + nsuOdd + "\"\n" + "CONFIG_BYTE_1=\"" + byte_1
-				+ "\"\n" + "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" + "CONFIG_BYTE_3=\"" + byte_3 + "\"\n";
+				+ "\"\n" + "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" + "CONFIG_BYTE_3=\"" + byte_3 + "\"\n" + "RBT_IP=\""
+				+ ip + "\"\n" + "RBT_PORT=\"" + port + "\"\n" + "RBT_FILA=\"" + fila + "\"\n" + "NSU_BERGS=\""
+				+ nsuBergs + "\"\n";
 
 		try {
 
-	        FileWriter fw = new FileWriter(System.getProperty("user.dir") + "/nsuconfig.data");
-	        BufferedWriter bw = new BufferedWriter(fw);
-	        bw.write(register);
-	        bw.close();
-			
+			FileWriter fw = new FileWriter(System.getProperty("user.dir") + "/nsuconfig.data");
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(register);
+			bw.close();
+
 		} catch (IOException e) {
-			Logger.log(new LogEvent(
-					"Error: br.listofacil.AcquirerSettings.writeDataFile \n " + e.getMessage()));
+			Logger.log(new LogEvent("Error: br.listofacil.AcquirerSettings.writeDataFile \n " + e.getMessage()));
 			e.printStackTrace();
 		}
 	}
-	
-	public static synchronized String getDateDataUpdate(){
+
+	private static String currentDate() {
+		Calendar cal = common.getCurrentDate();
+		
+		String dateReg = common.padLeft(String.valueOf(cal.get(Calendar.DAY_OF_MONTH)), 2, "0")
+				+ common.padLeft(String.valueOf(cal.get(Calendar.MONTH) + 1), 2, "0")
+				+ String.valueOf(cal.get(Calendar.YEAR));
+		return dateReg;
+	}
+
+	public static synchronized String getDateDataUpdate() {
 		return dateDataUpdate;
 	}
-	
-	public static synchronized void setDateDataUpdate(String date){
+
+	public static synchronized void setDateDataUpdate(String date) {
 		dateDataUpdate = date;
 	}
-	
-	public static synchronized long getIncrementNSUBanrisul(){
-		//Incrementa o NSU
-		
+
+	public static synchronized long getIncrementNSUBanrisul() {
+
+		// Zera o NSUBanrisul ao mudar o dia.
+		String dateReg = currentDate();
+		if (!dateDataUpdate.equals(dateReg)){
+			setDateDataUpdate(dateReg);
+			nsuBanrisul = 0;
+		}
+
+		// Incrementa o NSU
 		nsuBanrisul++;
-		
-		if(isNSUOdd){
-			if (nsuBanrisul % 2 == 0){
+
+		if (isNSUOdd) {
+			if (nsuBanrisul % 2 == 0) {
 				nsuBanrisul++;
 			}
 		} else {
-			if (nsuBanrisul % 2 != 0){
+			if (nsuBanrisul % 2 != 0) {
 				nsuBanrisul++;
 			}
 		}
 		return nsuBanrisul;
 	}
-	
-	public static synchronized long getIncrementNSUGlobalpayments(){
-		//Incrementa o NSU
+
+	public static synchronized long getIncrementNSUGlobalpayments() {
+
+		// Zera o NSUGP ao mudar o dia.
+		String dateReg = currentDate();
+		if (!dateDataUpdateGP.equals(dateReg)){
+			setDateDataUpdateGP(dateReg);
+			nsuGlobalpayments = 0;
+		}
+
+		// Incrementa o NSU
 		nsuGlobalpayments++;
 
-		if(isNSUOdd){
-			if (nsuGlobalpayments % 2 == 0){
+		if (isNSUOdd) {
+			if (nsuGlobalpayments % 2 == 0) {
 				nsuGlobalpayments++;
 			}
 		} else {
-			if (nsuGlobalpayments % 2 != 0){
+			if (nsuGlobalpayments % 2 != 0) {
 				nsuGlobalpayments++;
 			}
 		}
 		return nsuGlobalpayments;
 	}
-	
-	public static synchronized boolean isNSUOdd(){
+
+	public static synchronized boolean isNSUOdd() {
 		return isNSUOdd;
 	}
-	
-	public static synchronized void loadLastNsu(){			
+
+	public static synchronized void loadLastNsu() {
 		int nsuGP = 1;
 		int nsuBA = 1;
 		Boolean flagnsu = false;
 
 		Calendar nsucalendaraux = common.getCurrentDate();
-		
+
 		nsuBanrisul = 1;
 		nsuGlobalpayments = 1;
-		
-		try {		
-			
+
+		try {
+
 			TextFile txtFile = new TextFile(System.getProperty("user.dir") + "/nsuconfig.data");
-			
+
 			txtFile.openTextFile();
-    		
-    		while (txtFile.next()) 
-    		{    			
-    		    String line = txtFile.readLine();    		    
-    		    String[] nsudata = line.split("[\"]");
-    		    
-    		    if (nsudata[0].contains("NSU_GP")){
-    		    	nsuGP = Integer.parseInt(nsudata[1]);
-    		    	continue;
-    		    }
-    		    
-    		    if (nsudata[0].contains("NSU_BA")){
-    		    	nsuBA = Integer.parseInt(nsudata[1]);
-    		    	continue;
-    		    }
-    		    
-    		    if (nsudata[0].contains("DATE_UPDATE_NSU")){   
-    		    	if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0,  2)) &&
-    		    	   (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer.parseInt(nsudata[1].substring(2,  4))) {
-	    		    	flagnsu = false;
-    		    	}
-    		    	setDateDataUpdate(nsudata[1]);
-    		    	continue;
-    		    }    	
-    		    
-    		    if (nsudata[0].contains("NSU_ODD")){
-    		    	setNsuOdd(nsudata[1]);
-    		    	if (getNsuOdd().equals("0")){
-    		    		isNSUOdd = false;
-    		    	} else {
-    		    		isNSUOdd = true;
-    		    	}
-    		    	continue;
-    		    }
-    		    if (nsudata[0].contains("CONFIG_BYTE_1")){
-    		    	setByte_1(nsudata[1]);
-    		    	continue;
-    		    }
-    		    if (nsudata[0].contains("CONFIG_BYTE_2")){
-    		    	setByte_2(nsudata[1]);
-    		    	continue;
-    		    }
-    		    if (nsudata[0].contains("CONFIG_BYTE_3")){
-    		    	setByte_3(nsudata[1]);
-    		    	continue;
-    		    }
-    		}
-    		
-    		if(flagnsu) {
-    			nsuGlobalpayments = nsuGP;
-	    		nsuBanrisul = nsuBA;
-    		}
-    		
-    		txtFile.closeTextFile();	 
-    		
+
+			while (txtFile.next()) {
+				String line = txtFile.readLine();
+				String[] nsudata = line.split("[\"]");
+
+				if (nsudata[0].contains("NSU_GP")) {
+					nsuGP = Integer.parseInt(nsudata[1]);
+					continue;
+				}
+
+				if (nsudata[0].contains("NSU_BA")) {
+					nsuBA = Integer.parseInt(nsudata[1]);
+					continue;
+				}
+
+				if (nsudata[0].contains("DATE_UPDATE_NSU")) {
+					if (nsucalendaraux.get(Calendar.DAY_OF_MONTH) != Integer.parseInt(nsudata[1].substring(0, 2))
+							&& (nsucalendaraux.get(Calendar.MONTH) + 1) != Integer
+									.parseInt(nsudata[1].substring(2, 4))) {
+						flagnsu = false;
+					}
+					setDateDataUpdate(nsudata[1]);
+					setDateDataUpdateGP(nsudata[1]);
+					continue;
+				}
+
+				if (nsudata[0].contains("NSU_ODD")) {
+					setNsuOdd(nsudata[1]);
+					if (getNsuOdd().equals("0")) {
+						isNSUOdd = false;
+					} else {
+						isNSUOdd = true;
+					}
+					continue;
+				}
+				if (nsudata[0].contains("CONFIG_BYTE_1")) {
+					setByte_1(nsudata[1]);
+					continue;
+				}
+				if (nsudata[0].contains("CONFIG_BYTE_2")) {
+					setByte_2(nsudata[1]);
+					continue;
+				}
+				if (nsudata[0].contains("CONFIG_BYTE_3")) {
+					setByte_3(nsudata[1]);
+					continue;
+				}
+				if (nsudata[0].contains("RBT_IP")) {
+					setIp(nsudata[1]);
+					continue;
+				}
+				if (nsudata[0].contains("RBT_PORT")) {
+					setPort(nsudata[1]);
+					continue;
+				}
+				if (nsudata[0].contains("RBT_FILA")) {
+					setFila(nsudata[1]);
+					continue;
+				}
+				if (nsudata[0].contains("NSU_BERGS")) {
+					setNsuBergs(nsudata[1]);
+					continue;
+				}
+			}
+
+			if (flagnsu) {
+				nsuGlobalpayments = nsuGP;
+				nsuBanrisul = nsuBA;
+			}
+
+			txtFile.closeTextFile();
+
 		} catch (Exception e) {
-			Logger.log(new LogEvent(
-					"Error: br.listofacil.AcquirerSettings.loadLastNsu \n " + e.getMessage()));
+			Logger.log(new LogEvent("Error: br.listofacil.AcquirerSettings.loadLastNsu \n " + e.getMessage()));
 			e.printStackTrace();
-		}				
-	}	
-	
-	public static synchronized boolean getStatusLoadingGlobalpayments(String logicalNumber){
-		
+		}
+	}
+
+	public static synchronized boolean getStatusLoadingGlobalpayments(String logicalNumber) {
+
 		return isLoadingListoDataInitGlobalpayments.contains(logicalNumber);
 	}
-	
-	public static synchronized void setStatusLoadingGlobalpayments(String logicalNumber){
+
+	public static synchronized void setStatusLoadingGlobalpayments(String logicalNumber) {
 		isLoadingListoDataInitGlobalpayments.add(logicalNumber);
 	}
-	
-	public static synchronized void removeStatusLoadingGlobalpayments(String logicalNumber){
+
+	public static synchronized void removeStatusLoadingGlobalpayments(String logicalNumber) {
 		isLoadingListoDataInitGlobalpayments.remove(logicalNumber);
 	}
-	
-	public static synchronized boolean getStatusLoadingBanrisul(String logicalNumber){
-		
+
+	public static synchronized boolean getStatusLoadingBanrisul(String logicalNumber) {
+
 		return isLoadingListoDataInitBanrisul.contains(logicalNumber);
 	}
-	
-	public static synchronized void setStatusLoadingBanrisul(String logicalNumber){
+
+	public static synchronized void setStatusLoadingBanrisul(String logicalNumber) {
 		isLoadingListoDataInitBanrisul.add(logicalNumber);
 	}
-	
-	public static synchronized void removeStatusLoadingBanrisul(String logicalNumber){
+
+	public static synchronized void removeStatusLoadingBanrisul(String logicalNumber) {
 		isLoadingListoDataInitBanrisul.remove(logicalNumber);
 	}
-	
-	public static boolean loadAcquirerTables(String acquirer, String logicalNumber, String terminalNumber, boolean force) {
+
+	public static boolean loadAcquirerTables(String acquirer, String logicalNumber, String terminalNumber,
+			boolean force) {
 		boolean status = true;
-		
+
 		try {
 			switch (acquirer) {
 			case GLOBAL_PAYMENTS:
-				if ((!getStatusLoadingGlobalpayments(logicalNumber)) || force){
+				if ((!getStatusLoadingGlobalpayments(logicalNumber)) || force) {
 					AcquirerLoadTables process = new AcquirerLoadTables();
 					process.startProcess(acquirer, logicalNumber, terminalNumber, force);
 				}
 				break;
-				
+
 			case BANRISUL:
-				if ((!getStatusLoadingBanrisul(logicalNumber)) || force){
+				if ((!getStatusLoadingBanrisul(logicalNumber)) || force) {
 					AcquirerLoadTables process = new AcquirerLoadTables();
 					process.startProcess(acquirer, logicalNumber, terminalNumber, force);
 				}
@@ -248,7 +292,7 @@ public class AcquirerSettings {
 				status = false;
 				break;
 			}
-			
+
 		} catch (Exception e) {
 			Logger.log(new LogEvent(
 					"Error: br.listofacil.AcquirerSettings.loadAcquirerTables return false \n " + e.getMessage()));
@@ -257,68 +301,48 @@ public class AcquirerSettings {
 		}
 		return status;
 	}
-	
+
 	/*
-	public static void setResponseTransaction(ISOMsg msg) throws IOException {
-		
-		if (msg == null)
-			return;		
-	
-		Calendar trsDate = common.getCurrentDate();
-		
-		try {
-			
-			switch (msg.getMTI()) {
-			case "0210":
-				//verifica se os bits 11, 38 e 39 estao presentes
-				if (msg.hasField(11) && msg.hasField(39) && msg.hasField(127)) 
-				{					
-					//verifica se a transacao foi autorizada					
-					if (msg.getString(39).equals("00")) 
-					{
-						//Limpa os registros caso seja data diferente
-	    		    	if (currentDate.get(Calendar.DAY_OF_MONTH) != trsDate.get(Calendar.DAY_OF_MONTH) &&
-	    	    		   (currentDate.get(Calendar.MONTH) + 1) != (trsDate.get(Calendar.MONTH) + 1))
-	    		    		transactions.clear();
-	    		    	
-	    		    	InfoTransaction info = new InfoTransaction();
-	    		    	info.mti = msg.getMTI();
-	    		    	info.nsu_acquirer = msg.getString(127);
-	    		    	info.nsu_listo = msg.getString(11);
-	    		    	info.date_time = msg.getString(7);
-	    		    	info.amount = msg.getString(4);
-	    		    	
-	    		    	transactions.put(info.nsu_acquirer, info);	
-						
-						//Grava no txt						
-					}						
-				}				
-				break;
+	 * public static void setResponseTransaction(ISOMsg msg) throws IOException
+	 * {
+	 * 
+	 * if (msg == null) return;
+	 * 
+	 * Calendar trsDate = common.getCurrentDate();
+	 * 
+	 * try {
+	 * 
+	 * switch (msg.getMTI()) { case "0210": //verifica se os bits 11, 38 e 39
+	 * estao presentes if (msg.hasField(11) && msg.hasField(39) &&
+	 * msg.hasField(127)) { //verifica se a transacao foi autorizada if
+	 * (msg.getString(39).equals("00")) { //Limpa os registros caso seja data
+	 * diferente if (currentDate.get(Calendar.DAY_OF_MONTH) !=
+	 * trsDate.get(Calendar.DAY_OF_MONTH) && (currentDate.get(Calendar.MONTH) +
+	 * 1) != (trsDate.get(Calendar.MONTH) + 1)) transactions.clear();
+	 * 
+	 * InfoTransaction info = new InfoTransaction(); info.mti = msg.getMTI();
+	 * info.nsu_acquirer = msg.getString(127); info.nsu_listo =
+	 * msg.getString(11); info.date_time = msg.getString(7); info.amount =
+	 * msg.getString(4);
+	 * 
+	 * transactions.put(info.nsu_acquirer, info);
+	 * 
+	 * //Grava no txt } } break;
+	 * 
+	 * default: break; }
+	 * 
+	 * } catch (ISOException e) { // TODO Auto-generated catch block
+	 * e.printStackTrace(); } }
+	 * 
+	 * public static InfoTransaction getInfoTransaction(String nsu_acquirer) {
+	 * InfoTransaction info = null; if (transactions.containsKey(nsu_acquirer))
+	 * { info = transactions.get(nsu_acquirer); } return info; }
+	 */
 
-			default:
-				break;
-			}
-
-		} catch (ISOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-	}
-	
-	public static InfoTransaction getInfoTransaction(String nsu_acquirer) {
-		InfoTransaction info = null;
-		if (transactions.containsKey(nsu_acquirer)) {
-			info = transactions.get(nsu_acquirer);
-		}
-		return info;
-	}
-	*/
-	
-	public static synchronized boolean setInitializationTables(String acquirer, 
-															   String logicalNumber, 
-															   ListoData dataInitialization) {
+	public static synchronized boolean setInitializationTables(String acquirer, String logicalNumber,
+			ListoData dataInitialization) {
 		boolean status = true;
-		
+
 		try {
 			switch (acquirer) {
 			case GLOBAL_PAYMENTS:
@@ -326,7 +350,7 @@ public class AcquirerSettings {
 					listoDataInitGlobalpayments.remove(logicalNumber);
 				listoDataInitGlobalpayments.put(logicalNumber, dataInitialization);
 				break;
-				
+
 			case BANRISUL:
 				if (listoDataInitBanrisul.containsKey(logicalNumber))
 					listoDataInitBanrisul.remove(logicalNumber);
@@ -336,7 +360,7 @@ public class AcquirerSettings {
 			default:
 				break;
 			}
-			
+
 		} catch (Exception e) {
 			Logger.log(new LogEvent(
 					"Error: br.listofacil.AcquirerSettings.setInitializationTables return false \n " + e.getMessage()));
@@ -344,18 +368,17 @@ public class AcquirerSettings {
 			return false;
 		}
 		return status;
-	}		
-	
-	public static synchronized ListoData getInitializationTables(String acquirer, 
-																 String logicalNumber) {
+	}
+
+	public static synchronized ListoData getInitializationTables(String acquirer, String logicalNumber) {
 		ListoData tables = null;
-		
+
 		try {
 			switch (acquirer) {
 			case GLOBAL_PAYMENTS:
 				tables = listoDataInitGlobalpayments.get(logicalNumber);
 				break;
-				
+
 			case BANRISUL:
 				tables = listoDataInitBanrisul.get(logicalNumber);
 				break;
@@ -363,24 +386,22 @@ public class AcquirerSettings {
 			default:
 				break;
 			}
-			
+
 		} catch (Exception e) {
 			Logger.log(new LogEvent(
 					"Error: br.listofacil.AcquirerSettings.getInitializationTables return null \n " + e.getMessage()));
 			e.printStackTrace();
 			return null;
 		}
-		
-		return tables;
-	}	
-	
 
-	
-	public static synchronized void setDateNsuLastTransactionOk(String date, String nsu){
+		return tables;
+	}
+
+	public static synchronized void setDateNsuLastTransactionOk(String date, String nsu) {
 		dateNsuLastTransaction = date + nsu;
 	}
-	
-	public static synchronized String getDateNsuLastTransactionOk(){
+
+	public static synchronized String getDateNsuLastTransactionOk() {
 		return dateNsuLastTransaction;
 	}
 
@@ -437,9 +458,9 @@ public class AcquirerSettings {
 		try {
 			if (AcquirerSettings.banrisulBinsTable.containsKey(logicalNumber)) {
 				List<BinData> bins = AcquirerSettings.banrisulBinsTable.get(logicalNumber);
-				
+
 				for (BinData binData : bins) {
-					
+
 					long lngBin = Long.parseLong(bin);
 
 					if (lngBin >= binData.getInitial() && lngBin <= binData.getEnd())
@@ -467,7 +488,7 @@ public class AcquirerSettings {
 				if (!bins.contains(binData)) {
 					bins.add(binData);
 					AcquirerSettings.banrisulBinsTable.put(logicalNumber, bins);
-				}				
+				}
 
 			} else {
 
@@ -478,8 +499,7 @@ public class AcquirerSettings {
 
 		} catch (Exception e) {
 			// TODO: handle exception
-			Logger.log(new LogEvent(
-					"Error: br.listofacil.AcquirerSettings.setBanrisulBinsTable \n " + e.getMessage()));
+			Logger.log(new LogEvent("Error: br.listofacil.AcquirerSettings.setBanrisulBinsTable \n " + e.getMessage()));
 		}
 
 	}
@@ -488,42 +508,82 @@ public class AcquirerSettings {
 		return globalpaymentsBinsTable;
 	}
 
-	public static synchronized void setGlobalpaymentsBinsTable(
-			Map<String,List<BinData>> globalpaymentsBinsTable) {
+	public static synchronized void setGlobalpaymentsBinsTable(Map<String, List<BinData>> globalpaymentsBinsTable) {
 		AcquirerSettings.globalpaymentsBinsTable = globalpaymentsBinsTable;
 	}
 
 	public static String getBanrisulFlagName(String logicalNumber, String flagCode) {
 		String flag = "";
-		
+
 		if (banrisulFlagsTable.containsKey(logicalNumber)) {
 			Map<String, String> tables = banrisulFlagsTable.get(logicalNumber);
 			if (tables.containsKey(flagCode))
 				flag = tables.get(flagCode);
 		}
-					
-		return flag;		
+
+		return flag;
 	}
 
 	public static void setBanrisulFlagsTable(String logicalNumber, String flagCode, String flag) {
-		Map<String, String> table = new HashMap<String, String>();		
-		
+		Map<String, String> table = new HashMap<String, String>();
+
 		if (banrisulFlagsTable.containsKey(logicalNumber)) {
 			table = banrisulFlagsTable.get(logicalNumber);
 			table.put(flagCode, flag);
-		} else { 
+		} else {
 			table.put(flagCode, flag);
 		}
-			
-		banrisulFlagsTable.put(logicalNumber, table);						
+
+		banrisulFlagsTable.put(logicalNumber, table);
 	}
 
 	public static Map<String, Map<String, String>> getGlobalpaymentsFlagName() {
 		return globalpaymentsFlagsTable;
 	}
 
-	public static void setGlobalpaymentsFlagsTable(Map<String, Map<String, String>> globalpaymentsFlagsTable) {
+	public static synchronized void setGlobalpaymentsFlagsTable(
+			Map<String, Map<String, String>> globalpaymentsFlagsTable) {
 		AcquirerSettings.globalpaymentsFlagsTable = globalpaymentsFlagsTable;
+	}
+
+	public static synchronized String getPort() {
+		return port;
+	}
+
+	public static synchronized void setPort(String port) {
+		AcquirerSettings.port = port;
+	}
+
+	public static synchronized String getIp() {
+		return ip;
+	}
+
+	public static synchronized void setIp(String ip) {
+		AcquirerSettings.ip = ip;
+	}
+
+	public static synchronized String getFila() {
+		return fila;
+	}
+
+	public static synchronized void setFila(String fila) {
+		AcquirerSettings.fila = fila;
+	}
+
+	public static synchronized String getNsuBergs() {
+		return nsuBergs;
+	}
+
+	public static synchronized void setNsuBergs(String nsuBergs) {
+		AcquirerSettings.nsuBergs = nsuBergs;
+	}
+
+	public static synchronized String getDateDataUpdateGP() {
+		return dateDataUpdateGP;
+	}
+
+	public static synchronized void setDateDataUpdateGP(String dateDataUpdateGP) {
+		AcquirerSettings.dateDataUpdateGP = dateDataUpdateGP;
 	}
 
 }

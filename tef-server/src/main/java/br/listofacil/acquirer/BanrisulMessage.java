@@ -1305,6 +1305,8 @@ public class BanrisulMessage {
 		// Somente enviar valores da data e NSU banrisul da transacao
 		// realizada e confirmada com o host
 		request.set(FIELD_NSU_ACQUIRER, requestData.nsuAcquirer);
+		
+		AcquirerSettings.setNsuBergs(requestData.nsuAcquirer);
 
 		return request;
 	}
