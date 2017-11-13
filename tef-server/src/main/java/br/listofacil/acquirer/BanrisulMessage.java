@@ -129,7 +129,7 @@ public class BanrisulMessage {
 																		// BANRISUL
 																		// (testes)
 
-	private final String TAGS_EMV_1ND_GEN_AC = "9F269F279F109F379F36959A9C9F029F035F2A829F1AF345F249F159F335F2884";
+	private final String TAGS_EMV_1ND_GEN_AC = "9F269F279F109F379F36959A9C9F029F035F2A829F1A9F345F249F159F335F2884";
 	private final String TAGS_EMV_2ND_GEN_AC = "9F1A959C829F109F269F279F369F37849F349F24";
 	private final String TAGS_EMV_BANRISUL = "9F1A959C829F109F269F279F369F37849F34";
 	private final String TAGS_EMV_OPTIONAL = "9F125F34";
@@ -773,16 +773,15 @@ public class BanrisulMessage {
 		String index = emvAid.substring(6, 8);
 		String length = "0";
 
-		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
-				|| emvAid.contains("MAESTRO")) {
+		if (emvAid.contains("BANRI")) {
+			
+			length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
+			return index + length + TAGS_EMV_BANRISUL;
 
-			length = cf.padLeft(String.valueOf(TAGS_EMV_1ND_GEN_AC.length()), 3, "0");
-			return index + length + TAGS_EMV_1ND_GEN_AC;
 		}
 
-		length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
-		return index + length + TAGS_EMV_BANRISUL;
-		// return index + length + TAGS_EMV_BANRISUL;
+		length = cf.padLeft(String.valueOf(TAGS_EMV_1ND_GEN_AC.length()), 3, "0");
+		return index + length + TAGS_EMV_1ND_GEN_AC;
 	}
 
 	private String getTagsEmvOptional(String emvAid) {
@@ -792,17 +791,17 @@ public class BanrisulMessage {
 		// 9F1A959C829F109F269F279F369F3784
 		String index = emvAid.substring(6, 8);
 		String length = cf.padLeft(String.valueOf(TAGS_EMV_BANRISUL.length()), 3, "0");
-
-		if (emvAid.contains("VISA") || emvAid.contains("ELECTRON") || emvAid.contains("MASTER")
-				|| emvAid.contains("MAESTRO")) {
-
+		
+		if (emvAid.contains("BANRI")) {
+			
 			length = cf.padLeft(String.valueOf(TAGS_EMV_OPTIONAL.length()), 3, "0");
-			return index + length + TAGS_EMV_OPTIONAL;
+			return index + length + TAGS_EMV_OPTIONAL;			
+			
 		}
 
 		length = cf.padLeft(String.valueOf(TAGS_EMV_OPTIONAL.length()), 3, "0");
-		return index + length + TAGS_EMV_OPTIONAL;
-		// return index + length + TAGS_EMV_BANRISUL;
+		return index + length + TAGS_EMV_OPTIONAL;	
+
 	}
 
 	private String getTagsEmv2ndGenAC(String emvAid) {
