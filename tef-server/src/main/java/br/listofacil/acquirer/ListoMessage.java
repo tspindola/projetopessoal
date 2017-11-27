@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
+import org.jpos.iso.ISOSource;
 import org.jpos.iso.packager.XMLPackager;
 import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
@@ -525,6 +526,7 @@ public class ListoMessage {
 			case ListoData.GLOBAL_PAYMENTS:
 				dataRequest = getTransactionData(
 						getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUGlobalpayments()));
+
 				GlobalpaymentsMessage globalPayments = new GlobalpaymentsMessage();
 				dataResponse = globalPayments.requestPayment(dataRequest);
 				break;
@@ -532,6 +534,7 @@ public class ListoMessage {
 			case ListoData.BANRISUL:
 				dataRequest = getTransactionData(
 						getCommonBitsFormatted(request, AcquirerSettings.getIncrementNSUBanrisul()));
+
 				BanrisulMessage banrisul = new BanrisulMessage();
 				dataResponse = banrisul.requestPayment(dataRequest);
 				break;
@@ -540,8 +543,13 @@ public class ListoMessage {
 				response = getErrorMessage(request);
 				break;
 			}
-
-			response = getResponseFormatted(ListoData.RES_PAYMENT, request, dataRequest, dataResponse);
+			
+			if (dataResponse != null){
+				AcquirerSettings.setLastNsuAcquirer(dataResponse.nsuAcquirer);
+				response = getResponseFormatted(ListoData.RES_PAYMENT, request, dataRequest, dataResponse);
+			} else {
+				response = getResponse0210Timeout(dataRequest);
+			}
 
 		} catch (Exception e) {
 			Logger.log(new LogEvent("Exception on function getPayment"));
@@ -549,6 +557,32 @@ public class ListoMessage {
 		}
 
 		return response;
+	}
+
+	private ISOMsg getResponse0210Timeout(TransactionData dataRequest) throws ISOException {
+		ISOMsg response = new ISOMsg();
+
+		try {
+			response.setMTI(ListoData.RES_PAYMENT);
+
+			response.set(ListoData.FIELD_PROCESSING_CODE, dataRequest.processingCode);
+			response.set(ListoData.FIELD_RESPONSE_CODE, ListoData.RES_CODE_MESSAGE_TIMEOUT_ERROR);
+			response.set(ListoData.FIELD_AMOUNT, dataRequest.amount);
+			response.set(ListoData.FIELD_DATE_TIME, dataRequest.dateTime);
+			response.set(ListoData.FIELD_NSU_TEF, dataRequest.nsuTef);
+			response.set(ListoData.FIELD_TIME, dataRequest.time);
+			response.set(ListoData.FIELD_DATE, dataRequest.date);
+			response.set(ListoData.FIELD_TERMINAL_CODE, dataRequest.terminalCode);
+			response.set(ListoData.FIELD_MERCHANT_CODE, dataRequest.merchantCode);
+			response.set(ListoData.FIELD_SHOP_CODE, dataRequest.shopCode);
+			response.set(ListoData.FIELD_GENERIC_DATA_2, ListoData.RES_MESSAGE_TIMEOUT_ERROR);
+			
+		} catch (Exception e) {
+			Logger.log(new LogEvent("Exception on function getResponse0210Timeout"));
+		}
+
+		return response;
+		
 	}
 
 	private ISOMsg getConfirmation(ISOMsg request) {
@@ -924,84 +958,84 @@ public class ListoMessage {
 
 		try {
 
-		if ((dataResponse == null) || (dataRequest == null))
-			return null;
+			if ((dataResponse == null) || (dataRequest == null))
+				return null;
 
-		if (dataResponse.dateTime.trim().equals(""))
-			dataResponse.dateTime = dataRequest.dateTime;
+			if (dataResponse.dateTime.trim().equals(""))
+				dataResponse.dateTime = dataRequest.dateTime;
 
-		if (dataResponse.time.trim().equals(""))
-			dataResponse.time = dataRequest.time;
+			if (dataResponse.time.trim().equals(""))
+				dataResponse.time = dataRequest.time;
 
-		if (dataResponse.date.trim().equals(""))
-			dataResponse.date = dataRequest.date;
+			if (dataResponse.date.trim().equals(""))
+				dataResponse.date = dataRequest.date;
 
-		response.setPackager(new XMLPackager());
+			response.setPackager(new XMLPackager());
 
-		response.setMTI(mti);
-		response.set(ListoData.FIELD_PROCESSING_CODE, dataRequest.processingCode);
-		response.set(ListoData.FIELD_AMOUNT, dataRequest.amount);
-		response.set(ListoData.FIELD_DATE_TIME, dataResponse.dateTime);
-		response.set(ListoData.FIELD_NSU_TEF, dataResponse.nsuTef);
-		response.set(ListoData.FIELD_TIME, dataResponse.time);
-		response.set(ListoData.FIELD_DATE, dataResponse.date);
+			response.setMTI(mti);
+			response.set(ListoData.FIELD_PROCESSING_CODE, dataRequest.processingCode);
+			response.set(ListoData.FIELD_AMOUNT, dataRequest.amount);
+			response.set(ListoData.FIELD_DATE_TIME, dataResponse.dateTime);
+			response.set(ListoData.FIELD_NSU_TEF, dataResponse.nsuTef);
+			response.set(ListoData.FIELD_TIME, dataResponse.time);
+			response.set(ListoData.FIELD_DATE, dataResponse.date);
 
-		if (dataResponse.authorizationCode.trim().length() > 0)
-			response.set(ListoData.FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
+			if (dataResponse.authorizationCode.trim().length() > 0)
+				response.set(ListoData.FIELD_AUTHORIZATION_CODE, dataResponse.authorizationCode);
 
-		if (dataResponse.responseCode.trim().length() > 0)
-			response.set(ListoData.FIELD_RESPONSE_CODE, dataResponse.responseCode);
+			if (dataResponse.responseCode.trim().length() > 0)
+				response.set(ListoData.FIELD_RESPONSE_CODE, dataResponse.responseCode);
 
-		response.set(ListoData.FIELD_TERMINAL_CODE, dataRequest.terminalCode);
-		response.set(ListoData.FIELD_MERCHANT_CODE, dataRequest.merchantCode);
-		response.set(ListoData.FIELD_SHOP_CODE, dataRequest.shopCode);
-		response.set(ListoData.FIELD_ACQUIRER_CODE, dataRequest.acquirerCode);
-		response.set(ListoData.FIELD_EQUIPMENT_TYPE, dataRequest.equipmentType);
+			response.set(ListoData.FIELD_TERMINAL_CODE, dataRequest.terminalCode);
+			response.set(ListoData.FIELD_MERCHANT_CODE, dataRequest.merchantCode);
+			response.set(ListoData.FIELD_SHOP_CODE, dataRequest.shopCode);
+			response.set(ListoData.FIELD_ACQUIRER_CODE, dataRequest.acquirerCode);
+			response.set(ListoData.FIELD_EQUIPMENT_TYPE, dataRequest.equipmentType);
 
-		if (dataResponse.emvData.trim().length() > 0) {
+			if (dataResponse.emvData.trim().length() > 0) {
 
-			if (dataResponse.emvData.contains("9F26")) {
-				dataResponse.emvData = dataResponse.emvData.substring(0, dataResponse.emvData.length());
+				if (dataResponse.emvData.contains("9F26")) {
+					dataResponse.emvData = dataResponse.emvData.substring(0, dataResponse.emvData.length());
+				}
+				response.set(ListoData.FIELD_EMV_DATA, dataResponse.emvData);
+
 			}
-			response.set(ListoData.FIELD_EMV_DATA, dataResponse.emvData);
 
-		}
+			if (dataResponse.merchantReceipt.trim().length() > 0) {
+				if (!dataResponse.responseCode.equals("00")) {
+					dataResponse.merchantReceipt = dataResponse.merchantReceipt.trim();
 
-		if (dataResponse.merchantReceipt.trim().length() > 0) {
-			if (!dataResponse.responseCode.equals("00")) {
-				dataResponse.merchantReceipt = dataResponse.merchantReceipt.trim();
+					if (dataRequest.acquirerCode.equals(ListoData.GLOBAL_PAYMENTS))
+						dataResponse.merchantReceipt = dataResponse.merchantReceipt.substring(1,
+								dataResponse.merchantReceipt.length());
 
-				if (dataRequest.acquirerCode.equals(ListoData.GLOBAL_PAYMENTS))
-					dataResponse.merchantReceipt = dataResponse.merchantReceipt.substring(1,
-							dataResponse.merchantReceipt.length());
-
-				dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("'", "");
-				dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("#", "");
+					dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("'", "");
+					dataResponse.merchantReceipt = dataResponse.merchantReceipt.replace("#", "");
+				}
+				response.set(ListoData.FIELD_GENERIC_DATA_1, dataResponse.merchantReceipt);
 			}
-			response.set(ListoData.FIELD_GENERIC_DATA_1, dataResponse.merchantReceipt);
-		}
 
-		if (dataResponse.cardholderReceipt.trim().length() > 0)
-			response.set(ListoData.FIELD_GENERIC_DATA_2, dataResponse.cardholderReceipt);
+			if (dataResponse.cardholderReceipt.trim().length() > 0)
+				response.set(ListoData.FIELD_GENERIC_DATA_2, dataResponse.cardholderReceipt);
 
-		if (request.hasField(ListoData.FIELD_MERCHANT_DATA))
-			response.set(ListoData.FIELD_MERCHANT_DATA, request.getString(ListoData.FIELD_MERCHANT_DATA));
+			if (request.hasField(ListoData.FIELD_MERCHANT_DATA))
+				response.set(ListoData.FIELD_MERCHANT_DATA, request.getString(ListoData.FIELD_MERCHANT_DATA));
 
-		if (dataResponse.nsuAcquirer.trim().length() > 0) {
-			response.set(ListoData.FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
-			/*
-			 * if (dataRequest.acquirerCode.equals(ListoData.BANRISUL)) { String
-			 * nsuAcquirer = dataResponse.nsuAcquirer.substring(3,
-			 * dataResponse.nsuAcquirer.length());
-			 * response.set(ListoData.FIELD_NSU_ACQUIRER, nsuAcquirer); } else {
-			 * response.set(ListoData.FIELD_NSU_ACQUIRER,
-			 * dataResponse.nsuAcquirer); }
-			 */
-		}
+			if (dataResponse.nsuAcquirer.trim().length() > 0) {
+				response.set(ListoData.FIELD_NSU_ACQUIRER, dataResponse.nsuAcquirer);
+				/*
+				 * if (dataRequest.acquirerCode.equals(ListoData.BANRISUL)) {
+				 * String nsuAcquirer = dataResponse.nsuAcquirer.substring(3,
+				 * dataResponse.nsuAcquirer.length());
+				 * response.set(ListoData.FIELD_NSU_ACQUIRER, nsuAcquirer); }
+				 * else { response.set(ListoData.FIELD_NSU_ACQUIRER,
+				 * dataResponse.nsuAcquirer); }
+				 */
+			}
 
-		// Envia para o sistema que grava no banco de dados
-		byte[] messageData = response.pack();
-		RabbitMQ.Send(new String(messageData));
+			// Envia para o sistema que grava no banco de dados
+			byte[] messageData = response.pack();
+			RabbitMQ.Send(new String(messageData));
 
 		} catch (Exception e) {
 			Logger.log(new LogEvent(

@@ -47,6 +47,7 @@ public class BanrisulMessage {
 	private final String RES_BA_LOGON_INIT = "0810";
 	private final String REQ_BA_PAYMENT = "0200";
 	private final String RES_BA_PAYMENT = "0210";
+	private final String REQ_BA_CONFIRM_INFORMATION = "0310";
 	private final String REQ_BA_CONFIRMATION = "0202";
 	private final String REQ_BA_CANCELLATION = "0400";
 	private final String RES_BA_CANCELLATION = "0410";
@@ -1093,7 +1094,7 @@ public class BanrisulMessage {
 	private ISOMsg getMessage0200(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 
-		request.setPackager(new ISO87APackagerGP());
+		request.setPackager(new ISO93EPackagerBanrisul());
 		request.setMTI(REQ_BA_PAYMENT);
 		/*
 		 * if (requestData.pan.length() > 0) request.set(FIELD_PAN,
@@ -1209,7 +1210,7 @@ public class BanrisulMessage {
 	private ISOMsg getMessage0202(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 
-		request.setPackager(new ISO87APackagerGP());
+		request.setPackager(new ISO93EPackagerBanrisul());
 		request.setMTI(REQ_BA_CONFIRMATION);
 		/*
 		 * if (requestData.pan.length() > 0) request.set(FIELD_PAN,
@@ -1305,8 +1306,6 @@ public class BanrisulMessage {
 		// realizada e confirmada com o host
 		request.set(FIELD_NSU_ACQUIRER, requestData.nsuAcquirer);
 		
-		AcquirerSettings.setNsuBergs(requestData.nsuAcquirer);
-
 		return request;
 	}
 
@@ -1385,7 +1384,6 @@ public class BanrisulMessage {
 		} catch (Exception e) {
 			Logger.log(
 					new LogEvent("Error: br.listofacil.acquirer.BanrisulMessage.getResponseData \n " + e.getMessage()));
-			e.printStackTrace();
 			return null;
 		}
 
@@ -1867,11 +1865,11 @@ public class BanrisulMessage {
 
 		return responseData;
 	}
-
+	
 	private ISOMsg getMessage0400(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 
-		request.setPackager(new ISO87APackagerGP());
+		request.setPackager(new ISO93EPackagerBanrisul());
 		request.setMTI(REQ_BA_CANCELLATION);
 
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.productDescription, requestData.processingCode));
@@ -1899,7 +1897,7 @@ public class BanrisulMessage {
 	private ISOMsg getMessage0420(TransactionData requestData) throws ISOException {
 		ISOMsg request = new ISOMsg();
 
-		request.setPackager(new ISO87APackagerGP());
+		request.setPackager(new ISO93EPackagerBanrisul());
 		request.setMTI(REQ_BA_UNMAKING);
 
 		request.set(FIELD_PROC_CODE, getProcessingCode(requestData.productDescription, requestData.processingCode));
@@ -1910,7 +1908,7 @@ public class BanrisulMessage {
 		request.set(FIELD_DATE, requestData.date);
 		request.set(FIELD_ENTRY_MODE, requestData.entryMode);
 		request.set(FIELD_FINANCIAL_INSTITUTION, FINANCIAL_INSTITUTION_CODE);
-		request.set(FIELD_RESPONSE_CODE, "00"); // Transacao aprovada
+		request.set(FIELD_RESPONSE_CODE, "86"); // Transacao aprovada
 
 		request.set(FIELD_TERMINAL_CODE, requestData.terminalCode);
 		request.set(FIELD_MERCHANT_CODE, requestData.merchantCode);
@@ -1926,15 +1924,10 @@ public class BanrisulMessage {
 	private String getOriginalTransaction(TransactionData requestData) {
 		String bit090 = new String();
 
-		String originalNsuAcquirer = requestData.originalNSUAcquirer;
-		if (requestData.originalNSUAcquirer.length() > 3)
-			originalNsuAcquirer = requestData.originalNSUAcquirer.substring(3,
-					requestData.originalNSUAcquirer.length());
-
 		bit090 += requestData.originalMessageCode;
-		bit090 += originalNsuAcquirer;
+		bit090 +=  requestData.originalNSUTEF;
 		bit090 += requestData.originalDateTime.substring(0, 4);
-		bit090 += "00000000000000000000000000";
+		bit090 += "0000000000000000000000000000";
 
 		return bit090;
 	}

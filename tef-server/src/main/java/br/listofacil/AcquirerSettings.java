@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jpos.util.LogEvent;
 import org.jpos.util.Logger;
@@ -42,8 +41,8 @@ public class AcquirerSettings {
 	private static long nsuBanrisul = 1;
 	private static long nsuGlobalpayments = 1;
 
-	private static String nsuBergs;
-
+	private static String lastNsuAcquirer;
+	
 	private static String dateNsuLastTransaction = "0000000000000000";
 
 	private static String dateDataUpdate = new String();
@@ -64,8 +63,8 @@ public class AcquirerSettings {
 		String register = "NSU_GP=\"" + nsuGlobalpayments + "\"\n" + "NSU_BA=\"" + nsuBanrisul + "\"\n"
 				+ "DATE_UPDATE_NSU=\"" + dateReg + "\"\n" + "NSU_ODD=\"" + nsuOdd + "\"\n" + "CONFIG_BYTE_1=\"" + byte_1
 				+ "\"\n" + "CONFIG_BYTE_2=\"" + byte_2 + "\"\n" + "CONFIG_BYTE_3=\"" + byte_3 + "\"\n" + "RBT_IP=\""
-				+ ip + "\"\n" + "RBT_PORT=\"" + port + "\"\n" + "RBT_FILA=\"" + fila + "\"\n" + "NSU_BERGS=\""
-				+ nsuBergs + "\"\n";
+				+ ip + "\"\n" + "RBT_PORT=\"" + port + "\"\n" + "RBT_FILA=\"" + fila + "\"\n" + "LAST_NSU_ACQUIRER=\""
+				+ lastNsuAcquirer + "\"\n";
 
 		try {
 
@@ -223,8 +222,8 @@ public class AcquirerSettings {
 					setFila(nsudata[1]);
 					continue;
 				}
-				if (nsudata[0].contains("NSU_BERGS")) {
-					setNsuBergs(nsudata[1]);
+				if (nsudata[0].contains("LAST_NSU_ACQUIRER")) {
+					setLastNsuAcquirer(nsudata[1]);
 					continue;
 				}
 			}
@@ -570,12 +569,12 @@ public class AcquirerSettings {
 		AcquirerSettings.fila = fila;
 	}
 
-	public static synchronized String getNsuBergs() {
-		return nsuBergs;
+	public static synchronized String getLastNsuAcquirer() {
+		return lastNsuAcquirer;
 	}
 
-	public static synchronized void setNsuBergs(String nsuBergs) {
-		AcquirerSettings.nsuBergs = nsuBergs;
+	public static synchronized void setLastNsuAcquirer(String lastNsuAcquirer) {
+		AcquirerSettings.lastNsuAcquirer = lastNsuAcquirer;
 	}
 
 	public static synchronized String getDateDataUpdateGP() {

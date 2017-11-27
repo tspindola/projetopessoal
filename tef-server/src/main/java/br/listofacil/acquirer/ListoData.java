@@ -96,6 +96,11 @@ public class ListoData {
 	public final static String RES_CODE_ERROR = "05";
 	public final static String RES_CODE_WAIT_TABLES = "10";
 	
+	public final static String RES_CODE_MESSAGE_TIMEOUT_ERROR = "99";
+	public final static String RES_MESSAGE_TIMEOUT_ERROR = "TIMEOUT";
+	
+	
+	
 	public final static String ENTRY_MODE_MAGNETIC_WITH_PIN = "021";
 	public final static String ENTRY_MODE_MAGNETIC_WITHOUT_PIN = "028";
 	public final static String ENTRY_MODE_CHIP_WITH_PIN = "051";
@@ -128,7 +133,7 @@ public class ListoData {
 	
 	public final static String CODE_TRANSACTION_TIMEOUT = "86";
 	
-	public final static int SERVER_TIMEOUT = 60; //segundos
+	public final static int SERVER_TIMEOUT = 50; //segundos
 
 	public static final String REG_CODE_REQUEST = "000";
 	public static final String REG_CODE_LOGON = "001";
